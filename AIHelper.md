@@ -18,9 +18,9 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 | `README.md` | Final project front page (goal, stack, AI + Qwen model/config details, hardware, author) |
 | `AIHelper.md` | This project knowledge base |
 | `skills/` | AI skills shipped with the repo (see Project Skills) |
-| `.gitignore` | Python, venv, `.env`, `*.db`, IDE/OS entries |
+| `.gitignore` | Standard Python gitignore (GitHub template) + project-specific SQLite (`*.db`, `*.sqlite3`) and OS entries |
 
-No app code, no dependencies installed, no tests. Git repo initialized on branch `main` (local only, no remote); initial commit `3abdf5b`.
+No app code, no dependencies installed, no tests. Git repo on branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`); remote root commit `1944695` holds a `LICENSE` file.
 
 ## Authorship Rules (durable)
 
@@ -97,7 +97,6 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 ## Known Limitations
 
 - Nothing implemented yet; all architecture above is planned, not verified in code.
-- Repo is local only; no GitHub remote connected yet.
 
 ## AI Instructions
 
@@ -117,8 +116,8 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 
 - Last Updated: 2026-09-21
 - Last Full Scan: 2026-09-21
-- Last Incremental Update: 2026-09-21 (Qwen model/config section added to README)
+- Last Incremental Update: 2026-09-21 (.gitignore replaced with standard Python template)
 - Files Analyzed: `main.py`, `README.md`, `skills/*/SKILL.md`
-- Git Commit: `4f67975` (skills added, branch `main`, no remote)
+- Git Commit: `ab74cd6` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.1 (pre-implementation)
 - AIHelper Version: 1
