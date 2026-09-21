@@ -12,14 +12,15 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status (pre-implementation)
 
-Only two files exist:
-
-| File | State |
+| File / Dir | State |
 | --- | --- |
 | `main.py` | Placeholder `print("Hello, World!")` — to be replaced by the app entry point |
 | `README.md` | Final project front page (goal, stack, AI, hardware, author) |
+| `AIHelper.md` | This project knowledge base |
+| `skills/` | AI skills shipped with the repo (see Project Skills) |
+| `.gitignore` | Python, venv, `.env`, `*.db`, IDE/OS entries |
 
-No app code, no dependencies installed, no tests, no git repository yet.
+No app code, no dependencies installed, no tests. Git repo initialized on branch `main` (local only, no remote); initial commit `3abdf5b`.
 
 ## Authorship Rules (durable)
 
@@ -27,6 +28,17 @@ No app code, no dependencies installed, no tests, no git repository yet.
 - README states the author is **Parsa Mahmoodi** (programmer, coder, software engineer) and credits the AI.
 - AI: **Qwen 3.8 27B** via **LM Studio** (llama.cpp backend) with **ROCm** on an **HP ZBook Ultra G1a** (AMD Ryzen AI MAX PRO 390, Radeon 8050S, 64 GB unified LPDDR5X).
 - Never put secrets (serial numbers, device identifiers, keys) in repo files.
+
+## Project Skills (`skills/`)
+
+AI skills (created by Parsa Mahmoodi) shipped in-repo so anyone who clones the project gets them:
+
+| Skill | Purpose |
+| --- | --- |
+| `skills/use-aihelper` | Instructs an AI assistant to read `AIHelper.md` first as compact project knowledge before exploring source code, keep the user's request as the primary task, and use semantic search to locate implementations — minimizing unnecessary repo exploration. |
+| `skills/maintain-aihelper` | Instructs an AI assistant to create or incrementally update `AIHelper.md` when features complete, architecture changes, or dependencies shift — keeping it a concise, factual knowledge base (architecture, relationships, conventions, decisions) rather than a task list or changelog. |
+
+Together they form the project's AI knowledge loop: **use** the knowledge base to work, **maintain** it as the project evolves.
 
 ## Planned Architecture (approved, not yet implemented)
 
@@ -44,9 +56,11 @@ Accounting/
 │   └── routers/       # accounts, journal, reports, invoices, bills, budgets, export
 ├── static/            # tabbed SPA: dashboard, accounts, journal, ledger, statements, invoices, bills, budgets, export
 ├── tests/
+├── skills/            # AI skills shipped with the repo (use-aihelper, maintain-aihelper)
 ├── requirements.txt
 ├── .gitignore
 ├── README.md
+├── AIHelper.md        # project knowledge base for AI assistants
 └── AI_WORKFLOW.md     # to be written: how the AI built the project
 ```
 
@@ -76,7 +90,7 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 ## Known Limitations
 
 - Nothing implemented yet; all architecture above is planned, not verified in code.
-- No git history yet (repo not initialized); README's "see git history" claim becomes true only after `git init` + commits.
+- Repo is local only; no GitHub remote connected yet.
 
 ## AI Instructions
 
@@ -96,8 +110,8 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 
 - Last Updated: 2026-09-21
 - Last Full Scan: 2026-09-21
-- Last Incremental Update: — (initial creation)
-- Files Analyzed: `main.py`, `README.md` (full repo; only 2 files exist)
-- Git Commit: n/a (not a git repository)
+- Last Incremental Update: 2026-09-21 (skills/ directory added)
+- Files Analyzed: `main.py`, `README.md`, `skills/*/SKILL.md`
+- Git Commit: `3abdf5b` (initial commit, branch `main`, no remote; skills/ not yet committed)
 - Architecture Version: 0.1 (pre-implementation)
 - AIHelper Version: 1
