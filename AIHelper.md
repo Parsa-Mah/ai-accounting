@@ -15,7 +15,7 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 | File / Dir | State |
 | --- | --- |
 | `main.py` | Placeholder `print("Hello, World!")` — to be replaced by the app entry point |
-| `README.md` | Final project front page (goal, stack, AI, hardware, author) |
+| `README.md` | Final project front page (goal, stack, AI + Qwen model/config details, hardware, author) |
 | `AIHelper.md` | This project knowledge base |
 | `skills/` | AI skills shipped with the repo (see Project Skills) |
 | `.gitignore` | Python, venv, `.env`, `*.db`, IDE/OS entries |
@@ -28,6 +28,13 @@ No app code, no dependencies installed, no tests. Git repo initialized on branch
 - README states the author is **Parsa Mahmoodi** (programmer, coder, software engineer) and credits the AI.
 - AI: **Qwen 3.8 27B** via **LM Studio** (llama.cpp backend) with **ROCm** on an **HP ZBook Ultra G1a** (AMD Ryzen AI MAX PRO 390, Radeon 8050S, 64 GB unified LPDDR5X).
 - Never put secrets (serial numbers, device identifiers, keys) in repo files.
+
+## Qwen Model & Inference Config (durable)
+
+- Model file: `Qwen3.8-27B-UD-Q5_K_XL.gguf` — Unsloth Dynamic Q5_K_XL from `unsloth/Qwen3.8-27B-GGUF` (Apache 2.0); base model `Qwen/Qwen3.8-27B`; native context 262,144 tokens.
+- Key LM Studio settings: reasoning on (unlimited budget), context 133,120 tokens, temperature 0.6, top-k 20, top-p 0.95, repeat/presence penalties off, min-p disabled, MTP on (max 3 draft tokens), all 65 layers GPU-offloaded, 12 CPU threads, eval batch 512, flash attention on, KV cache quantized Q8_0.
+- **mmap deliberately OFF**: a unified-memory leak bug (llama.cpp / LM Studio / ROCm) doubles memory usage across VRAM and RAM when mmap is enabled.
+- Full human-readable table lives in README.md → "Details and configurations of Qwen AI".
 
 ## Project Skills (`skills/`)
 
@@ -110,8 +117,8 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 
 - Last Updated: 2026-09-21
 - Last Full Scan: 2026-09-21
-- Last Incremental Update: 2026-09-21 (skills/ directory added)
+- Last Incremental Update: 2026-09-21 (Qwen model/config section added to README)
 - Files Analyzed: `main.py`, `README.md`, `skills/*/SKILL.md`
-- Git Commit: `3abdf5b` (initial commit, branch `main`, no remote; skills/ not yet committed)
+- Git Commit: `4f67975` (skills added, branch `main`, no remote)
 - Architecture Version: 0.1 (pre-implementation)
 - AIHelper Version: 1

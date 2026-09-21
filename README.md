@@ -40,6 +40,44 @@ This project was authored by:
 
 Everything ran locally — no cloud inference, no external API calls.
 
+## Details and configurations of Qwen AI
+
+### Model
+
+| | |
+| --- | --- |
+| Model | Qwen 3.8 27B (27 billion parameters) |
+| Quantized file | `Qwen3.8-27B-UD-Q5_K_XL.gguf` (Unsloth Dynamic Q5_K_XL) |
+| Source | [unsloth/Qwen3.8-27B-GGUF](https://huggingface.co/unsloth) |
+| Base model | [Qwen/Qwen3.8-27B](https://huggingface.co/Qwen/Qwen3.8-27B) |
+| License | Apache 2.0 |
+| Native context window | up to 262,144 tokens |
+
+Qwen describes the model as a "Renewal of the beloved Qwen model, delivering unmatched intelligence density."
+
+### Inference configuration (LM Studio)
+
+| Setting | Value | What it means |
+| --- | --- | --- |
+| Reasoning | On, unlimited budget | The model is allowed to think as long as it needs before answering |
+| Context length | 133,120 tokens | How much of the conversation the model can see at once (about half of the model's native maximum) |
+| Temperature | 0.6 | Slightly conservative sampling — favors accurate, consistent output over wild creativity |
+| Top-k | 20 | Only the 20 most likely next tokens are considered at each step |
+| Top-p | 0.95 | Tokens are drawn from the smallest set of candidates covering 95% of the probability |
+| Min-p | Disabled | No additional probability floor filtering |
+| Repeat penalty | Off | No artificial penalty for repeating content |
+| Presence penalty | Off | No bonus for introducing new topics |
+| Multi-token prediction (MTP) | On, up to 3 draft tokens | The model drafts a few tokens ahead and verifies them, speeding up generation |
+| GPU offload | 65 / 65 layers | The entire model runs on the GPU (Radeon 8050S) |
+| CPU thread pool | 12 threads | Matches the CPU's 12 cores |
+| Evaluation batch size | 512 | Larger batches make prompt processing more efficient |
+| Flash attention | On | Faster attention computation with lower memory usage |
+| KV cache quantization | Q8_0 (both K and V) | Compresses the context cache so more context fits in memory, with minimal quality loss |
+| Keep model in memory | On | The model stays loaded in RAM between generations |
+| Memory-mapped loading (mmap) | Off | Deliberately disabled — a unified-memory leak bug (in llama.cpp, LM Studio, or ROCm) caused double memory usage across both VRAM and RAM when mmap was enabled |
+
+Everything else is left at LM Studio defaults.
+
 ## Hardware
 
 The AI ran on a single machine:
