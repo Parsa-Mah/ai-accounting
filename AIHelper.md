@@ -83,6 +83,25 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 - Bill posting: Dr Expense / Cr AP; payment: Dr AP / Cr Cash.
 - Balance sheet must satisfy Assets = Liabilities + Equity (incl. retained earnings).
 
+## Reference Architecture (studied, NOT copied)
+
+Searched GitHub for existing open-source Python accounting apps; none matched all needs (complete + web + Python + SQLite). Closest: **SlowBooks-Pro-2026** (FastAPI + SQLAlchemy 2.0 + vanilla JS + SQLite — near-identical stack, but **source-available license → no code reuse**) and **koalixcrm** (best fully-OSS option, Django, SQLite-capable). Decision: study SlowBooks as a blueprint only. Clone at `D:\Projects\Python\GithubResume\SlowBooks-Pro-2026` (shallow, outside this repo).
+
+Patterns worth adopting (implement our own versions):
+
+- **Single posting path**: one `create_journal_entry(db, date, description, lines, source_type, source_id)` service is the ONLY way journal entries are created; every financial event (invoice, bill, payment, bank txn) posts through it, guaranteeing sum(debits) == sum(credits).
+- **DB-level guard**: CHECK constraint on lines — each line is debit-only OR credit-only, never both.
+- **Provenance**: `source_type`/`source_id` polymorphic columns on the entry header trace every journal entry back to its originating document.
+- **Void = reversing entry**: swap debit/credit, prefix "VOID:", carry all dimensions; never delete history.
+- **Money discipline**: exact `Decimal` + `ROUND_HALF_UP`, `Numeric(12,2)`; round each line before summing so stored totals never drift from line sums. (We keep our own decision: integer cents.)
+- **Audit**: SQLAlchemy `after_flush` hooks auto-log changes; acting username travels via `session.info`, not contextvars.
+- **SQLite tuning**: `PRAGMA journal_mode=WAL`, `busy_timeout=5000`, `synchronous=NORMAL`.
+- **Bank reconciliation**: `cleared` + `reconciliation_id` on ledger lines; `bank_kind` on accounts (not names/numbers) keys the register.
+- **Frontend**: hash-routed SPA; one JS module per page exporting `render()`; central `api.js` wrapper; a "wiring audit" test fails if an endpoint has no SPA caller.
+- **Phased roadmap**: foundation (accounts, journal, audit) → AP → productivity → reports → integrations.
+
+Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, nonprofit, multi-company, job costing. Keep: accounts, customers, vendors, items, invoices, estimates, payments, bills, journal, bank register + reconciliation, reports, budgets, tax, audit, auth, seed data.
+
 ## Decision Log
 
 | # | Decision | Rationale |
@@ -95,6 +114,7 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 | 6 | Integer cents for all money values | Avoid float precision errors in accounting |
 | 7 | Seed script with demo accounts/transactions | App must demo well on first run |
 | 8 | FastAPI over Flask | Modern, typed, auto OpenAPI docs |
+| 9 | No existing OSS app adopted; SlowBooks-Pro-2026 studied as architecture reference only (source-available license bars code reuse) | GitHub search found no complete+web+Python+SQLite match; SlowBooks matches stack/features best |
 
 ## Known Limitations
 
@@ -118,8 +138,8 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 
 - Last Updated: 2026-09-21
 - Last Full Scan: 2026-09-21
-- Last Incremental Update: 2026-09-21 (opencode.jsonc added + gitignored; LSP noted in README)
+- Last Incremental Update: 2026-09-21 (GitHub search for OSS accounting apps; SlowBooks architecture studied and recorded as reference)
 - Files Analyzed: `main.py`, `README.md`, `skills/*/SKILL.md`
-- Git Commit: `ab74cd6` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
+- Git Commit: `36e8784` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.1 (pre-implementation)
 - AIHelper Version: 1
