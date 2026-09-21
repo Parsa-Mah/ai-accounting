@@ -227,3 +227,6 @@ __marimo__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Local opencode config (LSP enablement)
+opencode.jsonc

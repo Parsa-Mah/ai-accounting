@@ -18,7 +18,8 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 | `README.md` | Final project front page (goal, stack, AI + Qwen model/config details, hardware, author) |
 | `AIHelper.md` | This project knowledge base |
 | `skills/` | AI skills shipped with the repo (see Project Skills) |
-| `.gitignore` | Standard Python gitignore (GitHub template) + project-specific SQLite (`*.db`, `*.sqlite3`) and OS entries |
+| `.gitignore` | Standard Python gitignore (GitHub template) + project-specific SQLite (`*.db`, `*.sqlite3`), OS entries, and `opencode.jsonc` |
+| `opencode.jsonc` | Local-only (gitignored) — enables LSP in the AI's editor |
 
 No app code, no dependencies installed, no tests. Git repo on branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`); remote root commit `1944695` holds a `LICENSE` file.
 
@@ -27,6 +28,7 @@ No app code, no dependencies installed, no tests. Git repo on branch `main`, tra
 - All code in this repo is AI-generated; humans only direct and review.
 - README states the author is **Parsa Mahmoodi** (programmer, coder, software engineer) and credits the AI.
 - AI: **Qwen 3.8 27B** via **LM Studio** (llama.cpp backend) with **ROCm** on an **HP ZBook Ultra G1a** (AMD Ryzen AI MAX PRO 390, Radeon 8050S, 64 GB unified LPDDR5X).
+- The AI's editor runs with **LSP enabled** (`opencode.jsonc` at project root, gitignored).
 - Never put secrets (serial numbers, device identifiers, keys) in repo files.
 
 ## Qwen Model & Inference Config (durable)
@@ -116,7 +118,7 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend ca
 
 - Last Updated: 2026-09-21
 - Last Full Scan: 2026-09-21
-- Last Incremental Update: 2026-09-21 (.gitignore replaced with standard Python template)
+- Last Incremental Update: 2026-09-21 (opencode.jsonc added + gitignored; LSP noted in README)
 - Files Analyzed: `main.py`, `README.md`, `skills/*/SKILL.md`
 - Git Commit: `ab74cd6` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.1 (pre-implementation)

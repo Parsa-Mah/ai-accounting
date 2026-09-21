@@ -37,6 +37,7 @@ This project was authored by:
 - **Model:** Qwen 3.8 27B
 - **Runtime:** [LM Studio](https://lmstudio.ai) with the llama.cpp inference backend
 - **GPU acceleration:** ROCm (AMD)
+- **Code intelligence:** LSP (Language Server Protocol) enabled in the AI's editor for real-time diagnostics and symbol navigation
 
 Everything ran locally — no cloud inference, no external API calls.
 
