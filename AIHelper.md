@@ -12,31 +12,31 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status (build in progress)
 
-Phases 0–3 of the build plan are **complete and tested** (38/38 tests green). Phases 4–11 remain.
+Phases 0–4 of the build plan are **complete and tested** (49/49 tests green). Phases 5–11 remain.
 
 | File / Dir | State |
 | --- | --- |
 | `main.py` | uvicorn runner with `--host`, `--port`, `--seed` flags (`--seed` imports `app.seed.demo` — **not created yet, Phase 11**) |
-| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes, `/api/health`, static mount (skipped until `static/` exists) |
+| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes (auth, accounts, journal, ledger, reports), `/api/health`, static mount (skipped until `static/` exists) |
 | `app/database.py` | SQLite engine (`accounting.db` at root, overridable via `ACCOUNTING_DB_PATH` env var), WAL pragmas (`journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`), `Base`, `SessionLocal` (`expire_on_commit=False`), `get_db`, `init_db` (creates tables + seeds COA) |
 | `app/models/` | `Account` (+ `AccountType` enum), `User`, `JournalEntry` + `JournalLine` (CHECK debit-XOR-credit, provenance `source_type`/`source_id`, `is_voided`/`voided_by_id`) |
-| `app/schemas/` | Pydantic v2: `AccountCreate/Update/Read`, `Credentials/AuthStatus/AuthUser`, `JournalEntryCreate/Read`, `JournalLineCreate/Read` |
-| `app/services/` | `accounts.py` (CRUD + deactivate + journal-line guard), `auth.py` (pbkdf2 hashing, itsdangerous signed cookies), `journal.py` (single posting path `create_journal_entry` + void-as-reversal), `errors.py` (`NotFoundError`→404, `ConflictError`→409, `ValidationError`→422) |
-| `app/routers/` | `auth.py` (public), `accounts.py` + `journal.py` (auth-protected) |
+| `app/schemas/` | Pydantic v2: `AccountCreate/Update/Read`, `Credentials/AuthStatus/AuthUser`, `JournalEntryCreate/Read`, `JournalLineCreate/Read`, `GeneralLedgerRead`/`TrialBalanceRead`, `IncomeStatementRead`/`BalanceSheetRead`/`StatementLineRead` |
+| `app/services/` | `accounts.py` (CRUD + deactivate + journal-line guard), `auth.py` (pbkdf2 hashing, itsdangerous signed cookies), `journal.py` (single posting path `create_journal_entry` + void-as-reversal), `ledger.py` (`account_balance`, `general_ledger` running balance, `trial_balance`), `reports.py` (`income_statement`, `balance_sheet`), `errors.py` (`NotFoundError`→404, `ConflictError`→409, `ValidationError`→422) |
+| `app/routers/` | `auth.py` (public), `accounts.py` + `journal.py` + `ledger.py` + `reports.py` (auth-protected) |
 | `app/dependencies.py` | `get_current_user` — cookie session check, 401 if missing/invalid/no user |
 | `app/seed/coa.py` | 26-account standard COA, auto-seeded idempotently on every startup via `init_db` |
-| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py`, `test_journal.py` — **38 tests, all passing** |
+| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py`, `test_journal.py`, `test_ledger.py`, `test_reports.py` — **49 tests, all passing** |
 | `requirements.txt` | fastapi, uvicorn[standard], SQLAlchemy 2.0, pydantic v2, itsdangerous, reportlab, pytest, httpx, pyright |
 | `pytest.ini` | filters 2 third-party deprecation warnings |
 | `pyrightconfig.json` | pins pyright to `.venv` (LSP needs opencode restart to pick up) |
 | `static/` | **does not exist yet** (Phase 9) |
 | `AI_WORKFLOW.md` | **not written yet** (Phase 11) |
 
-Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–2 committed and pushed (HEAD `c08b617`); **Phase 3 (journal) is implemented but uncommitted**.
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–3 committed and pushed (HEAD `b1a603b`); **Phase 4 (ledger + statements) is implemented but uncommitted**.
 
 ## Build Roadmap (approved plan — use as the work queue)
 
-Small steps, 1–2 files each, `pytest` green after every step. Phases 0–2 done; continue from Phase 3.
+Small steps, 1–2 files each, `pytest` green after every step. Phases 0–4 done; continue from Phase 5.
 
 | # | Phase | Status |
 | --- | --- | --- |
@@ -44,8 +44,8 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–2 don
 | 1 | Chart of accounts: model, schema, service, router, tests, standard COA auto-seed | **Done** |
 | 2 | Auth: single-user setup/login/logout/me, pbkdf2 + signed cookie, route protection | **Done** |
 | 3 | **Journal (the core)**: `models/journal.py` (entry + lines, CHECK constraint debit-XOR-credit, provenance `source_type`/`source_id`), `services/journal.py` (single posting path `create_journal_entry` + void-as-reversing-entry), schemas, router, tests (balance, exclusivity, void) | **Done** |
-| 4 | Ledger + statements: `services/ledger.py` (balances, general ledger, trial balance), `services/reports.py` (income statement, balance sheet), router, tests (A = L + E identity) | Next |
-| 5 | Parties, items, estimates, invoices (AR + tax): `models/party.py` (Customer, Vendor) + `models/item.py`, `models/invoice.py` + `models/estimate.py`, `services/invoices.py` (create posts Dr AR incl. tax / Cr Revenue / Cr Tax Payable; payment Dr Cash / Cr AR; void), `services/estimates.py` (convert-to-invoice), routers, tests | Pending |
+| 4 | Ledger + statements: `services/ledger.py` (balances, general ledger, trial balance), `services/reports.py` (income statement, balance sheet), router, tests (A = L + E identity) | **Done** |
+| 5 | Parties, items, estimates, invoices (AR + tax): `models/party.py` (Customer, Vendor) + `models/item.py`, `models/invoice.py` + `models/estimate.py`, `services/invoices.py` (create posts Dr AR incl. tax / Cr Revenue / Cr Tax Payable; payment Dr Cash / Cr AR; void), `services/estimates.py` (convert-to-invoice), routers, tests | Next |
 | 6 | Bills (AP + tax): `models/bill.py`, `services/bills.py` (Dr Expense / Dr Tax Recoverable / Cr AP; payment Dr AP / Cr Cash; void), router, tests | Pending |
 | 7 | Budgets: `models/budget.py`, `services/budgets.py` (actual vs budget, variance), router, tests | Pending |
 | 8 | Bank register + reconciliation: `cleared`/`reconciliation_id` on journal lines, `services/reconciliation.py`, router, tests | Pending |
@@ -53,11 +53,15 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–2 don
 | 10 | Export: CSV service + router, PDF (ReportLab) + router, tests | Pending |
 | 11 | Seed + polish: `app/seed/demo.py` + wire `--seed` flag, `AI_WORKFLOW.md`, README status update, full test run | Pending |
 
-### Phase 4 integration notes (already-decided details)
+### Ledger & statements conventions (Phase 4, implemented)
 
 - Ledger/report services read from journal lines; the single posting path guarantees every entry balances, so balances are internally consistent.
+- Net balances are **debit-positive cents** (`debits - credits`). Trial balance shows each account in its natural column (positive net → debit column).
+- `general_ledger` opening balance = all activity strictly before `date_from` (0 when no `date_from`). `include_voided=False` hides voided entries **and their reversing entries together** (the pair nets to zero), keeping the running balance accurate.
 - Statement categorization uses `Account.type` (asset/liability/equity/revenue/expense); `subtype` aids lookups (e.g. `retained_earnings`, `revenue`, `cogs`).
-- Voided entries are offset by their reversing entries, so net balances are correct without filtering; expose `is_voided` for display/filtering.
+- Statement amounts are positive in the account type's natural direction (assets/expenses debit-normal, others credit-normal).
+- Balance sheet equity includes **all-time unclosed net income** (no closing entries exist), which is what makes Assets = Liabilities + Equity hold by construction.
+- Voided entries are offset by their reversing entries, so net balances are correct without filtering.
 
 ## Architecture
 
@@ -72,8 +76,8 @@ Accounting/
 │   ├── dependencies.py# get_current_user (cookie session auth)
 │   ├── models/        # Account, AccountType, User (+ JournalEntry, JournalLine, Invoice, Bill, Budget ... in Phases 3-8)
 │   ├── schemas/       # Pydantic v2 request/response models
-│   ├── services/      # domain logic: accounts, auth, errors (+ journal, ledger, reports, invoices, bills, budgets, reconciliation ...)
-│   ├── routers/       # auth, accounts (+ journal, reports, invoices, bills, budgets, export ...)
+│   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports (+ invoices, bills, budgets, reconciliation ...)
+│   ├── routers/       # auth, accounts, journal, ledger, reports (+ invoices, bills, budgets, export ...)
 │   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (Phase 11)
 ├── static/            # tabbed SPA (Phase 9): dashboard, accounts, journal, ledger, statements, invoices, bills, budgets, export
 ├── tests/
@@ -124,7 +128,7 @@ Patterns worth adopting (implement our own versions):
 - **Bank reconciliation**: `cleared` + `reconciliation_id` on ledger lines; `bank_kind` on accounts (not names/numbers) keys the register — `bank_kind` column **done** on Account.
 - **Frontend**: hash-routed SPA; one JS module per page exporting `render()`; central `api.js` wrapper; a "wiring audit" test fails if an endpoint has no SPA caller (Phase 9).
 
-Status as of Phase 3: single posting path, DB-level debit-XOR-credit guard, provenance columns, and void-as-reversal are **implemented**; audit logging and bank reconciliation remain pending.
+Status as of Phase 4: single posting path, DB-level debit-XOR-credit guard, provenance columns, void-as-reversal, ledger, and financial statements are **implemented**; audit logging and bank reconciliation remain pending.
 
 Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, nonprofit, multi-company, job costing. Keep: accounts, customers, vendors, items, invoices, estimates, payments, bills, journal, bank register + reconciliation, reports, budgets, tax, audit, auth, seed data.
 
@@ -161,7 +165,7 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 
 ## Known Limitations
 
-- Phases 4–11 not implemented: no ledger, statements, invoices, bills, budgets, reconciliation, frontend, export, or demo seed yet.
+- Phases 5–11 not implemented: no invoices, estimates, bills, budgets, reconciliation, frontend, export, or demo seed yet.
 - `main.py --seed` references `app.seed.demo.seed_demo_data` which does not exist until Phase 11 (lazy import; app runs fine without the flag).
 - No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks).
 
@@ -181,14 +185,14 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
 - DB file: `accounting.db` at project root (WAL mode)
-- Test suite: 38 tests, all passing (Phases 0–3)
+- Test suite: 49 tests, all passing (Phases 0–4)
 
 ## Metadata
 
 - Last Updated: 2026-09-22
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-22 (Phase 3 implemented: journal core — models, single posting path, void-as-reversal, router, deactivate guard, tests; 38 tests green)
-- Files Analyzed: `app/models/journal.py`, `app/models/__init__.py`, `app/schemas/journal.py`, `app/services/journal.py`, `app/services/errors.py`, `app/services/accounts.py`, `app/routers/journal.py`, `app/main.py`, `tests/test_journal.py`, `tests/test_accounts.py`, `tests/conftest.py`, `requirements.txt`
-- Git Commit: `c08b617` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–2 committed and pushed; **Phase 3 uncommitted**)
-- Architecture Version: 0.3 (foundation + accounts + auth + journal core implemented)
+- Last Incremental Update: 2026-09-22 (Phase 4 implemented: ledger + financial statements — services, schemas, routers, tests; 49 tests green)
+- Files Analyzed: `app/services/ledger.py`, `app/services/reports.py`, `app/schemas/ledger.py`, `app/schemas/reports.py`, `app/routers/ledger.py`, `app/routers/reports.py`, `app/main.py`, `tests/test_ledger.py`, `tests/test_reports.py`, `app/services/journal.py`, `app/models/journal.py`, `app/models/account.py`, `app/seed/coa.py`, `tests/conftest.py`
+- Git Commit: `b1a603b` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–3 committed and pushed; **Phase 4 uncommitted**)
+- Architecture Version: 0.4 (foundation + accounts + auth + journal core + ledger/statements implemented)
 - AIHelper Version: 2 (added Build Roadmap handoff section, conventions, environment notes)
