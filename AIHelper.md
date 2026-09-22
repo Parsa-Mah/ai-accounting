@@ -32,7 +32,7 @@ Phases 0–4 of the build plan are **complete and tested** (49/49 tests green). 
 | `static/` | **does not exist yet** (Phase 9) |
 | `AI_WORKFLOW.md` | **not written yet** (Phase 11) |
 
-Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–3 committed and pushed (HEAD `b1a603b`); **Phase 4 (ledger + statements) is implemented but uncommitted**.
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–4 committed and pushed (HEAD `384cfd2`).
 
 ## Build Roadmap (approved plan — use as the work queue)
 
@@ -158,7 +158,7 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and `opencode.jsonc` (`lsp.pyright.initialization.python.pythonPath`). If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
-- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (38 tests as of this update).
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (49 tests as of this update).
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` (pyright is installed in the venv and listed in `requirements.txt`; `pyrightconfig.json` pins it to `.venv`). Keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
 - **opencode.jsonc** is gitignored (local-only) and now contains the pyright venv config.
@@ -191,8 +191,8 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 
 - Last Updated: 2026-09-22
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-22 (Phase 4 implemented: ledger + financial statements — services, schemas, routers, tests; 49 tests green)
-- Files Analyzed: `app/services/ledger.py`, `app/services/reports.py`, `app/schemas/ledger.py`, `app/schemas/reports.py`, `app/routers/ledger.py`, `app/routers/reports.py`, `app/main.py`, `tests/test_ledger.py`, `tests/test_reports.py`, `app/services/journal.py`, `app/models/journal.py`, `app/models/account.py`, `app/seed/coa.py`, `tests/conftest.py`
-- Git Commit: `b1a603b` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–3 committed and pushed; **Phase 4 uncommitted**)
+- Last Incremental Update: 2026-09-22 (git-status sync after Phase 4 commit `384cfd2`; no source changes since the Phase 4 update)
+- Files Analyzed: git state only (no source files changed since the Phase 4 update)
+- Git Commit: `384cfd2` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–4 committed and pushed)
 - Architecture Version: 0.4 (foundation + accounts + auth + journal core + ledger/statements implemented)
 - AIHelper Version: 2 (added Build Roadmap handoff section, conventions, environment notes)
