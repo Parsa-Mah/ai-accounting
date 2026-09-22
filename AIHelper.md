@@ -32,7 +32,7 @@ Phases 0–2 of the build plan are **complete and tested** (21/21 tests green). 
 | `static/` | **does not exist yet** (Phase 9) |
 | `AI_WORKFLOW.md` | **not written yet** (Phase 11) |
 
-Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–2 work is **uncommitted** (last commit `7263e14` predates implementation).
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–2 are committed and pushed (6 commits `1771ef4`..`0076a2a`), working tree clean.
 
 ## Build Roadmap (approved plan — use as the work queue)
 
@@ -163,7 +163,6 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - `main.py --seed` references `app.seed.demo.seed_demo_data` which does not exist until Phase 11 (lazy import; app runs fine without the flag).
 - `deactivate_account` does not yet check journal-line usage (guard added in Phase 3).
 - No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks).
-- Phases 0–2 work is uncommitted on `main`.
 
 ## AI Instructions
 
@@ -189,6 +188,6 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
 - Last Incremental Update: 2026-09-22 (Phases 0–2 implemented: foundation, chart of accounts, auth; 21 tests green)
 - Files Analyzed: all of `app/**`, `tests/**`, `main.py`, `requirements.txt`, `pytest.ini`, `pyrightconfig.json`, `.gitignore`, `README.md`
-- Git Commit: `7263e14` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–2 uncommitted)
+- Git Commit: `0076a2a` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–2 committed and pushed)
 - Architecture Version: 0.2 (foundation + accounts + auth implemented)
 - AIHelper Version: 2 (added Build Roadmap handoff section, conventions, environment notes)
