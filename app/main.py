@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.database import init_db
-from app.services.errors import ConflictError, NotFoundError
+from app.services.errors import ConflictError, NotFoundError, ValidationError
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
@@ -24,10 +24,15 @@ def create_app() -> FastAPI:
     async def conflict_handler(request: Request, exc: ConflictError):
         return JSONResponse(status_code=409, content={"detail": str(exc)})
 
-    from app.routers import accounts, auth
+    @app.exception_handler(ValidationError)
+    async def validation_error_handler(request: Request, exc: ValidationError):
+        return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+    from app.routers import accounts, auth, journal
 
     app.include_router(auth.router)
     app.include_router(accounts.router)
+    app.include_router(journal.router)
 
     @app.get("/api/health")
     def health():

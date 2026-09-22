@@ -7,3 +7,7 @@ class NotFoundError(Exception):
 
 class ConflictError(Exception):
     """Write conflicts with existing data or domain rules (HTTP 409)."""
+
+
+class ValidationError(Exception):
+    """Submitted content is well-formed but violates a domain rule (HTTP 422)."""

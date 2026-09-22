@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.account import Account, AccountType
+from app.models.journal import JournalLine
 from app.schemas.account import AccountCreate, AccountUpdate
 from app.services.errors import ConflictError, NotFoundError
 
@@ -66,6 +67,14 @@ def deactivate_account(db: Session, account_id: int) -> Account:
     account = get_account(db, account_id)
     if account.is_system:
         raise ConflictError("System accounts cannot be deactivated")
+    used = db.scalar(
+        select(JournalLine.id).where(JournalLine.account_id == account_id).limit(1)
+    )
+    if used is not None:
+        raise ConflictError(
+            f"Account '{account.name}' is used by journal entries "
+            "and cannot be deactivated"
+        )
     account.is_active = False
     db.commit()
     db.refresh(account)

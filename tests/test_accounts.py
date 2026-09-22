@@ -78,3 +78,23 @@ def test_deactivate_system_account_rejected(client):
     cash = next(a for a in client.get("/api/accounts").json() if a["number"] == "1000")
     response = client.post(f"/api/accounts/{cash['id']}/deactivate")
     assert response.status_code == 409
+
+
+def test_deactivate_account_used_in_journal_rejected(client):
+    accounts = {a["number"]: a for a in client.get("/api/accounts").json()}
+    rent = accounts["5100"]["id"]
+    cash = accounts["1000"]["id"]
+    created = client.post(
+        "/api/journal",
+        json={
+            "date": "2026-01-15",
+            "description": "Pay rent",
+            "lines": [
+                {"account_id": rent, "debit": 100000, "credit": 0},
+                {"account_id": cash, "debit": 0, "credit": 100000},
+            ],
+        },
+    )
+    assert created.status_code == 201
+    response = client.post(f"/api/accounts/{rent}/deactivate")
+    assert response.status_code == 409

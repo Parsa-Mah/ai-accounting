@@ -13,6 +13,7 @@ import pytest
 _TMP = tempfile.TemporaryDirectory()
 os.environ["ACCOUNTING_DB_PATH"] = str(Path(_TMP.name) / "test.db")
 
+import app.models  # noqa: E402,F401  (registers all models on Base.metadata)
 from app.database import Base, engine  # noqa: E402
 from app.main import create_app  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
