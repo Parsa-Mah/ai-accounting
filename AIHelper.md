@@ -10,78 +10,104 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 2. Secondary: a real, coherent accounting domain implementation (not a toy).
 3. Public presentation: README + `AI_WORKFLOW.md` must make AI authorship explicit (model, runtime, hardware).
 
-## Current Project Status (pre-implementation)
+## Current Project Status (build in progress)
+
+Phases 0–2 of the build plan are **complete and tested** (21/21 tests green). Phases 3–11 remain.
 
 | File / Dir | State |
 | --- | --- |
-| `main.py` | Placeholder `print("Hello, World!")` — to be replaced by the app entry point |
-| `README.md` | Final project front page (goal, stack, AI + Qwen model/config details, hardware, author) |
-| `AIHelper.md` | This project knowledge base |
-| `skills/` | AI skills shipped with the repo (see Project Skills) |
-| `.gitignore` | Standard Python gitignore (GitHub template) + project-specific SQLite (`*.db`, `*.sqlite3`), OS entries, and `opencode.jsonc` |
-| `opencode.jsonc` | Local-only (gitignored) — enables LSP in the AI's editor |
+| `main.py` | uvicorn runner with `--host`, `--port`, `--seed` flags (`--seed` imports `app.seed.demo` — **not created yet, Phase 11**) |
+| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes, `/api/health`, static mount (skipped until `static/` exists) |
+| `app/database.py` | SQLite engine (`accounting.db` at root, overridable via `ACCOUNTING_DB_PATH` env var), WAL pragmas (`journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`), `Base`, `SessionLocal` (`expire_on_commit=False`), `get_db`, `init_db` (creates tables + seeds COA) |
+| `app/models/` | `Account` (+ `AccountType` enum), `User` |
+| `app/schemas/` | Pydantic v2: `AccountCreate/Update/Read`, `Credentials/AuthStatus/AuthUser` |
+| `app/services/` | `accounts.py` (CRUD + deactivate), `auth.py` (pbkdf2 hashing, itsdangerous signed cookies), `errors.py` (`NotFoundError`→404, `ConflictError`→409) |
+| `app/routers/` | `auth.py` (public), `accounts.py` (auth-protected) |
+| `app/dependencies.py` | `get_current_user` — cookie session check, 401 if missing/invalid/no user |
+| `app/seed/coa.py` | 26-account standard COA, auto-seeded idempotently on every startup via `init_db` |
+| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py` — **21 tests, all passing** |
+| `requirements.txt` | fastapi, uvicorn[standard], SQLAlchemy 2.0, pydantic v2, itsdangerous, reportlab, pytest, httpx |
+| `pytest.ini` | filters 2 third-party deprecation warnings |
+| `pyrightconfig.json` | pins pyright to `.venv` (LSP needs opencode restart to pick up) |
+| `static/` | **does not exist yet** (Phase 9) |
+| `AI_WORKFLOW.md` | **not written yet** (Phase 11) |
 
-No app code, no dependencies installed, no tests. Git repo on branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`); remote root commit `1944695` holds a `LICENSE` file.
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–2 work is **uncommitted** (last commit `7263e14` predates implementation).
 
-## Authorship Rules (durable)
+## Build Roadmap (approved plan — use as the work queue)
 
-- All code in this repo is AI-generated; humans only direct and review.
-- README states the author is **Parsa Mahmoodi** (programmer, coder, software engineer) and credits the AI.
-- AI: **Qwen 3.8 27B** via **LM Studio** (llama.cpp backend) with **ROCm** on an **HP ZBook Ultra G1a** (AMD Ryzen AI MAX PRO 390, Radeon 8050S, 64 GB unified LPDDR5X).
-- The AI's editor runs with **LSP enabled** (`opencode.jsonc` at project root, gitignored).
-- Never put secrets (serial numbers, device identifiers, keys) in repo files.
+Small steps, 1–2 files each, `pytest` green after every step. Phases 0–2 done; continue from Phase 3.
 
-## Qwen Model & Inference Config (durable)
+| # | Phase | Status |
+| --- | --- | --- |
+| 0 | Foundation: requirements/venv, `database.py`, app factory + runner, test scaffolding | **Done** |
+| 1 | Chart of accounts: model, schema, service, router, tests, standard COA auto-seed | **Done** |
+| 2 | Auth: single-user setup/login/logout/me, pbkdf2 + signed cookie, route protection | **Done** |
+| 3 | **Journal (the core)**: `models/journal.py` (entry + lines, CHECK constraint debit-XOR-credit, provenance `source_type`/`source_id`), `services/journal.py` (single posting path `create_journal_entry` + void-as-reversing-entry), schemas, router, tests (balance, exclusivity, void) | Next |
+| 4 | Ledger + statements: `services/ledger.py` (balances, general ledger, trial balance), `services/reports.py` (income statement, balance sheet), router, tests (A = L + E identity) | Pending |
+| 5 | Parties, items, estimates, invoices (AR + tax): `models/party.py` (Customer, Vendor) + `models/item.py`, `models/invoice.py` + `models/estimate.py`, `services/invoices.py` (create posts Dr AR incl. tax / Cr Revenue / Cr Tax Payable; payment Dr Cash / Cr AR; void), `services/estimates.py` (convert-to-invoice), routers, tests | Pending |
+| 6 | Bills (AP + tax): `models/bill.py`, `services/bills.py` (Dr Expense / Dr Tax Recoverable / Cr AP; payment Dr AP / Cr Cash; void), router, tests | Pending |
+| 7 | Budgets: `models/budget.py`, `services/budgets.py` (actual vs budget, variance), router, tests | Pending |
+| 8 | Bank register + reconciliation: `cleared`/`reconciliation_id` on journal lines, `services/reconciliation.py`, router, tests | Pending |
+| 9 | Frontend SPA: `static/index.html` + `app.css` (tab shell), `static/js/api.js` + `router.js` (hash-routed), then one page per step: login, dashboard, accounts, journal, ledger, statements, invoices/estimates, bills, budgets, export | Pending |
+| 10 | Export: CSV service + router, PDF (ReportLab) + router, tests | Pending |
+| 11 | Seed + polish: `app/seed/demo.py` + wire `--seed` flag, `AI_WORKFLOW.md`, README status update, full test run | Pending |
 
-- Model file: `Qwen3.8-27B-UD-Q5_K_XL.gguf` — Unsloth Dynamic Q5_K_XL from `unsloth/Qwen3.8-27B-GGUF` (Apache 2.0); base model `Qwen/Qwen3.8-27B`; native context 262,144 tokens.
-- Key LM Studio settings: reasoning on (unlimited budget), context 133,120 tokens, temperature 0.6, top-k 20, top-p 0.95, repeat/presence penalties off, min-p disabled, MTP on (max 3 draft tokens), all 65 layers GPU-offloaded, 12 CPU threads, eval batch 512, flash attention on, KV cache quantized Q8_0.
-- **mmap deliberately OFF**: a unified-memory leak bug (llama.cpp / LM Studio / ROCm) doubles memory usage across VRAM and RAM when mmap is enabled.
-- Full human-readable table lives in README.md → "Details and configurations of Qwen AI".
+### Phase 3 integration notes (already-decided details)
 
-## Project Skills (`skills/`)
+- `services/accounts.py::deactivate_account` currently only blocks system accounts; **add a guard in Phase 3** preventing deactivation of accounts referenced by journal lines.
+- Every new router must be created with `dependencies=[Depends(get_current_user)]` (pattern: `app/routers/accounts.py`) and included in `create_app()` in `app/main.py`.
+- Money is **integer cents** end-to-end; convert to USD currency only at API/UI boundaries.
+- Journal lines: each line is debit-only OR credit-only (DB CHECK constraint); entry must balance (sum debits == sum credits).
+- Void = reversing entry (swap debit/credit, prefix description "VOID:"), never delete history.
 
-AI skills (created by Parsa Mahmoodi) shipped in-repo so anyone who clones the project gets them:
+## Architecture
 
-| Skill | Purpose |
-| --- | --- |
-| `skills/use-aihelper` | Instructs an AI assistant to read `AIHelper.md` first as compact project knowledge before exploring source code, keep the user's request as the primary task, and use semantic search to locate implementations — minimizing unnecessary repo exploration. |
-| `skills/maintain-aihelper` | Instructs an AI assistant to create or incrementally update `AIHelper.md` when features complete, architecture changes, or dependencies shift — keeping it a concise, factual knowledge base (architecture, relationships, conventions, decisions) rather than a task list or changelog. |
-
-Together they form the project's AI knowledge loop: **use** the knowledge base to work, **maintain** it as the project evolves.
-
-## Planned Architecture (approved, not yet implemented)
-
-Stack: Python 3.13 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS frontend (no build step) · ReportLab (PDF) · pytest + TestClient.
+Stack: Python 3.13 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS frontend (no build step, Phase 9) · ReportLab (PDF, Phase 10) · pytest + TestClient.
 
 ```
 Accounting/
-├── main.py            # entry point: uvicorn runner (+ --seed flag)
+├── main.py            # entry point: uvicorn runner (+ --seed flag, Phase 11)
 ├── app/
-│   ├── main.py        # FastAPI app factory, mounts, DB init
-│   ├── database.py    # engine, session, schema init
-│   ├── models/        # Account, JournalEntry, JournalLine, Invoice, Bill, Budget
+│   ├── main.py        # FastAPI app factory, mounts, DB init, exception handlers
+│   ├── database.py    # engine, session, schema init, COA seed hook
+│   ├── dependencies.py# get_current_user (cookie session auth)
+│   ├── models/        # Account, AccountType, User (+ JournalEntry, JournalLine, Invoice, Bill, Budget ... in Phases 3-8)
 │   ├── schemas/       # Pydantic v2 request/response models
-│   ├── services/      # domain logic: validation, ledger, statements, posting, budgets
-│   └── routers/       # accounts, journal, reports, invoices, bills, budgets, export
-├── static/            # tabbed SPA: dashboard, accounts, journal, ledger, statements, invoices, bills, budgets, export
+│   ├── services/      # domain logic: accounts, auth, errors (+ journal, ledger, reports, invoices, bills, budgets, reconciliation ...)
+│   ├── routers/       # auth, accounts (+ journal, reports, invoices, bills, budgets, export ...)
+│   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (Phase 11)
+├── static/            # tabbed SPA (Phase 9): dashboard, accounts, journal, ledger, statements, invoices, bills, budgets, export
 ├── tests/
 ├── skills/            # AI skills shipped with the repo (use-aihelper, maintain-aihelper)
 ├── requirements.txt
+├── pytest.ini
+├── pyrightconfig.json
 ├── .gitignore
 ├── README.md
-├── AIHelper.md        # project knowledge base for AI assistants
-└── AI_WORKFLOW.md     # to be written: how the AI built the project
+├── AIHelper.md        # this project knowledge base
+└── AI_WORKFLOW.md     # to be written (Phase 11): how the AI built the project
 ```
 
-Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend calls REST `/api/*` endpoints via fetch.
+Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend (Phase 9) calls REST `/api/*` endpoints via fetch.
+
+### Established conventions (follow these in new code)
+
+- **Layering**: routers are thin (parse/validate via Pydantic, call service, return ORM object); all domain logic lives in `services/`; services raise `NotFoundError`/`ConflictError` from `app/services/errors.py`, mapped to 404/409 by handlers registered in `create_app()`.
+- **Auth**: single user. First run → `POST /api/auth/setup` (creates user, sets cookie). All routers except `auth` require `Depends(get_current_user)`. Password: `pbkdf2_hmac` sha256, 200k iterations, stored as `{iterations}${salt}${digest}`. Session: itsdangerous `TimestampSigner` with per-user secret, cookie `session` (httponly, samesite=lax, 12h max age).
+- **Models**: SQLAlchemy 2.0 typed style (`Mapped`, `mapped_column`), `DateTime(timezone=True)` + `server_default=func.now()`, enums stored as VARCHAR (`native_enum=False`). New models must be exported from `app/models/__init__.py` (required for `init_db` table creation).
+- **Schemas**: Pydantic v2, `ConfigDict(from_attributes=True)` on read models, `Field` constraints for validation (validation errors → 422 automatically).
+- **COA**: 26 standard accounts auto-seeded on startup (idempotent, keyed by number). System accounts (`is_system=True`: Cash 1000, AR 1100, AP 2000, Taxes Payable 2200, Tax Recoverable 2210, Owner's Capital 3000, Retained Earnings 3900, Sales Revenue 4000, COGS 5000) cannot be deactivated. Subtypes used for lookups: `cash` (bank_kind `checking`), `ar`, `ap`, `tax`, `revenue`, `cogs`, `retained_earnings`, `capital`.
+- **Tests**: `tests/conftest.py` sets `ACCOUNTING_DB_PATH` to a temp file before app import; `app_client` fixture = fresh DB + anonymous TestClient; `client` fixture = `app_client` + admin user (`admin`/`admin123`) with session cookie. New API tests use `client` (authenticated) or `app_client` (anonymous).
 
 ### Domain invariants
 
 - Every journal entry must balance: sum(debits) == sum(credits).
-- Money is stored as **integer cents** end-to-end (no floats); convert to currency only at API/UI boundaries.
-- Invoice posting auto-generates journal entries (Dr AR / Cr Revenue; payment: Dr Cash / Cr AR).
-- Bill posting: Dr Expense / Cr AP; payment: Dr AP / Cr Cash.
+- Money is stored as **integer cents** end-to-end (no floats); convert to currency only at API/UI boundaries. Currency: **USD**.
+- Invoice posting auto-generates journal entries (Dr AR incl. tax / Cr Revenue / Cr Tax Payable; payment: Dr Cash / Cr AR).
+- Bill posting: Dr Expense / Dr Tax Recoverable / Cr AP; payment: Dr AP / Cr Cash.
 - Balance sheet must satisfy Assets = Liabilities + Equity (incl. retained earnings).
+- Tax: simple flat rate per invoice/bill (decided: include simple versions of tax + estimates).
 
 ## Reference Architecture (studied, NOT copied)
 
@@ -93,12 +119,11 @@ Patterns worth adopting (implement our own versions):
 - **DB-level guard**: CHECK constraint on lines — each line is debit-only OR credit-only, never both.
 - **Provenance**: `source_type`/`source_id` polymorphic columns on the entry header trace every journal entry back to its originating document.
 - **Void = reversing entry**: swap debit/credit, prefix "VOID:", carry all dimensions; never delete history.
-- **Money discipline**: exact `Decimal` + `ROUND_HALF_UP`, `Numeric(12,2)`; round each line before summing so stored totals never drift from line sums. (We keep our own decision: integer cents.)
-- **Audit**: SQLAlchemy `after_flush` hooks auto-log changes; acting username travels via `session.info`, not contextvars.
-- **SQLite tuning**: `PRAGMA journal_mode=WAL`, `busy_timeout=5000`, `synchronous=NORMAL`.
-- **Bank reconciliation**: `cleared` + `reconciliation_id` on ledger lines; `bank_kind` on accounts (not names/numbers) keys the register.
-- **Frontend**: hash-routed SPA; one JS module per page exporting `render()`; central `api.js` wrapper; a "wiring audit" test fails if an endpoint has no SPA caller.
-- **Phased roadmap**: foundation (accounts, journal, audit) → AP → productivity → reports → integrations.
+- **Money discipline**: we keep our own decision: integer cents (not Decimal/Numeric).
+- **Audit**: SQLAlchemy `after_flush` hooks auto-log changes (not yet implemented — fold into Phase 3+ if feasible, else note as limitation).
+- **SQLite tuning**: `PRAGMA journal_mode=WAL`, `busy_timeout=5000`, `synchronous=NORMAL` — **done** in `app/database.py`.
+- **Bank reconciliation**: `cleared` + `reconciliation_id` on ledger lines; `bank_kind` on accounts (not names/numbers) keys the register — `bank_kind` column **done** on Account.
+- **Frontend**: hash-routed SPA; one JS module per page exporting `render()`; central `api.js` wrapper; a "wiring audit" test fails if an endpoint has no SPA caller (Phase 9).
 
 Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, nonprofit, multi-company, job costing. Keep: accounts, customers, vendors, items, invoices, estimates, payments, bills, journal, bank register + reconciliation, reports, budgets, tax, audit, auth, seed data.
 
@@ -114,32 +139,56 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 | 6 | Integer cents for all money values | Avoid float precision errors in accounting |
 | 7 | Seed script with demo accounts/transactions | App must demo well on first run |
 | 8 | FastAPI over Flask | Modern, typed, auto OpenAPI docs |
-| 9 | No existing OSS app adopted; SlowBooks-Pro-2026 studied as architecture reference only (source-available license bars code reuse) | GitHub search found no complete+web+Python+SQLite match; SlowBooks matches stack/features best |
+| 9 | No existing OSS app adopted; SlowBooks-Pro-2026 studied as architecture reference only (source-available license bars code reuse) | GitHub search found no complete+web+Python+SQLite match |
+| 10 | Auth: simple single-user login (setup on first run, signed cookie session) | User choice; good demo value, low complexity |
+| 11 | Tax + estimates: include simple versions (flat tax rate per invoice/bill; estimate convert-to-invoice) | User choice; keeps scope complete |
+| 12 | Currency: USD | User choice for public portfolio demo |
+| 13 | Standard COA auto-seeded on every startup (idempotent), not only via `--seed` | App must be usable on first run; `--seed` (Phase 11) adds demo transactions on top |
+| 14 | Domain exceptions (`NotFoundError`/`ConflictError`) raised in services, mapped to HTTP by app-level handlers | Keeps services framework-free; one mapping point |
+| 15 | Every non-auth router carries `Depends(get_current_user)` at router level | Uniform protection, explicit per router |
+
+## Environment & Tooling Notes
+
+- **venv**: `.venv` at project root (Python 3.13.15). Run everything with `.venv\Scripts\python.exe` (e.g. `.venv\Scripts\python.exe -m pytest`).
+- **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
+- **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and `opencode.jsonc` (`lsp.pyright.initialization.python.pythonPath`). If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
+- **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (21 tests as of this update).
+- **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
+- **opencode.jsonc** is gitignored (local-only) and now contains the pyright venv config.
 
 ## Known Limitations
 
-- Nothing implemented yet; all architecture above is planned, not verified in code.
+- Phases 3–11 not implemented: no journal, ledger, statements, invoices, bills, budgets, reconciliation, frontend, export, or demo seed yet.
+- `main.py --seed` references `app.seed.demo.seed_demo_data` which does not exist until Phase 11 (lazy import; app runs fine without the flag).
+- `deactivate_account` does not yet check journal-line usage (guard added in Phase 3).
+- No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks).
+- Phases 0–2 work is uncommitted on `main`.
 
 ## AI Instructions
 
-- Treat the planned architecture as the target design; verify against actual code once it exists — when code and this document disagree, update this document to match verified code.
+- The build roadmap above is the work queue; continue from the first non-Done phase. Keep the "small steps, tests green after each step" rhythm.
+- Follow the established conventions section exactly (layering, error handling, auth dependency, typed models, test fixtures).
+- Treat this document as the target design; verify against actual code — when code and this document disagree, update this document to match verified code.
 - Keep the AI-authorship framing intact in any docs the AI writes.
-- Do not start building the app without explicit user go-ahead.
-- Run tests (`pytest`) and keep them green after changes once the test suite exists.
+- Run tests (`.venv\Scripts\python.exe -m pytest`) and keep them green after changes.
+- Update this document (via the maintain-aihelper skill) at phase boundaries, especially the Build Roadmap status column.
+- Do not commit unless the user asks.
 
 ## Quick Project Facts
 
 - Language/runtime: Python 3.13.15 (Windows, pwsh)
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
-- DB file (planned): `accounting.db` at project root
+- DB file: `accounting.db` at project root (WAL mode)
+- Test suite: 21 tests, all passing (Phases 0–2)
 
 ## Metadata
 
-- Last Updated: 2026-09-21
-- Last Full Scan: 2026-09-21
-- Last Incremental Update: 2026-09-21 (GitHub search for OSS accounting apps; SlowBooks architecture studied and recorded as reference)
-- Files Analyzed: `main.py`, `README.md`, `skills/*/SKILL.md`
-- Git Commit: `36e8784` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
-- Architecture Version: 0.1 (pre-implementation)
-- AIHelper Version: 1
+- Last Updated: 2026-09-22
+- Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
+- Last Incremental Update: 2026-09-22 (Phases 0–2 implemented: foundation, chart of accounts, auth; 21 tests green)
+- Files Analyzed: all of `app/**`, `tests/**`, `main.py`, `requirements.txt`, `pytest.ini`, `pyrightconfig.json`, `.gitignore`, `README.md`
+- Git Commit: `7263e14` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–2 uncommitted)
+- Architecture Version: 0.2 (foundation + accounts + auth implemented)
+- AIHelper Version: 2 (added Build Roadmap handoff section, conventions, environment notes)
