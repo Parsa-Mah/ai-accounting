@@ -30,6 +30,13 @@ def get_account(db: Session, account_id: int) -> Account:
     return account
 
 
+def get_account_by_number(db: Session, number: str) -> Account:
+    account = db.scalar(select(Account).where(Account.number == number))
+    if account is None:
+        raise NotFoundError(f"Account {number} not found")
+    return account
+
+
 def create_account(db: Session, data: AccountCreate) -> Account:
     clash = db.scalar(
         select(Account).where(

@@ -28,13 +28,27 @@ def create_app() -> FastAPI:
     async def validation_error_handler(request: Request, exc: ValidationError):
         return JSONResponse(status_code=422, content={"detail": str(exc)})
 
-    from app.routers import accounts, auth, journal, ledger, reports
+    from app.routers import (
+        accounts,
+        auth,
+        estimates,
+        invoices,
+        items,
+        journal,
+        ledger,
+        parties,
+        reports,
+    )
 
     app.include_router(auth.router)
     app.include_router(accounts.router)
     app.include_router(journal.router)
     app.include_router(ledger.router)
     app.include_router(reports.router)
+    app.include_router(parties.router)
+    app.include_router(items.router)
+    app.include_router(invoices.router)
+    app.include_router(estimates.router)
 
     @app.get("/api/health")
     def health():
