@@ -31,6 +31,7 @@ def create_app() -> FastAPI:
     from app.routers import (
         accounts,
         auth,
+        bills,
         estimates,
         invoices,
         items,
@@ -48,6 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(parties.router)
     app.include_router(items.router)
     app.include_router(invoices.router)
+    app.include_router(bills.router)
     app.include_router(estimates.router)
 
     @app.get("/api/health")

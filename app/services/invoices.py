@@ -26,7 +26,7 @@ REVENUE_NUMBER = "4000"
 TAX_NUMBER = "2200"
 
 
-def _tax_cents(subtotal_cents: int, tax_rate: float) -> int:
+def tax_cents(subtotal_cents: int, tax_rate: float) -> int:
     if tax_rate == 0:
         return 0
     return int(
@@ -84,7 +84,7 @@ def create_invoice(
             )
         )
         subtotal += amount
-    tax = _tax_cents(subtotal, tax_rate)
+    tax = tax_cents(subtotal, tax_rate)
     total = subtotal + tax
     if total == 0:
         raise ValidationError("invoice total must be greater than zero")

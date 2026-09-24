@@ -9,7 +9,7 @@ from app.models.estimate import Estimate, EstimateLine
 from app.models.invoice import Invoice
 from app.schemas.invoice import InvoiceLineCreate
 from app.services.errors import ConflictError, NotFoundError
-from app.services.invoices import _resolve_lines, _tax_cents, create_invoice
+from app.services.invoices import _resolve_lines, create_invoice, tax_cents
 from app.services.parties import get_customer
 
 
@@ -38,7 +38,7 @@ def create_estimate(
         )
         subtotal += amount
     estimate.subtotal_cents = subtotal
-    estimate.tax_cents = _tax_cents(subtotal, tax_rate)
+    estimate.tax_cents = tax_cents(subtotal, tax_rate)
     estimate.total_cents = estimate.subtotal_cents + estimate.tax_cents
     db.add(estimate)
     db.commit()
