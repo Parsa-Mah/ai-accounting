@@ -17,6 +17,8 @@ class GeneralLedgerLineRead(BaseModel):
     credit: int
     balance: int
     is_voided: bool
+    cleared: bool
+    reconciliation_id: int | None
 
 
 class GeneralLedgerRead(BaseModel):

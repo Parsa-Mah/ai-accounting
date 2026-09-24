@@ -129,6 +129,8 @@ def general_ledger(
                 "credit": line.credit,
                 "balance": running,
                 "is_voided": entry.is_voided,
+                "cleared": line.cleared,
+                "reconciliation_id": line.reconciliation_id,
             }
         )
 

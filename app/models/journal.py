@@ -63,6 +63,10 @@ class JournalLine(Base):
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
     debit: Mapped[int] = mapped_column(Integer, default=0)
     credit: Mapped[int] = mapped_column(Integer, default=0)
+    cleared: Mapped[bool] = mapped_column(Boolean, default=False)
+    reconciliation_id: Mapped[int | None] = mapped_column(
+        ForeignKey("reconciliations.id"), nullable=True
+    )
 
     entry: Mapped["JournalEntry"] = relationship(back_populates="lines")
     account: Mapped["Account"] = relationship()

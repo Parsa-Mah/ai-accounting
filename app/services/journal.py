@@ -95,6 +95,10 @@ def void_journal_entry(db: Session, entry_id: int) -> JournalEntry:
     entry = get_journal_entry(db, entry_id)
     if entry.is_voided:
         raise ConflictError("journal entry is already voided")
+    if any(line.cleared for line in entry.lines):
+        raise ConflictError(
+            "journal entry has cleared lines; delete their reconciliation first"
+        )
 
     reversal_lines = [
         JournalLineCreate(
