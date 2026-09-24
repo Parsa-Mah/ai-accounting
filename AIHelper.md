@@ -12,31 +12,31 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status (build in progress)
 
-Phases 0–6 of the build plan are **complete and tested** (112/112 tests green). Phases 7–11 remain.
+Phases 0–7 of the build plan are **complete and tested** (127/127 tests green). Phases 8–11 remain.
 
 | File / Dir | State |
 | --- | --- |
 | `main.py` | uvicorn runner with `--host`, `--port`, `--seed` flags (`--seed` imports `app.seed.demo` — **not created yet, Phase 11**) |
-| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes (auth, accounts, journal, ledger, reports, parties, items, invoices, bills, estimates), `/api/health`, static mount (skipped until `static/` exists) |
+| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes (auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, estimates), `/api/health`, static mount (skipped until `static/` exists) |
 | `app/database.py` | SQLite engine (`accounting.db` at root, overridable via `ACCOUNTING_DB_PATH` env var), WAL pragmas (`journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`), `Base`, `SessionLocal` (`expire_on_commit=False`), `get_db`, `init_db` (creates tables + seeds COA) |
-| `app/models/` | `Account` (+ `AccountType` enum), `User`, `JournalEntry` + `JournalLine` (CHECK debit-XOR-credit, provenance `source_type`/`source_id`, `is_voided`/`voided_by_id`), `Customer`/`Vendor`, `Item`, `Invoice` + `InvoiceLine` + `InvoicePayment`, `Estimate` + `EstimateLine`, `Bill` + `BillLine` (per-line `expense_account_id`) + `BillPayment` |
-| `app/schemas/` | Pydantic v2: `AccountCreate/Update/Read`, `Credentials/AuthStatus/AuthUser`, `JournalEntryCreate/Read`, `JournalLineCreate/Read`, `GeneralLedgerRead`/`TrialBalanceRead`, `IncomeStatementRead`/`BalanceSheetRead`/`StatementLineRead`, `Customer/Vendor Create/Read`, `ItemCreate/Update/Read`, `InvoiceCreate/PayCreate/Read` + line/payment reads, `EstimateCreate/Read`, `BillCreate/PayCreate/Read` + line/payment reads (line carries required `expense_account_id`) |
-| `app/services/` | `accounts.py` (CRUD + deactivate + journal-line guard + `get_account_by_number`), `auth.py` (pbkdf2 hashing, itsdangerous signed cookies), `journal.py` (single posting path `create_journal_entry` + void-as-reversal), `ledger.py` (`account_balance`, `general_ledger` running balance, `trial_balance`), `reports.py` (`income_statement`, `balance_sheet`), `parties.py` (customer/vendor CRUD), `items.py` (item CRUD + deactivate), `invoices.py` (create+post, pay, void; public `tax_cents` helper shared by estimates/bills), `estimates.py` (create, convert-to-invoice), `bills.py` (create+post, pay, void), `errors.py` (`NotFoundError`→404, `ConflictError`→409, `ValidationError`→422) |
-| `app/routers/` | `auth.py` (public), `accounts.py` + `journal.py` + `ledger.py` + `reports.py` + `parties.py` + `items.py` + `invoices.py` + `bills.py` + `estimates.py` (auth-protected) |
+| `app/models/` | `Account` (+ `AccountType` enum), `User`, `JournalEntry` + `JournalLine` (CHECK debit-XOR-credit, provenance `source_type`/`source_id`, `is_voided`/`voided_by_id`), `Customer`/`Vendor`, `Item`, `Invoice` + `InvoiceLine` + `InvoicePayment`, `Estimate` + `EstimateLine`, `Bill` + `BillLine` (per-line `expense_account_id`) + `BillPayment`, `Budget` (account + date range + `budget_cents`) |
+| `app/schemas/` | Pydantic v2: `AccountCreate/Update/Read`, `Credentials/AuthStatus/AuthUser`, `JournalEntryCreate/Read`, `JournalLineCreate/Read`, `GeneralLedgerRead`/`TrialBalanceRead`, `IncomeStatementRead`/`BalanceSheetRead`/`StatementLineRead`, `Customer/Vendor Create/Read`, `ItemCreate/Update/Read`, `InvoiceCreate/PayCreate/Read` + line/payment reads, `EstimateCreate/Read`, `BillCreate/PayCreate/Read` + line/payment reads (line carries required `expense_account_id`), `BudgetCreate/Update/Read` + `BudgetReportRead` (rows + totals) |
+| `app/services/` | `accounts.py` (CRUD + deactivate + journal-line guard + `get_account_by_number`), `auth.py` (pbkdf2 hashing, itsdangerous signed cookies), `journal.py` (single posting path `create_journal_entry` + void-as-reversal), `ledger.py` (`account_balance`, `general_ledger` running balance, `trial_balance`), `reports.py` (`income_statement`, `balance_sheet`), `parties.py` (customer/vendor CRUD), `items.py` (item CRUD + deactivate), `invoices.py` (create+post, pay, void; public `tax_cents` helper shared by estimates/bills), `estimates.py` (create, convert-to-invoice), `bills.py` (create+post, pay, void), `budgets.py` (CRUD + `budget_report` actual-vs-budget/variance), `errors.py` (`NotFoundError`→404, `ConflictError`→409, `ValidationError`→422) |
+| `app/routers/` | `auth.py` (public), `accounts.py` + `journal.py` + `ledger.py` + `reports.py` + `parties.py` + `items.py` + `invoices.py` + `bills.py` + `budgets.py` + `estimates.py` (auth-protected) |
 | `app/dependencies.py` | `get_current_user` — cookie session check, 401 if missing/invalid/no user |
 | `app/seed/coa.py` | 26-account standard COA, auto-seeded idempotently on every startup via `init_db` |
-| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py`, `test_journal.py`, `test_ledger.py`, `test_reports.py`, `test_parties_items.py`, `test_invoices.py`, `test_estimates.py`, `test_bills.py` — **112 tests, all passing** |
+| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py`, `test_journal.py`, `test_ledger.py`, `test_reports.py`, `test_parties_items.py`, `test_invoices.py`, `test_estimates.py`, `test_bills.py`, `test_budgets.py` — **127 tests, all passing** |
 | `requirements.txt` | fastapi, uvicorn[standard], SQLAlchemy 2.0, pydantic v2, itsdangerous, reportlab, pytest, httpx, pyright |
 | `pytest.ini` | filters 2 third-party deprecation warnings |
 | `pyrightconfig.json` | pins pyright to `.venv` (LSP needs opencode restart to pick up) |
 | `static/` | **does not exist yet** (Phase 9) |
 | `AI_WORKFLOW.md` | **not written yet** (Phase 11) |
 
-Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–5 committed and pushed (HEAD `85824eb`); **Phase 6 (bills) is implemented but uncommitted**.
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–6 committed and pushed (HEAD `d01cd93`); **Phase 7 (budgets) is implemented but uncommitted**.
 
 ## Build Roadmap (approved plan — use as the work queue)
 
-Small steps, 1–2 files each, `pytest` green after every step. Phases 0–6 done; continue from Phase 7.
+Small steps, 1–2 files each, `pytest` green after every step. Phases 0–7 done; continue from Phase 8.
 
 | # | Phase | Status |
 | --- | --- | --- |
@@ -47,8 +47,8 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–6 don
 | 4 | Ledger + statements: `services/ledger.py` (balances, general ledger, trial balance), `services/reports.py` (income statement, balance sheet), router, tests (A = L + E identity) | **Done** |
 | 5 | Parties, items, estimates, invoices (AR + tax): `models/party.py` (Customer, Vendor) + `models/item.py`, `models/invoice.py` + `models/estimate.py`, `services/invoices.py` (create posts Dr AR incl. tax / Cr Revenue / Cr Tax Payable; payment Dr Cash / Cr AR; void), `services/estimates.py` (convert-to-invoice), routers, tests | **Done** |
 | 6 | Bills (AP + tax): `models/bill.py`, `services/bills.py` (Dr Expense / Dr Tax Recoverable / Cr AP; payment Dr AP / Cr Cash; void), router, tests | **Done** |
-| 7 | Budgets: `models/budget.py`, `services/budgets.py` (actual vs budget, variance), router, tests | Next |
-| 8 | Bank register + reconciliation: `cleared`/`reconciliation_id` on journal lines, `services/reconciliation.py`, router, tests | Pending |
+| 7 | Budgets: `models/budget.py`, `services/budgets.py` (actual vs budget, variance), router, tests | **Done** |
+| 8 | Bank register + reconciliation: `cleared`/`reconciliation_id` on journal lines, `services/reconciliation.py`, router, tests | Next |
 | 9 | Frontend SPA: `static/index.html` + `app.css` (tab shell), `static/js/api.js` + `router.js` (hash-routed), then one page per step: login, dashboard, accounts, journal, ledger, statements, invoices/estimates, bills, budgets, export | Pending |
 | 10 | Export: CSV service + router, PDF (ReportLab) + router, tests | Pending |
 | 11 | Seed + polish: `app/seed/demo.py` + wire `--seed` flag, `AI_WORKFLOW.md`, README status update, full test run | Pending |
@@ -84,6 +84,14 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–6 don
 - Bill status is **derived** exactly like invoices (`open`/`partially_paid`/`paid`/`void`); void only while `paid_cents == 0` (409 otherwise).
 - `invoices.tax_cents(subtotal_cents, tax_rate)` is the shared public tax helper (Decimal + `ROUND_HALF_UP`), used by invoices, estimates, and bills.
 
+### Budgets conventions (Phase 7, implemented)
+
+- Budgets are **planning data**: a `Budget` is a planned amount for one account over a custom `budget_start`/`budget_end` date range (CHECK `start <= end`). They post **nothing** to the ledger and have no journal linkage, so they are freely updatable/deletable (unlike journal history). No uniqueness constraint — overlapping budgets per account are allowed.
+- Any account type may be budgeted. The report expresses each account's actual in its **natural direction** (expense/asset = debit-normal `debits - credits`; revenue/liability/equity = credit-normal `credits - debits`), reusing `ledger.account_balance` — the same convention as the statements.
+- **Report rule**: `GET /api/budgets/report?start=&end=` lists budgets **fully contained** in `[start, end]` (`budget_start >= start AND budget_end <= end`), optionally filtered by `account_id`. Each row compares the budget amount to actual activity over **that budget's own range** — so querying a whole year is an annual review and querying a month is a monthly view, with no partial-overlap ambiguity.
+- `variance_cents = budget_cents - actual_cents` (positive = under budget / below plan); `within_budget = actual_cents <= budget_cents`.
+- Router declares `GET /report` **before** `GET /{budget_id}` so "report" is not captured as an id.
+
 ## Architecture
 
 Stack: Python 3.13 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS frontend (no build step, Phase 9) · ReportLab (PDF, Phase 10) · pytest + TestClient.
@@ -95,10 +103,10 @@ Accounting/
 │   ├── main.py        # FastAPI app factory, mounts, DB init, exception handlers
 │   ├── database.py    # engine, session, schema init, COA seed hook
 │   ├── dependencies.py# get_current_user (cookie session auth)
-│   ├── models/        # Account, AccountType, User, JournalEntry, JournalLine, Customer, Vendor, Item, Invoice, Estimate, Bill (+ Budget in Phase 7)
+│   ├── models/        # Account, AccountType, User, JournalEntry, JournalLine, Customer, Vendor, Item, Invoice, Estimate, Bill, Budget
 │   ├── schemas/       # Pydantic v2 request/response models
-│   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills (+ budgets, reconciliation ...)
-│   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, estimates (+ budgets, export ...)
+│   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills, budgets (+ reconciliation ...)
+│   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, estimates (+ export ...)
 │   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (Phase 11)
 ├── static/            # tabbed SPA (Phase 9): dashboard, accounts, journal, ledger, statements, invoices, bills, budgets, export
 ├── tests/
@@ -149,7 +157,7 @@ Patterns worth adopting (implement our own versions):
 - **Bank reconciliation**: `cleared` + `reconciliation_id` on ledger lines; `bank_kind` on accounts (not names/numbers) keys the register — `bank_kind` column **done** on Account.
 - **Frontend**: hash-routed SPA; one JS module per page exporting `render()`; central `api.js` wrapper; a "wiring audit" test fails if an endpoint has no SPA caller (Phase 9).
 
-Status as of Phase 6: single posting path, DB-level debit-XOR-credit guard, provenance columns, void-as-reversal, ledger, financial statements, invoices/estimates, and bills are **implemented**; audit logging and bank reconciliation remain pending.
+Status as of Phase 7: single posting path, DB-level debit-XOR-credit guard, provenance columns, void-as-reversal, ledger, financial statements, invoices/estimates, bills, and budgets are **implemented**; audit logging and bank reconciliation remain pending.
 
 Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, nonprofit, multi-company, job costing. Keep: accounts, customers, vendors, items, invoices, estimates, payments, bills, journal, bank register + reconciliation, reports, budgets, tax, audit, auth, seed data.
 
@@ -173,6 +181,7 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 | 14 | Domain exceptions (`NotFoundError`/`ConflictError`) raised in services, mapped to HTTP by app-level handlers | Keeps services framework-free; one mapping point |
 | 15 | Every non-auth router carries `Depends(get_current_user)` at router level | Uniform protection, explicit per router |
 | 16 | Bills: per-line expense account (each `BillLine` requires `expense_account_id`, validated as an active EXPENSE account) | Unlike invoices (fixed revenue account 4000), a bill can be for any expense type; per-line accounts are needed for correct expense categorization |
+| 17 | Budgets: custom date range per budget; report compares each budget to actuals over its own range, only for budgets fully contained in the queried window; actuals shown in the account's natural direction | Custom ranges give flexibility (monthly/quarterly/annual); the fully-contained rule avoids partial-overlap ambiguity; natural-direction actuals match the statements convention |
 
 ## Environment & Tooling Notes
 
@@ -180,14 +189,14 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and `opencode.jsonc` (`lsp.pyright.initialization.python.pythonPath`). If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
-- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (88 tests as of this update).
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (127 tests as of this update).
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` (pyright is installed in the venv and listed in `requirements.txt`; `pyrightconfig.json` pins it to `.venv`). Keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
 - **opencode.jsonc** is gitignored (local-only) and now contains the pyright venv config.
 
 ## Known Limitations
 
-- Phases 7–11 not implemented: no budgets, reconciliation, frontend, export, or demo seed yet.
+- Phases 8–11 not implemented: no bank reconciliation, frontend, export, or demo seed yet.
 - `main.py --seed` references `app.seed.demo.seed_demo_data` which does not exist until Phase 11 (lazy import; app runs fine without the flag).
 - No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks).
 
@@ -207,14 +216,14 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
 - DB file: `accounting.db` at project root (WAL mode)
-- Test suite: 112 tests, all passing (Phases 0–6)
+- Test suite: 127 tests, all passing (Phases 0–7)
 
 ## Metadata
 
 - Last Updated: 2026-09-24
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-24 (Phase 6 implemented: bills — model, schema, service, router, tests; `invoices._tax_cents` made public `tax_cents` and shared with estimates/bills; 112 tests green)
-- Files Analyzed: `app/models/bill.py`, `app/models/__init__.py`, `app/schemas/bill.py`, `app/services/bills.py`, `app/services/invoices.py`, `app/services/estimates.py`, `app/routers/bills.py`, `app/main.py`, `tests/test_bills.py`, `tests/conftest.py`, `app/routers/accounts.py`, `app/services/accounts.py`, `app/models/account.py`
-- Git Commit: `85824eb` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–5 committed and pushed; **Phase 6 uncommitted**)
-- Architecture Version: 0.6 (foundation + accounts + auth + journal core + ledger/statements + invoices/estimates + bills implemented)
+- Last Incremental Update: 2026-09-24 (Phase 7 implemented: budgets — model, schema, service, router, tests; custom date-range budgets + actual-vs-budget report; 127 tests green)
+- Files Analyzed: `app/models/budget.py`, `app/models/__init__.py`, `app/schemas/budget.py`, `app/services/budgets.py`, `app/routers/budgets.py`, `app/main.py`, `tests/test_budgets.py`, `app/services/ledger.py`, `app/services/accounts.py`, `app/models/account.py`, `app/seed/coa.py`
+- Git Commit: `d01cd93` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–6 committed and pushed; **Phase 7 uncommitted**)
+- Architecture Version: 0.7 (foundation + accounts + auth + journal core + ledger/statements + invoices/estimates + bills + budgets implemented)
 - AIHelper Version: 2 (added Build Roadmap handoff section, conventions, environment notes)
