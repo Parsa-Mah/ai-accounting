@@ -99,6 +99,20 @@ Parsa set the goals, reviewed the output, and steered the project. All code was 
 
 The application is complete. All 12 build phases (0–11) are implemented and tested — 167 tests, all passing, with the type checker reporting zero errors. The full step-by-step build is visible in the git history, and [AI_WORKFLOW.md](AI_WORKFLOW.md) explains the process.
 
+## Using with an AI (MCP) — research done, implementation next
+
+The next phase connects the app to **any AI assistant** through [Model Context Protocol (MCP)](https://modelcontextprotocol.io) — the open standard that lets LLM clients (ChatGPT, Claude, or a local Qwen) call an application's typed tools. The goal: ask in plain English — *"What was March's payroll?"*, *"How much tax do we owe?"*, *"Which invoices are overdue?"* — and the AI answers with real numbers from the books, or (opt-in) records a transaction on your behalf.
+
+Before designing it, the AI studied the current state of MCP (2026-09-25):
+
+- **The spec** (current revision **2026-07-28**) is now stateless, with structured tool output, streamable-HTTP transport, and OAuth 2.1 for remote servers. The official **Python SDK v2** generates tool schemas straight from type hints and docstrings.
+- **Unreal Engine 5.8** ships an **experimental first-party "Unreal MCP" plugin** that embeds an MCP server inside the editor so agents like Claude Code can spawn actors, edit materials, and run automation tests over local HTTP. Its architecture was studied as a reference: tool definitions are kept in a separate **Toolset Registry** (decoupled from the protocol layer), a **tool-search mode** keeps large tool catalogs out of the LLM's context, and a `GenerateClientConfig` command writes ready-made client configs. (It is loopback-only with no auth — our design is stricter, since this is financial data.)
+- **The ecosystem**: an official registry with ~9,700 servers, major apps (GitHub, Stripe, Notion, Linear, Sentry, Figma) all MCP-enabled, and a standard debugging client (MCP Inspector).
+- **Accounting prior art**: Intuit's official QuickBooks server (145 tools, full API passthrough) vs. Xero's official server and community servers with ~29 **curated, intent-oriented tools**. The consensus: curated tools are far more reliable for LLMs than API passthrough — so this project's design exposes ~18 focused tools (statements, ledger, search, invoices, bills, budgets, reconciliation, plus opt-in write tools) instead of mirroring every endpoint.
+- **Local models**: LM Studio hosts MCP servers natively (so a local Qwen can use them directly); Ollama is a model server, not an MCP client, and pairs with bridges like `ollmcp` or Cline.
+
+The full design — tool catalog, transports, security, testing plan, and implementation order — is documented in [AIHelper.md](AIHelper.md) (section "Phase 12").
+
 ## Features
 
 - **Double-entry core** — chart of accounts, journal entries, general ledger, trial balance

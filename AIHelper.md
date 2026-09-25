@@ -12,7 +12,7 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status (build in progress)
 
-All 12 phases (0–11) of the build plan are **complete and tested** (167/167 tests green). The build is finished.
+Phases 0–11 of the build plan are **complete and tested** (167/167 tests green). **Phase 12 (MCP server) is fully researched and designed (see "Phase 12" section below) but not yet implemented** — a fresh session should pick it up from there.
 
 | File / Dir | State |
 | --- | --- |
@@ -33,11 +33,11 @@ All 12 phases (0–11) of the build plan are **complete and tested** (167/167 te
 | `static/` | Vanilla JS SPA (no build step, ES modules): `index.html` + `app.css` (tab shell), `js/api.js` (fetch wrapper, cookies auto-sent), `js/ui.js` (money/date/escape/toast helpers), `js/doclines.js` (shared invoice/estimate/bill line editor), `js/router.js` (hash router, lazy page imports, auth gate), `js/pages/*.js` (login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export) |
 | `AI_WORKFLOW.md` | Public record of how the AI built the project phase by phase (Phase 11) |
 
-Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). All phases 0–11 implemented; Phases 0–10 committed and pushed (HEAD `572a965`); **Phase 11 (seed + docs) is implemented but uncommitted**.
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). All phases 0–11 implemented, committed, and pushed (HEAD `49a3c5c`). Phase 12 (MCP) is designed, not yet implemented.
 
 ## Build Roadmap (approved plan — use as the work queue)
 
-Small steps, 1–2 files each, `pytest` green after every step. All 12 phases (0–11) are done — the build is complete.
+Small steps, 1–2 files each, `pytest` green after every step. Phases 0–11 are done; **Phase 12 (MCP server) is the active work item** — design and research are complete in the section below.
 
 | # | Phase | Status |
 | --- | --- | --- |
@@ -53,6 +53,7 @@ Small steps, 1–2 files each, `pytest` green after every step. All 12 phases (0
 | 9 | Frontend SPA: `static/index.html` + `app.css` (tab shell), `static/js/api.js` + `router.js` (hash-routed, lazy page imports), one page per step: login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export (placeholder) | **Done** |
 | 10 | Export: CSV service + router, PDF (ReportLab) + router, tests — 7 reports (general ledger, trial balance, income statement, balance sheet, journal, invoices, bills) as CSV/PDF downloads | **Done** |
 | 11 | Seed + polish: `app/seed/demo.py` + wire `--seed` flag, `AI_WORKFLOW.md`, README status update, full test run | **Done** |
+| 12 | **MCP server**: `mcp_server.py` + `app/mcp/` (tools/resources/prompts on Python SDK v2), stdio + streamable-HTTP transports, gated write tools, in-memory client tests, README "Using with an AI" section | **Pending** (researched + designed 2026-09-25 — see below) |
 
 ### Ledger & statements conventions (Phase 4, implemented)
 
@@ -131,6 +132,147 @@ Small steps, 1–2 files each, `pytest` green after every step. All 12 phases (0
 - **Seeded mix**: 3 customers, 3 vendors, 5 items; 4 manual entries (owner capital, equipment, 2× monthly rent); 5 invoices covering all four statuses (paid, partially_paid, open, void) + 1 open estimate; 4 bills (2 paid, 2 open, per-line expense accounts); 4 budgets (3 current-month, 1 previous-month).
 - **Balanced reconciliation**: clears **all** Cash lines dated on/before the last day of the previous month and sets the statement balance to the account's actual net balance at that date → `difference_cents == 0`, `is_balanced`.
 
+### Phase 12: MCP server (researched + designed 2026-09-25 — IMPLEMENT THIS)
+
+**Goal**: let any AI (ChatGPT, Claude, a local Qwen via LM Studio or Ollama) drive the app like an accountant — answer questions ("What was March's payroll?", "How much tax do we owe?", "Which invoices are overdue?") and, optionally, record transactions. The AI calls typed tools; the tools call the existing services (same single posting path — no logic duplication).
+
+#### Research summary (web research done 2026-09-25 — do NOT redo, just build on this)
+
+- **Current spec: 2026-07-28** (modelcontextprotocol.io/specification/2026-07-28). Key facts that shape the design:
+  - Protocol is **stateless**: no sessions, no `initialize` handshake; every request carries protocol version + client capabilities in `_meta`. (Fits our per-call DB sessions perfectly.)
+  - **MRTR** (multi round-trip requests) replaced server-initiated elicitation/sampling: a server returns `InputRequiredResult` (`resultType: "input_required"`) and the client retries with `inputResponses`.
+  - **Roots, Sampling, Logging are DEPRECATED** — do not build on them (migration: pass paths via tool params; log to stderr).
+  - **Structured tool output** is stable: `outputSchema` + `structuredContent` on tool results.
+  - List/read results carry `ttlMs`/`cacheScope` caching hints; servers SHOULD return tools in deterministic order (prompt-cache hits).
+  - **Streamable HTTP** is the only HTTP transport (old HTTP+SSE deprecated). stdio remains for local.
+  - Remote auth: OAuth 2.1 + Client ID Metadata Documents (we use a simpler bearer token — see below).
+- **Python SDK v2** (`pip install mcp` → 2.x; the old `FastMCP` is v1, legacy branch `v1.x`):
+  - API: `from mcp.server import MCPServer`; `mcp = MCPServer("name")`; `@mcp.tool()`, `@mcp.resource("uri://...")`, `@mcp.prompt()` decorators.
+  - **Type hints + docstrings become the JSON Schema** — no manual schema writing (this is the pattern to follow for every tool).
+  - Speaks 2026-07-28 AND negotiates down to older clients automatically.
+  - **Testing pattern (use this)**: in-memory client — `from mcp import Client; async with Client(mcp) as client: result = await client.call_tool("add", {...})` — no subprocess, no port. SDK examples use `@pytest.mark.anyio`.
+  - CLI: `mcp dev server.py` (opens MCP Inspector), `mcp run server.py --transport streamable-http`. Install with `pip install "mcp[cli]"` (via the aliyun mirror — see Environment notes).
+  - Docs: https://py.sdk.modelcontextprotocol.io/ (get-started, servers/tools, servers/structured-output, servers/resources, servers/prompts, run/asgi, run/authorization, testing).
+- **Unreal Engine 5.8 "Unreal MCP"** (Experimental, shipped June 2026 — studied in depth from dev.epicgames.com docs):
+  - First-party plugin embedding an MCP server inside the editor process; HTTP-only, loopback-only, **no auth**; server name `unreal-mcp`; default `http://127.0.0.1:8000/mcp`; auto-start option; serial tool execution on the game thread.
+  - **Lesson 1 — Toolset Registry**: tool definitions are fully decoupled from the protocol layer. Toolsets are classes of typed functions with docstrings; a registry collects them; the MCP layer just wraps each function as a Tool. Docstrings/type hints are reflected into the schema "with the same care as the public surface of any other API".
+  - **Lesson 2 — Tool-search mode** (default ON in UE): `tools/list` returns only 3 meta-tools (`list_toolsets`, `describe_toolset`, `call_tool`) so hundreds of tools don't blow up the LLM context. **Not needed at our scale** (~18 tools) — we advertise tools flat; revisit only if the count grows past ~25.
+  - **Lesson 3 — `GenerateClientConfig`**: a command writes ready-made client config files (`.mcp.json` for ClaudeCode/Cursor/VSCode/Gemini, TOML for Codex) into the project root. We implement this as `--print-config <client>`.
+  - UE's tool-authoring guidelines (adopted): keep functions small and focused (one tool, one responsibility); prefer structured return types over free-form strings; write docstrings like public API docs.
+- **Ecosystem**: official registry registry.modelcontextprotocol.io (~9,700 servers); 6 official SDKs (Python, TS, C#, Java, Kotlin, Swift); **MCP Inspector** (`npx @modelcontextprotocol/inspector`) is the standard debugging client; "MCP Apps" (ext-apps) = UIs embedded in chat UIs, the newest direction. Major MCP-enabled apps: GitHub, Stripe, Notion, Linear, Sentry, Figma, Playwright, Cloudflare.
+- **Accounting prior art (directly comparable — studied)**:
+  - **Intuit QuickBooks official** (github.com/intuit/quickbooks-online-mcp-server): 145 tools, 29 entity types, full CRUD passthrough + 11 financial reports, OAuth 2.0. Exhaustive approach — context-heavy.
+  - **Xero official** (github.com/XeroAPI/xero-mcp-server): 60+ tools (accounting, payments, payroll), OAuth2 or bearer token.
+  - **Community curated** (github.com/d4m14ndx/xero-mcp-server): **29 curated tools** — "Drive your Xero accounting from Claude" (create invoices/bills, record payments, reconcile bank transactions).
+  - **AgenticBooks** (github.com/AgenticBooks/agenticbooks-mcp): hosted remote MCP exposing a startup's ledger (live P&L, bank balances, transaction review, COA); every write audit-trailed and scoped to the caller.
+  - **Consensus: curated, intent-oriented tools beat API passthrough for LLM reliability.** We follow the curated approach.
+- **Local-model clients (verified 2026-09-25)**:
+  - **LM Studio** (0.3.17+; current 0.4.x): full MCP host — `mcp.json` with local (stdio command/args) or remote (url) servers; works with local Qwen. Primary target for "local Qwen asks the books questions".
+  - **Ollama is NOT an MCP client** — it's a model server with tool-calling support; it needs a bridge: `ollmcp` (TUI MCP client for Ollama — `ollmcp mcp add accounting -- python mcp_server.py`), or Cline / opencode / Claude Code pointed at Ollama as the model backend.
+  - **Claude Desktop / Claude Code**: native MCP (stdio + HTTP). **ChatGPT**: remote MCP connectors (needs hosted HTTP endpoint). **OpenAI Agents SDK / Responses API** and **Anthropic Messages API**: native MCP connector support. **Qwen Code**: `mcpServers` in settings.json (HTTP preferred over SSE).
+
+#### Design (approved 2026-09-25)
+
+**File layout** (UE lesson: separate tool definitions from transport):
+
+```
+mcp_server.py            # entry point: argparse (transport, --port, --host, --print-config), calls build_server()
+app/mcp/__init__.py      # empty
+app/mcp/context.py       # get_session() context manager (SessionLocal per call), startup() = init_db(), money() re-export from services.export
+app/mcp/tools.py         # all tool functions: typed params, docstring-described, service-backed
+app/mcp/server.py        # build_server() -> MCPServer with tools/resources/prompts registered; reads MCP_ALLOW_WRITE at call time
+tests/test_mcp_server.py # in-memory Client(mcp) tests (anyio)
+```
+
+**Core mechanics:**
+- Built on **Python SDK v2**: add `mcp>=2` to `requirements.txt` (install via aliyun mirror).
+- **Standalone process** opening the same SQLite file: `ACCOUNTING_DB_PATH` env var (default `accounting.db` at project root — see `app/database.py:10`). WAL mode + `busy_timeout=5000` (already in `app/database.py:19-24`) make concurrent web-app + MCP access safe.
+- `build_server()` calls `init_db()` first (idempotent: tables + COA + ALTER guard).
+- **Each tool call opens its own `SessionLocal()` session** (stateless, matches the 2026-07-28 protocol), commits on success, closes in `finally`.
+- **Errors are returned in the tool result**, never as JSON-RPC errors: catch `NotFoundError`/`ConflictError`/`ValidationError` from `app/services/errors.py` and return a result with `isError=True` and a human-readable message (e.g. "Account 'Payroll' not found — use list_accounts to see valid accounts").
+- **Dual money fields**: every money value in tool output appears as both `*_cents` (int) and a formatted USD string, reusing `app/services/export.py::money(cents)` (integer math, no float) — so small local models can quote numbers correctly.
+- **Docstrings are the LLM's only guidance** (UE guideline): each tool docstring states what it does, when to use it, argument meanings, and an example question ("Use for questions like 'how much tax do we owe?'").
+- Account references in tool params accept **number or name** (e.g. `"5200"` or `"Payroll Expense"`); resolve via `accounts.get_account_by_number` then a case-insensitive name lookup; unknown → error result listing valid options.
+
+**Read tools (11) — always registered:**
+
+| Tool | Signature (type hints = schema) | Backing service |
+| --- | --- | --- |
+| `list_accounts` | `() -> list[dict]` | `app/services/accounts.py` list — number, name, type, subtype, is_system, active |
+| `get_income_statement` | `(month: str \| None = None) -> dict` (month = `"YYYY-MM"`) | `reports.income_statement(db, start, end)` |
+| `get_balance_sheet` | `(as_of: str \| None = None) -> dict` (ISO date) | `reports.balance_sheet(db, as_of)` |
+| `get_trial_balance` | `(as_of: str \| None = None) -> dict` | `ledger.trial_balance(db, as_of)` |
+| `get_account_ledger` | `(account: str, date_from: str \| None = None, date_to: str \| None = None, include_voided: bool = False) -> dict` | `ledger.general_ledger(db, account_id, ...)` — running balance + lines |
+| `search_transactions` | `(query: str \| None = None, account: str \| None = None, date_from: str \| None = None, date_to: str \| None = None, limit: int = 50) -> list[dict]` | **NEW service function** `ledger.search_transactions(db, ...)` — free-text LIKE on `JournalEntry.description` + `JournalLine.description`, filters, returns entry + line rows with account number/name, date, debit/credit cents |
+| `list_invoices` | `(status: str \| None = None, month: str \| None = None) -> list[dict]` | `invoices.list_invoices(db)` — filter in Python (status is derived; month = issue-date) |
+| `get_invoice` | `(invoice_id: int) -> dict` | `invoices.get_invoice(db, id)` |
+| `list_bills` | `(status: str \| None = None, month: str \| None = None) -> list[dict]` | `bills.list_bills(db)` — filter in Python |
+| `list_estimates` | `(status: str \| None = None) -> list[dict]` | `estimates.list_estimates(db)` |
+| `get_budget_report` | `(start: str, end: str) -> dict` | `budgets.budget_report(db, start, end)` |
+| `list_reconciliations` | `() -> list[dict]` | `reconciliation.list_reconciliations(db)` |
+
+**Write tools (7) — registered ONLY when env `MCP_ALLOW_WRITE=1`** (read at `build_server()` call time, NOT import time, so tests can toggle via monkeypatch):
+
+| Tool | Signature | Backing service |
+| --- | --- | --- |
+| `create_journal_entry` | `(date: str, description: str, lines: list[dict]) -> dict` — line = `{"account": str, "debit_cents": int, "credit_cents": int}` (one of debit/credit per line) | `journal.create_journal_entry` (resolve account refs) |
+| `create_invoice` | `(customer: str, issue_date: str, lines: list[dict], tax_rate: float = 0.0, due_date: str \| None = None) -> dict` — line = `{"description": str, "quantity": int, "unit_price_cents": int}` | `invoices.create_invoice` (resolve customer by name) |
+| `pay_invoice` | `(invoice_id: int, amount_cents: int, date: str \| None = None, method: str = "cash") -> dict` | `invoices.pay_invoice` |
+| `void_invoice` | `(invoice_id: int, reason: str \| None = None) -> dict` | `invoices.void_invoice` |
+| `create_bill` | `(vendor: str, due_date: str, lines: list[dict], tax_rate: float = 0.0) -> dict` — line = `{"description": str, "quantity": int, "unit_price_cents": int, "expense_account": str}` | `bills.create_bill` (resolve vendor + per-line expense account) |
+| `pay_bill` | `(bill_id: int, amount_cents: int, date: str \| None = None, method: str = "cash") -> dict` | `bills.pay_bill` |
+| `create_budget` | `(account: str, budget_start: str, budget_end: str, amount_cents: int) -> dict` | `budgets.create_budget` |
+
+All writes go through the existing services → single posting path → books balance by construction. Service validation errors (unbalanced entry, unknown customer, void-with-payments) surface as `isError` tool results.
+
+**Resources (2):**
+- `accounting://accounts` — full COA (number, name, type, subtype) as standing context.
+- `accounting://trial-balance` — current trial balance as JSON text.
+
+**Prompts (3)** (surface as slash commands in Claude):
+- `monthly_report` (arg `month: str`) — template: pull income statement + Cash ledger + budget report for the month, produce a plain-English monthly close summary.
+- `tax_position` — template: pull ledgers for 2200 Taxes Payable + 2210 Tax Recoverable, compute net tax owed, explain in plain English.
+- `cash_position` — template: pull Cash ledger + reconciliations, summarize cash on hand vs last statement.
+
+**Transports & security:**
+- `python mcp_server.py` → **stdio** (default). Targets: LM Studio (local Qwen), Claude Desktop/Code, ollmcp (Ollama), Qwen Code, opencode.
+- `python mcp_server.py --http [--port 8765] [--host 127.0.0.1]` → **streamable HTTP**. Targets: ChatGPT remote connector, OpenAI Agents SDK, Anthropic Messages API. **Bearer token required**: env `MCP_HTTP_TOKEN`; if unset in HTTP mode, refuse to start with a clear message. Default bind `127.0.0.1` (UE ships loopback-with-no-auth; we're stricter — financial data).
+- `python mcp_server.py --print-config <lmstudio|claude-code|claude-desktop|cursor|ollmcp|qwen-code|opencode>` → print the ready-to-paste client config (UE's `GenerateClientConfig` idea).
+- No deprecated features: no roots/sampling/logging support anywhere.
+
+**Testing (`tests/test_mcp_server.py`)** — SDK in-memory pattern:
+- `from mcp import Client`; `async with Client(mcp) as client: result = await client.call_tool("list_accounts", {})`; assert on `result.structured_content`. Use `@pytest.mark.anyio` (add `anyio` to requirements if not already present via `mcp`).
+- **DB setup**: reuse the `tests/conftest.py` pattern — set `ACCOUNTING_DB_PATH` to a temp file before importing app modules; then call `app/seed/demo.py::seed_demo_data()` for rich fixture data (it creates the demo user + full balanced business).
+- Cover: every read tool returns expected structured content (spot-check values against seeded data); `search_transactions` finds a seeded entry by description text; dual money fields present (`*_cents` + formatted); unknown account → `isError` result (not an exception); **write tools absent by default**; with `MCP_ALLOW_WRITE=1` (monkeypatch env before `build_server()`): writes present, `create_journal_entry` posts a balanced entry (verify via `get_trial_balance`), unbalanced entry → error result, `create_invoice` for unknown customer → error result; resources listed + readable; prompts listed.
+- Also unit-test the new `ledger.search_transactions` service function directly (filters, limit, account filter).
+
+**Docs to update in the same phase:**
+- **README.md**: new section "Using with an AI (MCP)" — brief research note (MCP standard, spec 2026-07-28, UE 5.8 experimental plugin as studied reference, curated-tools approach) + per-client setup snippets (LM Studio `mcp.json` for local Qwen; Ollama via `ollmcp`; Claude Desktop/Code `mcpServers`; ChatGPT/OpenAI/Anthropic remote connector) + env vars (`ACCOUNTING_DB_PATH`, `MCP_ALLOW_WRITE`, `MCP_HTTP_TOKEN`) + MCP Inspector debugging tip. Keep the AI-authorship framing.
+- **AI_WORKFLOW.md**: add a Phase 12 entry (research → design → implementation).
+- **AIHelper.md**: update via the maintain-aihelper skill at phase completion (roadmap status, conventions section, metadata).
+
+**Implementation order (small steps, pytest green after each step):**
+1. Add `mcp>=2` (+ `anyio` if missing) to `requirements.txt`; install via aliyun mirror; verify `import mcp` works.
+2. `app/mcp/context.py` + `app/mcp/server.py` skeleton: `build_server()` registering ONE tool (`list_accounts`); `mcp_server.py` stdio entry; first in-memory client smoke test.
+3. New `app/services/ledger.py::search_transactions` + direct service tests.
+4. All 11 read tools in `app/mcp/tools.py` + per-tool in-memory tests.
+5. 2 resources + 3 prompts + tests (listed + readable).
+6. 7 write tools + `MCP_ALLOW_WRITE` gating + tests (absent by default, functional when enabled, error paths).
+7. HTTP transport + `MCP_HTTP_TOKEN` enforcement + `--print-config` + manual smoke with MCP Inspector (`npx @modelcontextprotocol/inspector`).
+8. README + AI_WORKFLOW.md + AIHelper updates; full `pytest` + `pyright app` green; commit + push (user's standing preference).
+
+**Files to read first in a fresh session (before writing any code):**
+- `AIHelper.md` — this section + "Established conventions" + "Environment & Tooling Notes"
+- `app/database.py` — engine, `SessionLocal`, `init_db`, `ACCOUNTING_DB_PATH`
+- `app/services/ledger.py` — `general_ledger`, `account_balance`, `trial_balance` signatures + return shapes
+- `app/services/reports.py` — `income_statement`, `balance_sheet` signatures + return shapes
+- `app/services/invoices.py`, `app/services/bills.py`, `app/services/estimates.py`, `app/services/budgets.py`, `app/services/reconciliation.py`, `app/services/accounts.py` — exact function signatures + return shapes (tools wrap these; verify names/params against code, not just this table)
+- `app/services/export.py` — the `money(cents)` helper to reuse
+- `app/services/errors.py` — `NotFoundError`/`ConflictError`/`ValidationError`
+- `app/seed/demo.py` — what demo data looks like (useful for test expectations)
+- `tests/conftest.py` — temp-DB env-var pattern
+- SDK docs (web, if reachable): https://py.sdk.modelcontextprotocol.io/ — especially get-started, servers/tools, servers/structured-output, run/asgi, testing
+
 ## Architecture
 
 Stack: Python 3.12 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS SPA frontend (no build step, Phase 9) · ReportLab (PDF export) · pytest + TestClient.
@@ -138,6 +280,7 @@ Stack: Python 3.12 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting
 ```
 Accounting/
 ├── main.py            # entry point: uvicorn runner (+ --seed flag)
+├── mcp_server.py      # (Phase 12, pending) MCP entry point: stdio + streamable-HTTP
 ├── app/
 │   ├── main.py        # FastAPI app factory, mounts, DB init, exception handlers
 │   ├── database.py    # engine, session, schema init, COA seed hook
@@ -146,6 +289,7 @@ Accounting/
 │   ├── schemas/       # Pydantic v2 request/response models
 │   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills, budgets, reconciliation, export
 │   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates, export
+│   ├── mcp/           # (Phase 12, pending) context.py, tools.py, server.py — MCP tools/resources/prompts
 │   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (demo data via --seed)
 ├── static/            # vanilla JS SPA (Phase 9): index.html + app.css, js/ (api, ui, doclines, router) + js/pages/ (12 pages)
 ├── tests/
@@ -223,6 +367,7 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 | 17 | Budgets: custom date range per budget; report compares each budget to actuals over its own range, only for budgets fully contained in the queried window; actuals shown in the account's natural direction | Custom ranges give flexibility (monthly/quarterly/annual); the fully-contained rule avoids partial-overlap ambiguity; natural-direction actuals match the statements convention |
 | 18 | Reconciliation: classic difference rule (statement balance − (opening before first cleared line + cleared lines)); cleared lines locked to their reconciliation; delete un-clears; void blocked on entries with cleared lines; `init_db` runs an `ALTER TABLE` guard for the new `journal_lines` columns | Classic rule makes cleared lines meaningful (non-zero difference = outstanding items); locking + void guard keep reconciliations consistent with journal history; the guard preserves pre-Phase-8 databases since `create_all` never alters tables |
 | 19 | Demo seed: idempotent (marker-customer guard, skip if present); creates demo user `demo`/`demo123` only when no user exists; dates relative to the current month (clamped to today); all data posted through the normal services; Cash reconciled to a balanced state as of the last day of the previous month | App must demo well on first run (decision 7); idempotency makes `--seed` safe to run repeatedly; relative dates keep statements/budgets current whenever the seed runs; posting through services guarantees the seeded books balance by construction |
+| 20 | Phase 12 MCP: Python SDK **v2** (`MCPServer`, not legacy FastMCP); curated ~18 intent-oriented tools (11 read + 7 write) instead of API passthrough; tools separated from transport (UE 5.8 Toolset-Registry lesson); write tools gated behind `MCP_ALLOW_WRITE=1`; HTTP mode requires `MCP_HTTP_TOKEN` + loopback bind; dual money fields (cents + formatted USD) in every tool result; errors returned in tool results, not JSON-RPC errors; in-memory `Client(mcp)` for tests | Research (2026-09-25): spec 2026-07-28 is stateless (fits per-call sessions) and deprecates roots/sampling/logging; accounting prior art (Intuit 145-tool passthrough vs Xero/community 29-tool curated) favors curated tools for LLM reliability; UE 5.8's experimental Unreal MCP validates tool/transport separation and client-config generation; LM Studio hosts MCP natively for local Qwen, Ollama needs a bridge (ollmcp); financial data justifies stricter auth than UE's loopback-no-auth |
 
 ## Environment & Tooling Notes
 
@@ -230,7 +375,7 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and `opencode.jsonc` (`lsp.pyright.initialization.python.pythonPath`). If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
-- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (162 tests as of this update).
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (167 tests as of this update).
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` (pyright is installed in the venv and listed in `requirements.txt`; `pyrightconfig.json` pins it to `.venv`). Keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
 - **opencode.jsonc** is gitignored (local-only) and now contains the pyright venv config.
@@ -242,7 +387,8 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 
 ## AI Instructions
 
-- The build roadmap above is complete (all 12 phases Done). Any new work should follow the same "small steps, tests green after each step" rhythm and the conventions below.
+- **Phase 12 (MCP server) is the active work item** — fully researched and designed in the "Phase 12" section above; a fresh session should read that section plus the listed files, then implement in the given order. Phases 0–11 are Done.
+- Any new work should follow the same "small steps, tests green after each step" rhythm and the conventions below.
 - Follow the established conventions section exactly (layering, error handling, auth dependency, typed models, test fixtures).
 - Treat this document as the target design; verify against actual code — when code and this document disagree, update this document to match verified code.
 - Keep the AI-authorship framing intact in any docs the AI writes.
@@ -262,8 +408,8 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 
 - Last Updated: 2026-09-25
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-25 (Phase 11 seed + polish: `app/seed/demo.py` (idempotent demo business, demo user, balanced reconciliation), `tests/test_demo_seed.py` (5 tests), `AI_WORKFLOW.md` (public build record), README finalized (status, features, run instructions; Python 3.12). 167 tests green + pyright 0 errors. Build complete. Prior: Phase 10 export)
-- Files Analyzed: `app/seed/demo.py`, `tests/test_demo_seed.py`, `AI_WORKFLOW.md`, `README.md`, `main.py`, `app/database.py`, `app/services/{invoices,bills,estimates,auth,journal,reconciliation,ledger,reports}.py`, `app/models/{invoice,estimate,reconciliation}.py`, `app/schemas/{party,item,budget,invoice,bill,journal}.py`, `tests/conftest.py`
-- Git Commit: `279befe` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; all phases 0–11 committed)
-- Architecture Version: 0.11 (build complete: foundation + accounts + auth + journal core + ledger/statements + invoices/estimates + bills + budgets + bank reconciliation + frontend SPA + CSV/PDF export + demo seed + AI_WORKFLOW.md)
-- AIHelper Version: 2 (added Build Roadmap handoff section, conventions, environment notes)
+- Last Incremental Update: 2026-09-25 (Phase 12 MCP: full web research — spec 2026-07-28 changelog, Python SDK v2 docs, UE 5.8 "Unreal MCP" experimental plugin docs, accounting MCP prior art (Intuit/Xero/AgenticBooks), local-model clients (LM Studio/Ollama) — plus complete approved design written into the "Phase 12" section (file layout, 11 read + 7 gated write tools, 2 resources, 3 prompts, transports/security, testing plan, implementation order, file reading list). README gained a "Using with an AI (MCP)" research section. Nothing implemented yet. Prior: Phase 11 seed + polish)
+- Files Analyzed: web research (modelcontextprotocol.io spec 2026-07-28 + changelog, dev.epicgames.com UE 5.8 Unreal MCP docs, py.sdk.modelcontextprotocol.io, github.com/modelcontextprotocol/{python-sdk,servers}, LM Studio + Ollama MCP docs, accounting MCP servers), `app/database.py`, `README.md`, `AIHelper.md`
+- Git Commit: `49a3c5c` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; all phases 0–11 committed and pushed)
+- Architecture Version: 0.12 (Phases 0–11 built; Phase 12 MCP designed, pending implementation)
+- AIHelper Version: 3 (added Phase 12 research + design handoff section, decision 20)
