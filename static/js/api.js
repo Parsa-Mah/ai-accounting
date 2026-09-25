@@ -137,4 +137,10 @@ export const API = {
     request("POST", "/api/reconciliation", body),
   deleteReconciliation: (id) =>
     request("DELETE", `/api/reconciliation/${id}`),
+
+  // --- export ---
+  // Returns a download URL (not a fetch); the caller sets window.location.href
+  // to it. The server responds with Content-Disposition: attachment, so the
+  // browser saves the file without navigating away.
+  exportUrl: (report, params) => withQuery(`/api/export/${report}`, params),
 };

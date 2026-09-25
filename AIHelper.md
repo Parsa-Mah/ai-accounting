@@ -12,31 +12,31 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status (build in progress)
 
-Phases 0–9 of the build plan are **complete and tested** (142/142 tests green). Phases 10–11 remain.
+Phases 0–10 of the build plan are **complete and tested** (162/162 tests green). Phase 11 remains.
 
 | File / Dir | State |
 | --- | --- |
 | `main.py` | uvicorn runner with `--host`, `--port`, `--seed` flags (`--seed` imports `app.seed.demo` — **not created yet, Phase 11**) |
-| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes (auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates), `/api/health`, static mount (serves the `static/` SPA at `/` with `html=True`) |
+| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes (auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates, export), `/api/health`, static mount (serves the `static/` SPA at `/` with `html=True`) |
 | `app/database.py` | SQLite engine (`accounting.db` at root, overridable via `ACCOUNTING_DB_PATH` env var), WAL pragmas (`journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`), `Base`, `SessionLocal` (`expire_on_commit=False`), `get_db`, `init_db` (creates tables + `ALTER TABLE` guard adding `cleared`/`reconciliation_id` to a pre-existing `journal_lines` + seeds COA) |
 | `app/models/` | `Account` (+ `AccountType` enum), `User`, `JournalEntry` + `JournalLine` (CHECK debit-XOR-credit, provenance `source_type`/`source_id`, `is_voided`/`voided_by_id`, `cleared`/`reconciliation_id`), `Customer`/`Vendor`, `Item`, `Invoice` + `InvoiceLine` + `InvoicePayment`, `Estimate` + `EstimateLine`, `Bill` + `BillLine` (per-line `expense_account_id`) + `BillPayment`, `Budget` (account + date range + `budget_cents`), `Reconciliation` (account + statement date/balance + stored opening/cleared/difference) |
 | `app/schemas/` | Pydantic v2: `AccountCreate/Update/Read`, `Credentials/AuthStatus/AuthUser`, `JournalEntryCreate/Read`, `JournalLineCreate/Read`, `GeneralLedgerRead`/`TrialBalanceRead`, `IncomeStatementRead`/`BalanceSheetRead`/`StatementLineRead`, `Customer/Vendor Create/Read`, `ItemCreate/Update/Read`, `InvoiceCreate/PayCreate/Read` + line/payment reads, `EstimateCreate/Read`, `BillCreate/PayCreate/Read` + line/payment reads (line carries required `expense_account_id`), `BudgetCreate/Update/Read` + `BudgetReportRead` (rows + totals), `ReconciliationCreate/Read` + `BankAccountRead` |
-| `app/services/` | `accounts.py` (CRUD + deactivate + journal-line guard + `get_account_by_number`), `auth.py` (pbkdf2 hashing, itsdangerous signed cookies), `journal.py` (single posting path `create_journal_entry` + void-as-reversal), `ledger.py` (`account_balance`, `general_ledger` running balance, `trial_balance`), `reports.py` (`income_statement`, `balance_sheet`), `parties.py` (customer/vendor CRUD), `items.py` (item CRUD + deactivate), `invoices.py` (create+post, pay, void; public `tax_cents` helper shared by estimates/bills), `estimates.py` (create, convert-to-invoice), `bills.py` (create+post, pay, void), `budgets.py` (CRUD + `budget_report` actual-vs-budget/variance), `reconciliation.py` (bank accounts, create/get/list/delete reconciliation, cleared-line locking), `errors.py` (`NotFoundError`→404, `ConflictError`→409, `ValidationError`→422) |
-| `app/routers/` | `auth.py` (public), `accounts.py` + `journal.py` + `ledger.py` + `reports.py` + `parties.py` + `items.py` + `invoices.py` + `bills.py` + `budgets.py` + `reconciliation.py` + `estimates.py` (auth-protected) |
+| `app/services/` | `accounts.py` (CRUD + deactivate + journal-line guard + `get_account_by_number`), `auth.py` (pbkdf2 hashing, itsdangerous signed cookies), `journal.py` (single posting path `create_journal_entry` + void-as-reversal), `ledger.py` (`account_balance`, `general_ledger` running balance, `trial_balance`), `reports.py` (`income_statement`, `balance_sheet`), `parties.py` (customer/vendor CRUD), `items.py` (item CRUD + deactivate), `invoices.py` (create+post, pay, void; public `tax_cents` helper shared by estimates/bills), `estimates.py` (create, convert-to-invoice), `bills.py` (create+post, pay, void), `budgets.py` (CRUD + `budget_report` actual-vs-budget/variance), `reconciliation.py` (bank accounts, create/get/list/delete reconciliation, cleared-line locking), `export.py` (7 report row builders + `render_csv`/`render_pdf` renderers + `money` cents→dollars helper), `errors.py` (`NotFoundError`→404, `ConflictError`→409, `ValidationError`→422) |
+| `app/routers/` | `auth.py` (public), `accounts.py` + `journal.py` + `ledger.py` + `reports.py` + `parties.py` + `items.py` + `invoices.py` + `bills.py` + `budgets.py` + `reconciliation.py` + `estimates.py` + `export.py` (7 CSV/PDF download endpoints) (auth-protected) |
 | `app/dependencies.py` | `get_current_user` — cookie session check, 401 if missing/invalid/no user |
 | `app/seed/coa.py` | 26-account standard COA, auto-seeded idempotently on every startup via `init_db` |
-| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py`, `test_journal.py`, `test_ledger.py`, `test_reports.py`, `test_parties_items.py`, `test_invoices.py`, `test_estimates.py`, `test_bills.py`, `test_budgets.py`, `test_reconciliation.py` — **142 tests, all passing** |
+| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py`, `test_journal.py`, `test_ledger.py`, `test_reports.py`, `test_parties_items.py`, `test_invoices.py`, `test_estimates.py`, `test_bills.py`, `test_budgets.py`, `test_reconciliation.py`, `test_export.py` — **162 tests, all passing** |
 | `requirements.txt` | fastapi, uvicorn[standard], SQLAlchemy 2.0, pydantic v2, itsdangerous, reportlab, pytest, httpx, pyright |
 | `pytest.ini` | filters 2 third-party deprecation warnings |
 | `pyrightconfig.json` | pins pyright to `.venv` (LSP needs opencode restart to pick up) |
 | `static/` | Vanilla JS SPA (no build step, ES modules): `index.html` + `app.css` (tab shell), `js/api.js` (fetch wrapper, cookies auto-sent), `js/ui.js` (money/date/escape/toast helpers), `js/doclines.js` (shared invoice/estimate/bill line editor), `js/router.js` (hash router, lazy page imports, auth gate), `js/pages/*.js` (login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export) |
 | `AI_WORKFLOW.md` | **not written yet** (Phase 11) |
 
-Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–8 committed and pushed (HEAD `8551ad8`); **Phase 9 (frontend SPA) is implemented but uncommitted**.
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–9 committed and pushed (HEAD `2f63afc`); **Phase 10 (export) is implemented but uncommitted**.
 
 ## Build Roadmap (approved plan — use as the work queue)
 
-Small steps, 1–2 files each, `pytest` green after every step. Phases 0–9 done; continue from Phase 10.
+Small steps, 1–2 files each, `pytest` green after every step. Phases 0–10 done; continue from Phase 11.
 
 | # | Phase | Status |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–9 don
 | 7 | Budgets: `models/budget.py`, `services/budgets.py` (actual vs budget, variance), router, tests | **Done** |
 | 8 | Bank register + reconciliation: `cleared`/`reconciliation_id` on journal lines, `services/reconciliation.py`, router, tests | **Done** |
 | 9 | Frontend SPA: `static/index.html` + `app.css` (tab shell), `static/js/api.js` + `router.js` (hash-routed, lazy page imports), one page per step: login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export (placeholder) | **Done** |
-| 10 | Export: CSV service + router, PDF (ReportLab) + router, tests | Pending |
+| 10 | Export: CSV service + router, PDF (ReportLab) + router, tests — 7 reports (general ledger, trial balance, income statement, balance sheet, journal, invoices, bills) as CSV/PDF downloads | **Done** |
 | 11 | Seed + polish: `app/seed/demo.py` + wire `--seed` flag, `AI_WORKFLOW.md`, README status update, full test run | Pending |
 
 ### Ledger & statements conventions (Phase 4, implemented)
@@ -102,6 +102,13 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–9 don
 - `general_ledger` lines expose `line_id` + `cleared` + `reconciliation_id` (the bank register is just the general ledger of a bank account; `line_id` is what the reconciliation UI submits to clear lines — added in Phase 9 since `create_reconciliation` needs journal line ids).
 - **Schema migration**: `create_all` never alters existing tables, so `init_db` runs an `ALTER TABLE journal_lines ADD COLUMN` guard (via `PRAGMA table_info`) for `cleared`/`reconciliation_id`. No-op on fresh DBs; preserves data on pre-Phase-8 DBs.
 
+### Export conventions (Phase 10, implemented)
+
+- **Reports as tables**: each `*_rows` builder in `services/export.py` reuses an existing report service (`ledger.general_ledger`/`trial_balance`, `reports.income_statement`/`balance_sheet`, `journal.list_journal_entries`, `invoices.list_invoices`, `bills.list_bills`) and flattens it into `(title, subtitle, header, rows, filename)` where `rows` are lists of strings. Two generic renderers then emit the file: `render_csv` (stdlib `csv`, LF endings, UTF-8) and `render_pdf` (ReportLab `SimpleDocTemplate` + `Table`, numeric columns right-aligned, header repeats per page).
+- **Money in exports is dollars, 2 decimals** (`money(cents)` uses integer math, no float) — the one backend place cents become currency strings, alongside the UI boundary.
+- **Endpoints**: `GET /api/export/{report}?format=csv|pdf` for `general-ledger` (requires `account_id`), `trial-balance`/`balance-sheet` (`as_of`), `income-statement`/`journal` (`date_from`/`date_to`), `invoices` (`customer_id`), `bills` (`vendor_id`); each also takes `include_voided` where applicable. The response is a `Response` with `Content-Disposition: attachment; filename="..."` (no Pydantic schema — the body is a file, not JSON).
+- **Frontend download**: the SPA does not `fetch` exports; `api.js::exportUrl(report, params)` builds the URL and the page sets `window.location.href` to it. The attachment header makes the browser save the file without navigating away; the session cookie is sent automatically.
+
 ### Frontend conventions (Phase 9, implemented)
 
 - **No build step**: vanilla HTML/CSS/JS as ES modules. `index.html` loads only `/js/router.js` (a `<script type="module">`); everything else is imported from there. Served by the FastAPI static mount at `/` (`html=True`), so `/` returns `index.html`.
@@ -110,12 +117,12 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–9 don
 - **Pages** (`js/pages/*.js`): each default-exports `{ render(container) }`. They set `container.innerHTML` to a template, then wire up `addEventListener`s. Forms use `novalidate` + client-side checks and surface server errors via `showFormError`. Destructive actions confirm with `window.confirm` and report via `toast`.
 - **Money & dates** (`js/ui.js`): all money is integer cents end-to-end; the UI types/reads **dollars** and converts with `dollarsToCents`/`centsToDollars` (only at the form boundary). `fmtMoney` renders cents as USD; `fmtDate`/`todayISO` handle ISO dates; `esc()` HTML-escapes all interpolated values.
 - **Shared line editor** (`js/doclines.js`): `createLineEditor({tbody, addBtn, items, expenseAccounts?, onTotal})` builds the invoice/estimate/bill line rows (optional item auto-fills description+price, qty, unit price, live amount). Bills pass `expenseAccounts` to add the required per-line expense-account column. Returns `{ addLine, lines, totals, update }`.
-- **Routes**: `login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export`. `export` is a placeholder (endpoints land in Phase 10).
+- **Routes**: `login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export`. The `export` page is a report picker (7 reports, conditional account/date/party fields, CSV/PDF) that builds a download URL via `api.js::exportUrl` and sets `window.location.href`.
 - **No frontend unit tests yet**; validated via `node --check` (syntax) + a TestClient smoke script that exercises every page's data path + static assets (45 checks). A "wiring audit" test (every endpoint has an SPA caller) is a possible Phase 9 follow-up.
 
 ## Architecture
 
-Stack: Python 3.12 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS SPA frontend (no build step, Phase 9) · ReportLab (PDF, Phase 10) · pytest + TestClient.
+Stack: Python 3.12 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS SPA frontend (no build step, Phase 9) · ReportLab (PDF export) · pytest + TestClient.
 
 ```
 Accounting/
@@ -126,8 +133,8 @@ Accounting/
 │   ├── dependencies.py# get_current_user (cookie session auth)
 │   ├── models/        # Account, AccountType, User, JournalEntry, JournalLine, Customer, Vendor, Item, Invoice, Estimate, Bill, Budget, Reconciliation
 │   ├── schemas/       # Pydantic v2 request/response models
-│   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills, budgets, reconciliation
-│   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates (+ export ...)
+│   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills, budgets, reconciliation, export
+│   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates, export
 │   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (Phase 11)
 ├── static/            # vanilla JS SPA (Phase 9): index.html + app.css, js/ (api, ui, doclines, router) + js/pages/ (12 pages)
 ├── tests/
@@ -178,7 +185,7 @@ Patterns worth adopting (implement our own versions):
 - **Bank reconciliation**: `cleared` + `reconciliation_id` on ledger lines; `bank_kind` on accounts (not names/numbers) keys the register — `bank_kind` column **done** on Account.
 - **Frontend**: hash-routed SPA; one JS module per page exporting `render()`; central `api.js` wrapper; a "wiring audit" test fails if an endpoint has no SPA caller (Phase 9).
 
-Status as of Phase 8: single posting path, DB-level debit-XOR-credit guard, provenance columns, void-as-reversal, ledger, financial statements, invoices/estimates, bills, budgets, and bank reconciliation are **implemented**; audit logging remains pending.
+Status as of Phase 10: single posting path, DB-level debit-XOR-credit guard, provenance columns, void-as-reversal, ledger, financial statements, invoices/estimates, bills, budgets, bank reconciliation, and CSV/PDF export are **implemented**; audit logging remains pending.
 
 Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, nonprofit, multi-company, job costing. Keep: accounts, customers, vendors, items, invoices, estimates, payments, bills, journal, bank register + reconciliation, reports, budgets, tax, audit, auth, seed data.
 
@@ -211,14 +218,14 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and `opencode.jsonc` (`lsp.pyright.initialization.python.pythonPath`). If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
-- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (142 tests as of this update).
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (162 tests as of this update).
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` (pyright is installed in the venv and listed in `requirements.txt`; `pyrightconfig.json` pins it to `.venv`). Keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
 - **opencode.jsonc** is gitignored (local-only) and now contains the pyright venv config.
 
 ## Known Limitations
 
-- Phases 10–11 not implemented: no export (CSV/PDF) or demo seed yet. The frontend `export` page is a placeholder until Phase 10 wires the endpoints.
+- Phase 11 not implemented: no demo seed (`app/seed/demo.py`) or `AI_WORKFLOW.md` yet.
 - No frontend unit tests yet (validated via `node --check` + a TestClient smoke script); a "wiring audit" test (every endpoint has an SPA caller) is a possible follow-up.
 - `main.py --seed` references `app.seed.demo.seed_demo_data` which does not exist until Phase 11 (lazy import; app runs fine without the flag).
 - No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks).
@@ -239,14 +246,14 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
 - DB file: `accounting.db` at project root (WAL mode)
-- Test suite: 142 tests, all passing (Phases 0–9)
+- Test suite: 162 tests, all passing (Phases 0–10)
 
 ## Metadata
 
 - Last Updated: 2026-09-25
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-25 (Phase 9 frontend SPA implemented: `static/` vanilla JS SPA — shell + api/ui/doclines/router modules + 12 pages; added `line_id` to general ledger so reconciliation can clear lines; 142 tests green + pyright 0 errors + 45-check smoke test. Prior: rebased runtime to Python 3.12.10)
-- Files Analyzed: `static/index.html`, `static/app.css`, `static/js/api.js`, `static/js/ui.js`, `static/js/doclines.js`, `static/js/router.js`, `static/js/pages/*.js` (12 pages), `app/schemas/ledger.py`, `app/services/ledger.py`, `app/main.py`
-- Git Commit: `8551ad8` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–8 committed and pushed; **Phase 9 uncommitted**)
-- Architecture Version: 0.9 (foundation + accounts + auth + journal core + ledger/statements + invoices/estimates + bills + budgets + bank reconciliation + frontend SPA implemented)
+- Last Incremental Update: 2026-09-25 (Phase 10 export implemented: `app/services/export.py` (7 report row builders + `render_csv`/`render_pdf` + `money` helper), `app/routers/export.py` (7 CSV/PDF download endpoints), `tests/test_export.py` (20 tests), wired the SPA `export` page (report picker → download URL). 162 tests green + pyright 0 errors. Prior: Phase 9 frontend SPA; rebased runtime to Python 3.12.10)
+- Files Analyzed: `app/services/export.py`, `app/routers/export.py`, `tests/test_export.py`, `app/main.py`, `static/js/api.js`, `static/js/pages/export.js`
+- Git Commit: `2f63afc` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–9 committed and pushed; **Phase 10 uncommitted**)
+- Architecture Version: 0.10 (foundation + accounts + auth + journal core + ledger/statements + invoices/estimates + bills + budgets + bank reconciliation + frontend SPA + CSV/PDF export implemented)
 - AIHelper Version: 2 (added Build Roadmap handoff section, conventions, environment notes)

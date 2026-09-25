@@ -34,6 +34,7 @@ def create_app() -> FastAPI:
         bills,
         budgets,
         estimates,
+        export,
         invoices,
         items,
         journal,
@@ -55,6 +56,7 @@ def create_app() -> FastAPI:
     app.include_router(budgets.router)
     app.include_router(reconciliation.router)
     app.include_router(estimates.router)
+    app.include_router(export.router)
 
     @app.get("/api/health")
     def health():
