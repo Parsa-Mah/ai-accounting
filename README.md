@@ -6,7 +6,7 @@ A full-featured double-entry accounting web application — **written entirely b
 
 This repository contains an accounting application built in Python. The app implements a real double-entry bookkeeping core — chart of accounts, journal entries, ledgers, trial balance, income statement, and balance sheet — plus invoicing, accounts receivable/payable, budgets, and CSV/PDF report export, all exposed through a web interface.
 
-But the application is not the main point. **The main point is that the entire application was written by an AI.** No human wrote a single line of code in this project. The AI planned the architecture, wrote the backend, the frontend, the tests, and the documentation.
+But the application is not the main point. **The main point is that the entire application was written by an AI.** No human wrote a single line of code in this project. The AI planned the architecture, wrote the backend, the frontend, the tests, and the documentation. [AI_WORKFLOW.md](AI_WORKFLOW.md) is the full record of how the AI built it, phase by phase.
 
 ## The goal
 
@@ -22,7 +22,7 @@ To demonstrate that a **local, open-weight AI model running on a single consumer
 
 | Layer     | Technology                          |
 | --------- | ----------------------------------- |
-| Language  | Python 3.13                         |
+| Language  | Python 3.12                         |
 | Backend   | FastAPI + uvicorn                   |
 | ORM       | SQLAlchemy 2.0                      |
 | Database  | SQLite (file-based, ACID)           |
@@ -97,4 +97,33 @@ Parsa set the goals, reviewed the output, and steered the project. All code was 
 
 ## Status
 
-The project is under active development. See the git history for the AI's step-by-step build process.
+The application is complete. All 12 build phases (0–11) are implemented and tested — 167 tests, all passing, with the type checker reporting zero errors. The full step-by-step build is visible in the git history, and [AI_WORKFLOW.md](AI_WORKFLOW.md) explains the process.
+
+## Features
+
+- **Double-entry core** — chart of accounts, journal entries, general ledger, trial balance
+- **Financial statements** — income statement and balance sheet (Assets = Liabilities + Equity by construction)
+- **Invoicing & AR** — flat tax, payments, partial payments, voids
+- **Estimates** — quotes that convert to invoices in one step
+- **Bills & AP** — per-line expense accounts, tax recoverable, payments, voids
+- **Budgets** — planned vs. actual with variance, over custom date ranges
+- **Bank reconciliation** — cleared-line locking and the classic difference rule
+- **Export** — 7 reports as CSV and PDF
+- **Auth** — single-user, first-run setup, signed cookie sessions
+- **Web UI** — a vanilla JS SPA with no build step
+- **Demo data** — a complete, balanced sample business via `--seed`
+
+## Running the app
+
+```bash
+pip install -r requirements.txt
+python main.py --seed   # optional: seed demo data first
+```
+
+Then open <http://127.0.0.1:8000>. With `--seed`, log in as `demo` / `demo123`; without it, the first visit shows a setup screen to create the account.
+
+## Running the tests
+
+```bash
+pytest
+```
