@@ -12,12 +12,12 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status (build in progress)
 
-Phases 0–8 of the build plan are **complete and tested** (142/142 tests green). Phases 9–11 remain.
+Phases 0–9 of the build plan are **complete and tested** (142/142 tests green). Phases 10–11 remain.
 
 | File / Dir | State |
 | --- | --- |
 | `main.py` | uvicorn runner with `--host`, `--port`, `--seed` flags (`--seed` imports `app.seed.demo` — **not created yet, Phase 11**) |
-| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes (auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates), `/api/health`, static mount (skipped until `static/` exists) |
+| `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes (auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates), `/api/health`, static mount (serves the `static/` SPA at `/` with `html=True`) |
 | `app/database.py` | SQLite engine (`accounting.db` at root, overridable via `ACCOUNTING_DB_PATH` env var), WAL pragmas (`journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`), `Base`, `SessionLocal` (`expire_on_commit=False`), `get_db`, `init_db` (creates tables + `ALTER TABLE` guard adding `cleared`/`reconciliation_id` to a pre-existing `journal_lines` + seeds COA) |
 | `app/models/` | `Account` (+ `AccountType` enum), `User`, `JournalEntry` + `JournalLine` (CHECK debit-XOR-credit, provenance `source_type`/`source_id`, `is_voided`/`voided_by_id`, `cleared`/`reconciliation_id`), `Customer`/`Vendor`, `Item`, `Invoice` + `InvoiceLine` + `InvoicePayment`, `Estimate` + `EstimateLine`, `Bill` + `BillLine` (per-line `expense_account_id`) + `BillPayment`, `Budget` (account + date range + `budget_cents`), `Reconciliation` (account + statement date/balance + stored opening/cleared/difference) |
 | `app/schemas/` | Pydantic v2: `AccountCreate/Update/Read`, `Credentials/AuthStatus/AuthUser`, `JournalEntryCreate/Read`, `JournalLineCreate/Read`, `GeneralLedgerRead`/`TrialBalanceRead`, `IncomeStatementRead`/`BalanceSheetRead`/`StatementLineRead`, `Customer/Vendor Create/Read`, `ItemCreate/Update/Read`, `InvoiceCreate/PayCreate/Read` + line/payment reads, `EstimateCreate/Read`, `BillCreate/PayCreate/Read` + line/payment reads (line carries required `expense_account_id`), `BudgetCreate/Update/Read` + `BudgetReportRead` (rows + totals), `ReconciliationCreate/Read` + `BankAccountRead` |
@@ -29,14 +29,14 @@ Phases 0–8 of the build plan are **complete and tested** (142/142 tests green)
 | `requirements.txt` | fastapi, uvicorn[standard], SQLAlchemy 2.0, pydantic v2, itsdangerous, reportlab, pytest, httpx, pyright |
 | `pytest.ini` | filters 2 third-party deprecation warnings |
 | `pyrightconfig.json` | pins pyright to `.venv` (LSP needs opencode restart to pick up) |
-| `static/` | **does not exist yet** (Phase 9) |
+| `static/` | Vanilla JS SPA (no build step, ES modules): `index.html` + `app.css` (tab shell), `js/api.js` (fetch wrapper, cookies auto-sent), `js/ui.js` (money/date/escape/toast helpers), `js/doclines.js` (shared invoice/estimate/bill line editor), `js/router.js` (hash router, lazy page imports, auth gate), `js/pages/*.js` (login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export) |
 | `AI_WORKFLOW.md` | **not written yet** (Phase 11) |
 
-Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–7 committed and pushed (HEAD `2f85c58`); **Phase 8 (reconciliation) is implemented but uncommitted**.
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Phases 0–8 committed and pushed (HEAD `8551ad8`); **Phase 9 (frontend SPA) is implemented but uncommitted**.
 
 ## Build Roadmap (approved plan — use as the work queue)
 
-Small steps, 1–2 files each, `pytest` green after every step. Phases 0–8 done; continue from Phase 9.
+Small steps, 1–2 files each, `pytest` green after every step. Phases 0–9 done; continue from Phase 10.
 
 | # | Phase | Status |
 | --- | --- | --- |
@@ -49,7 +49,7 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–8 don
 | 6 | Bills (AP + tax): `models/bill.py`, `services/bills.py` (Dr Expense / Dr Tax Recoverable / Cr AP; payment Dr AP / Cr Cash; void), router, tests | **Done** |
 | 7 | Budgets: `models/budget.py`, `services/budgets.py` (actual vs budget, variance), router, tests | **Done** |
 | 8 | Bank register + reconciliation: `cleared`/`reconciliation_id` on journal lines, `services/reconciliation.py`, router, tests | **Done** |
-| 9 | Frontend SPA: `static/index.html` + `app.css` (tab shell), `static/js/api.js` + `router.js` (hash-routed), then one page per step: login, dashboard, accounts, journal, ledger, statements, invoices/estimates, bills, budgets, reconciliation, export | Next |
+| 9 | Frontend SPA: `static/index.html` + `app.css` (tab shell), `static/js/api.js` + `router.js` (hash-routed, lazy page imports), one page per step: login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export (placeholder) | **Done** |
 | 10 | Export: CSV service + router, PDF (ReportLab) + router, tests | Pending |
 | 11 | Seed + polish: `app/seed/demo.py` + wire `--seed` flag, `AI_WORKFLOW.md`, README status update, full test run | Pending |
 
@@ -99,12 +99,23 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–8 don
 - **Difference rule (classic)**: `opening` = account net activity strictly before the earliest cleared line's date; `cleared_total` = Σ(debit − credit) of the cleared lines; `difference = statement_balance − (opening + cleared_total)`. Non-zero difference = outstanding items; `is_balanced = difference == 0`. Opening/cleared/difference are **stored** so the record is an immutable snapshot.
 - **Correction path**: `DELETE /api/reconciliation/{id}` un-clears its lines (`cleared=False`, `reconciliation_id=NULL`) and removes the record — there is no separate "unclear" or "void" state.
 - **Void guard**: `void_journal_entry` refuses (409) an entry that has any cleared line, so a cleared line can never be reversed out from under a reconciliation.
-- `general_ledger` lines now also expose `cleared` + `reconciliation_id` (the bank register is just the general ledger of a bank account).
+- `general_ledger` lines expose `line_id` + `cleared` + `reconciliation_id` (the bank register is just the general ledger of a bank account; `line_id` is what the reconciliation UI submits to clear lines — added in Phase 9 since `create_reconciliation` needs journal line ids).
 - **Schema migration**: `create_all` never alters existing tables, so `init_db` runs an `ALTER TABLE journal_lines ADD COLUMN` guard (via `PRAGMA table_info`) for `cleared`/`reconciliation_id`. No-op on fresh DBs; preserves data on pre-Phase-8 DBs.
+
+### Frontend conventions (Phase 9, implemented)
+
+- **No build step**: vanilla HTML/CSS/JS as ES modules. `index.html` loads only `/js/router.js` (a `<script type="module">`); everything else is imported from there. Served by the FastAPI static mount at `/` (`html=True`), so `/` returns `index.html`.
+- **Router** (`js/router.js`): hash-based (`#/route`). A `LOADERS` map lazily `import()`s each page module (code splitting); a missing page renders a "still being built" placeholder. An **auth gate** runs `GET /api/auth/me` before any non-login route and bounces to `#/login` on 401. `currentUser` is cached to avoid re-fetching on every nav; logout clears it.
+- **API wrapper** (`js/api.js`): one `request(method, path, body)` helper; `fetch` sends the HttpOnly session cookie automatically (same-origin). Non-2xx throws an `Error` whose `.message` is the server `detail` (string, or joined FastAPI validation `msg`s). A `withQuery()` helper drops empty/undefined/null params.
+- **Pages** (`js/pages/*.js`): each default-exports `{ render(container) }`. They set `container.innerHTML` to a template, then wire up `addEventListener`s. Forms use `novalidate` + client-side checks and surface server errors via `showFormError`. Destructive actions confirm with `window.confirm` and report via `toast`.
+- **Money & dates** (`js/ui.js`): all money is integer cents end-to-end; the UI types/reads **dollars** and converts with `dollarsToCents`/`centsToDollars` (only at the form boundary). `fmtMoney` renders cents as USD; `fmtDate`/`todayISO` handle ISO dates; `esc()` HTML-escapes all interpolated values.
+- **Shared line editor** (`js/doclines.js`): `createLineEditor({tbody, addBtn, items, expenseAccounts?, onTotal})` builds the invoice/estimate/bill line rows (optional item auto-fills description+price, qty, unit price, live amount). Bills pass `expenseAccounts` to add the required per-line expense-account column. Returns `{ addLine, lines, totals, update }`.
+- **Routes**: `login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export`. `export` is a placeholder (endpoints land in Phase 10).
+- **No frontend unit tests yet**; validated via `node --check` (syntax) + a TestClient smoke script that exercises every page's data path + static assets (45 checks). A "wiring audit" test (every endpoint has an SPA caller) is a possible Phase 9 follow-up.
 
 ## Architecture
 
-Stack: Python 3.13 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS frontend (no build step, Phase 9) · ReportLab (PDF, Phase 10) · pytest + TestClient.
+Stack: Python 3.12 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS SPA frontend (no build step, Phase 9) · ReportLab (PDF, Phase 10) · pytest + TestClient.
 
 ```
 Accounting/
@@ -118,7 +129,7 @@ Accounting/
 │   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills, budgets, reconciliation
 │   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates (+ export ...)
 │   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (Phase 11)
-├── static/            # tabbed SPA (Phase 9): dashboard, accounts, journal, ledger, statements, invoices, bills, budgets, export
+├── static/            # vanilla JS SPA (Phase 9): index.html + app.css, js/ (api, ui, doclines, router) + js/pages/ (12 pages)
 ├── tests/
 ├── skills/            # AI skills shipped with the repo (use-aihelper, maintain-aihelper)
 ├── requirements.txt
@@ -130,7 +141,7 @@ Accounting/
 └── AI_WORKFLOW.md     # to be written (Phase 11): how the AI built the project
 ```
 
-Layering: `routers → services → models (SQLAlchemy) → SQLite`. Frontend (Phase 9) calls REST `/api/*` endpoints via fetch.
+Layering: `routers → services → models (SQLAlchemy) → SQLite`. The frontend SPA (Phase 9) is a hash-routed ES-module app that calls REST `/api/*` endpoints via fetch (session cookie sent automatically).
 
 ### Established conventions (follow these in new code)
 
@@ -196,7 +207,7 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 
 ## Environment & Tooling Notes
 
-- **venv**: `.venv` at project root (Python 3.13.15). Run everything with `.venv\Scripts\python.exe` (e.g. `.venv\Scripts\python.exe -m pytest`).
+- **venv**: `.venv` at project root (Python 3.12.10). Recreate with `py -3.12 -m venv .venv` then `.venv\Scripts\python.exe -m pip install -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt`. Pinned via `.python-version` (`3.12`). Run everything with `.venv\Scripts\python.exe` (e.g. `.venv\Scripts\python.exe -m pytest`).
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and `opencode.jsonc` (`lsp.pyright.initialization.python.pythonPath`). If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
@@ -207,7 +218,8 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 
 ## Known Limitations
 
-- Phases 9–11 not implemented: no frontend, export, or demo seed yet.
+- Phases 10–11 not implemented: no export (CSV/PDF) or demo seed yet. The frontend `export` page is a placeholder until Phase 10 wires the endpoints.
+- No frontend unit tests yet (validated via `node --check` + a TestClient smoke script); a "wiring audit" test (every endpoint has an SPA caller) is a possible follow-up.
 - `main.py --seed` references `app.seed.demo.seed_demo_data` which does not exist until Phase 11 (lazy import; app runs fine without the flag).
 - No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks).
 
@@ -223,18 +235,18 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 
 ## Quick Project Facts
 
-- Language/runtime: Python 3.13.15 (Windows, pwsh)
+- Language/runtime: Python 3.12.10 (Windows, pwsh)
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
 - DB file: `accounting.db` at project root (WAL mode)
-- Test suite: 142 tests, all passing (Phases 0–8)
+- Test suite: 142 tests, all passing (Phases 0–9)
 
 ## Metadata
 
-- Last Updated: 2026-09-24
+- Last Updated: 2026-09-25
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-24 (Phase 8 implemented: bank reconciliation — `cleared`/`reconciliation_id` on journal lines, `Reconciliation` model, service, router, tests, `ALTER TABLE` migration guard; 142 tests green)
-- Files Analyzed: `app/models/journal.py`, `app/models/reconciliation.py`, `app/models/__init__.py`, `app/database.py`, `app/schemas/reconciliation.py`, `app/schemas/ledger.py`, `app/services/reconciliation.py`, `app/services/journal.py`, `app/services/ledger.py`, `app/routers/reconciliation.py`, `app/main.py`, `tests/test_reconciliation.py`
-- Git Commit: `2f85c58` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–7 committed and pushed; **Phase 8 uncommitted**)
-- Architecture Version: 0.8 (foundation + accounts + auth + journal core + ledger/statements + invoices/estimates + bills + budgets + bank reconciliation implemented)
+- Last Incremental Update: 2026-09-25 (Phase 9 frontend SPA implemented: `static/` vanilla JS SPA — shell + api/ui/doclines/router modules + 12 pages; added `line_id` to general ledger so reconciliation can clear lines; 142 tests green + pyright 0 errors + 45-check smoke test. Prior: rebased runtime to Python 3.12.10)
+- Files Analyzed: `static/index.html`, `static/app.css`, `static/js/api.js`, `static/js/ui.js`, `static/js/doclines.js`, `static/js/router.js`, `static/js/pages/*.js` (12 pages), `app/schemas/ledger.py`, `app/services/ledger.py`, `app/main.py`
+- Git Commit: `8551ad8` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; Phases 0–8 committed and pushed; **Phase 9 uncommitted**)
+- Architecture Version: 0.9 (foundation + accounts + auth + journal core + ledger/statements + invoices/estimates + bills + budgets + bank reconciliation + frontend SPA implemented)
 - AIHelper Version: 2 (added Build Roadmap handoff section, conventions, environment notes)

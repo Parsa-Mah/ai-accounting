@@ -121,6 +121,7 @@ def general_ledger(
         running += line.debit - line.credit
         lines.append(
             {
+                "line_id": line.id,
                 "date": entry.date,
                 "entry_id": entry.id,
                 "entry_description": entry.description,

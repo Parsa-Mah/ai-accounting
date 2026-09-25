@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 
 class GeneralLedgerLineRead(BaseModel):
+    line_id: int
     date: date
     entry_id: int
     entry_description: str
