@@ -14,7 +14,7 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 **Build complete.** All 13 phases (0–12) are implemented and tested: 204/204 tests passing (incl. 6 i18n parity tests), pyright 0 errors. Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Any new work is post-build (features, fixes, polish).
 
-**Post-build — i18n (UI localization) in progress.** Phase 0 is complete: i18n infrastructure (`js/i18n.js`), the English baseline dictionary (`static/i18n/en.json`), all 16 frontend JS files refactored to `t()`, a language selector (topbar + login), and `tests/test_i18n.py`. Batch 1 is complete: 5 languages added (`fr, de, it, es, pt`) and wired into `LANGS`. 37 more languages remain, to be added in batches of ~5 (RTL languages — Hebrew/Persian/Arabic — last).
+**Post-build — i18n (UI localization) in progress.** Phase 0 is complete: i18n infrastructure (`js/i18n.js`), the English baseline dictionary (`static/i18n/en.json`), all 16 frontend JS files refactored to `t()`, a language selector (topbar + login), and `tests/test_i18n.py`. Batch 1 is complete: 5 languages added (`fr, de, it, es, pt`) and wired into `LANGS`. The localization target is now **84 languages** (6 done, 78 queued — see "i18n — language queue" below), to be added in batches of ~5 (RTL languages — Hebrew/Persian/Arabic — last). The README's "Languages supported" section lists the per-country coverage.
 
 ## Architecture
 
@@ -143,6 +143,19 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. The fronten
 - **Wiring**: `router.js` awaits `initI18n()` before the first render, wires the topbar `#lang-select`, and re-renders the current route on `i18n:changed`. Every page calls `t()` for user-facing strings; `statusBadge()` in `ui.js` resolves `status.<key>`; `export.js` resolves report names via a `labelKey` per report.
 - **Adding a language**: create `static/i18n/{code}.json` with the same `ui` keys (and same `{placeholder}` sets) as `en.json`, then append `{code, name, dir?}` to `LANGS`. `tests/test_i18n.py` enforces key + placeholder parity across dictionaries, that every static `t("…")` literal and dynamic key family (nav routes, `statusBadge` values, account types, export label keys) exists in `en.json`, and that `LANGS` matches the dictionary files on disk.
 
+**i18n — language queue (78 to add; target 84 total)**
+
+Localization target is **84 languages**. Six are done (`en, fr, de, it, es, pt`); the 78 below are the authoritative queue — each will get a `static/i18n/{code}.json` dictionary + a `LANGS` entry, added in batches of ~5 (RTL — Hebrew/Persian/Arabic — last). The user's requested list was curated: languages the model cannot translate reliably (low-resource, or sign languages) were dropped, and a country counts as "supported" only if it keeps at least one language (see README "Languages supported").
+
+- **Western & Central Europe (26):** Albanian `sq`, Belarusian `be`, Bulgarian `bg`, Catalan `ca`, Croatian `hr`, Czech `cs`, Danish `da`, Estonian `et`, Finnish `fi`, Greek `el`, Hungarian `hu`, Icelandic `is`, Irish `ga`, Latvian `lv`, Lithuanian `lt`, Luxembourgish `lb`, Macedonian `mk`, Norwegian `no`, Polish `pl`, Romanian `ro`, Russian `ru`, Serbian `sr`, Slovene `sl`, Slovak `sk`, Swedish `sv`, Ukrainian `uk`
+- **Middle East, Caucasus & Central Asia (16):** Arabic `ar`, Armenian `hy`, Azerbaijani `az`, Dari `prs`, Georgian `ka`, Hebrew `he`, Kazakh `kk`, Kurdish `ku`, Kyrgyz `ky`, Maltese `mt`, Pashto `ps`, Persian `fa`, Tajik `tg`, Turkmen `tk`, Turkish `tr`, Uzbek `uz`
+- **South Asia (7):** Bengali `bn`, Bhojpuri `bho`, Dzongkha `dz`, Hindi `hi`, Nepali `ne`, Tamil `ta`, Urdu `ur`
+- **East & Southeast Asia (13):** Burmese `my`, Chinese (Mandarin) `zh`, Filipino `fil`, Indonesian `id`, Japanese `ja`, Khmer `km`, Korean `ko`, Lao `lo`, Malay `ms`, Mongolian `mn`, Sinhala `si`, Thai `th`, Vietnamese `vi`
+- **Africa (12):** Amharic `am`, Chichewa `ny`, Hausa `ha`, Kinyarwanda `rw`, Malagasy `mg`, Shona `sn`, Somali `so`, Sesotho `st`, Swahili `sw`, Swazi `ss`, Xhosa `xh`, Zulu `zu`
+- **Other (4):** Guaraní `gn`, Māori `mi`, Haitian Creole `ht`, Latin `la`
+
+**Curation — excluded from the queue** (cannot be translated reliably; low-resource or sign languages): Tamazight/Amazigh, Mooré, Fulfulde, Sango, Tigrinya, Tigre, Oromo, Fijian, Bambara, Mauritian Creole, Seychellois Creole, Antiguan & Barbudan Creole, Bahamian Creole, Nahuatl, Marshallese, Nauruan, Palauan, Tok Pisin, Ndebele, Tetum, Tongan, Bislama, Sami, Dhivehi, Kirundi, Comorian, Quechua, Gilbertese, Tuvaluan, Samoan, Icelandic Sign Language, Korean Sign Language. Note: "Fiji Hindi" is covered by Hindi `hi`; "Mandarin" / "Standard Chinese" / "Mandarin Chinese" are all Chinese (Mandarin) `zh`.
+
 **i18n — postponed (not yet built)**
 
 - **Locale-aware money/date**: `fmtMoney` hardcodes `$` + `en-US` and `fmtDate` is plain ISO; switch to `Intl.NumberFormat`/`Intl.DateTimeFormat` keyed by the active language.
@@ -239,8 +252,8 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 
 - Last Updated: 2026-09-26
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-26 (i18n batch 1: added `static/i18n/{fr,de,it,es,pt}.json` (259 keys each), registered the 5 languages in `LANGS` (`static/js/i18n.js`), relaxed the `test_langs_registry_matches_files` parity check to compare sets (registry is in UI order, files sort alphabetically); updated status + dictionary count)
-- Files Analyzed: `static/i18n/{en,fr,de,it,es,pt}.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `AIHelper.md`
+- Last Incremental Update: 2026-09-26 (i18n language queue: set the 84-language localization target; curated a 78-language queue — grouped by region with ISO codes — plus the excluded-language curation notes; added the README "Languages supported" per-country list (191 countries); added a "Post-build: i18n localization" section to `AI_WORKFLOW.md`; status line updated to reference the queue)
+- Files Analyzed: `static/i18n/{en,fr,de,it,es,pt}.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `README.md`, `AI_WORKFLOW.md`, `AIHelper.md`
 - Git Commit: `ec033b3` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.14 (i18n subsystem added: per-language JSON dictionaries + `t()` + language selector; English baseline wired)
-- AIHelper Version: 6 (cleanup: document reduced to durable project knowledge; build-process records removed)
+- AIHelper Version: 7 (i18n: 84-language target + curated 78-language queue + curation notes; README "Languages supported" country list)

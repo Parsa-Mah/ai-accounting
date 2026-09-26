@@ -58,6 +58,24 @@ Before writing any code, the AI also did a research step: it searched GitHub for
 
 Phase 12 got its own research pass first: the current MCP specification (2026-07-28), the official Python SDK v2 (verified against the actual installed wheel's source, not just the docs), Unreal Engine 5.8's experimental first-party "Unreal MCP" plugin (as a reference for keeping tool definitions decoupled from the transport and for generating ready-made client configs), and the accounting MCP ecosystem (Intuit's 145-tool QuickBooks passthrough vs. Xero's and community servers' ~29 curated tools — the consensus that curated, intent-oriented tools are more reliable for LLMs shaped the tool catalog).
 
+## Post-build: i18n localization
+
+Once the core build was done, the project turned to localizing the web interface. Same rhythm — small steps, green tests, `AIHelper.md` as the queue — but with a new dimension: the AI had to decide not just *how* to build, but *what* to build, based on how reliably it could translate each language.
+
+**Phase 0 — infrastructure.** One JSON dictionary per language (`static/i18n/{code}.json`), a small `t()` helper (`js/i18n.js`) with `{var}` substitution and English fallback, a language selector (topbar + login), and a parity test (`tests/test_i18n.py`) that enforces key + placeholder parity across every dictionary so a new language can't drift. All 16 frontend files were refactored to route user-facing strings through `t()`. English is the baseline: 259 keys across 17 namespaces.
+
+**Batch 1 — first languages.** Five full dictionaries added (`fr, de, it, es, pt`) and registered in `LANGS`.
+
+**The language queue — curation as a first-class step.** The human then supplied a long wishlist of languages plus a per-country list of 195 countries for the README, with one rule: *translate only what you can do reliably; if you can't be sure a language represents the right data, drop it.* The task became curation, not just translation. The AI:
+
+- ranked each requested language by translation confidence — keeping major world languages and well-documented official languages, and dropping low-resource ones (e.g. Oromo, Tigrinya, Quechua, the Pacific creoles) and sign languages (which have no written form to render in a UI);
+- added languages that appeared only in the country list but that it was confident in (Russian, Korean, Belarusian, Bulgarian, Khmer, Lithuanian, Estonian, Hungarian, Maltese, Somali, Sinhala, Turkmen, Uzbek, Amharic);
+- normalized aliases (Mandarin / Standard Chinese / Mandarin Chinese → one `zh`; Fiji Hindi → Hindi);
+- fixed the target at **84 languages** (6 done, 78 queued) and recorded it as the authoritative queue in `AIHelper.md`, grouped by region with ISO codes;
+- wrote the README's **"Languages supported"** section — 191 countries, each listing only its supported languages — and removed the four countries whose only languages were dropped (Burkina Faso, Eritrea, Maldives, Mali).
+
+The 78 queued languages are added in batches of ~5 (RTL — Hebrew/Persian/Arabic — last); each batch is a full 259-key dictionary + a `LANGS` entry + a green parity test.
+
 ## How the AI kept quality high without a human reviewer in the loop
 
 - **The domain checks itself.** Double-entry bookkeeping has built-in invariants: every entry must balance, the trial balance must tie, and the balance sheet must satisfy A = L + E. Tests assert these invariants on real data, so an arithmetic or posting mistake cannot pass silently.

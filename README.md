@@ -31,6 +31,7 @@ To demonstrate that a **local, open-weight AI model running on a single consumer
 - [Hardware](#hardware)
 - [Author](#author)
 - [Status](#status)
+- [Languages supported](#languages-supported)
 
 ## Overview
 
@@ -260,3 +261,199 @@ Parsa set the goals, reviewed the output, and steered the project. All code was 
 ## Status
 
 The application is complete. All 13 build phases (0–12) are implemented and tested — 198 tests, all passing, with the type checker reporting zero errors. The full step-by-step build is visible in the git history, and [AI_WORKFLOW.md](AI_WORKFLOW.md) explains the process.
+
+## Languages supported
+
+The web interface is localized into **84 languages**. The list below covers every country where at least one supported language is spoken; each entry shows the supported language(s) for that country.
+
+- Afghanistan — Dari, Pashto
+- Albania — Albanian
+- Algeria — Arabic
+- Andorra — Catalan
+- Angola — Portuguese
+- Antigua and Barbuda — English
+- Argentina — Spanish, Guaraní
+- Armenia — Armenian
+- Australia — English, Chinese (Mandarin)
+- Austria — German
+- Azerbaijan — Azerbaijani
+- Bahamas — English
+- Bahrain — Arabic
+- Bangladesh — Bengali
+- Barbados — English
+- Belarus — Belarusian, Russian
+- Belgium — Dutch, French
+- Belize — English
+- Benin — French
+- Bhutan — Dzongkha
+- Bolivia — Spanish
+- Bosnia and Herzegovina — Bosnian, Croatian, Serbian
+- Botswana — English
+- Brazil — Portuguese
+- Brunei — Malay
+- Bulgaria — Bulgarian
+- Burundi — French
+- Cabo Verde — Portuguese
+- Cambodia — Khmer
+- Cameroon — English, French
+- Canada — English, French
+- Central African Republic — French
+- Chad — Arabic, French
+- Chile — Spanish
+- China — Chinese (Mandarin)
+- Colombia — Spanish
+- Comoros — French
+- Costa Rica — Spanish
+- Côte d’Ivoire — French
+- Croatia — Croatian
+- Cuba — Spanish
+- Cyprus — Greek, Turkish
+- Czechia — Czech
+- Democratic Republic of the Congo — French
+- Denmark — Danish
+- Djibouti — Arabic, French
+- Dominica — English
+- Dominican Republic — Spanish
+- Ecuador — Spanish
+- Egypt — Arabic
+- El Salvador — Spanish
+- Equatorial Guinea — Spanish, French
+- Estonia — Estonian
+- Eswatini — Swazi, English
+- Ethiopia — Amharic
+- Fiji — Hindi
+- Finland — Finnish, Swedish
+- France — French
+- Gabon — French
+- Gambia — English
+- Georgia — Georgian
+- Germany — German
+- Ghana — English
+- Greece — Greek
+- Grenada — English
+- Guatemala — Spanish
+- Guinea — French
+- Guinea-Bissau — Portuguese
+- Guyana — English
+- Haiti — Haitian Creole, French
+- Honduras — Spanish
+- Hungary — Hungarian
+- Iceland — Icelandic
+- India — Hindi, English
+- Indonesia — Indonesian
+- Iran — Persian
+- Iraq — Arabic, Kurdish
+- Ireland — Irish, English
+- Israel — Hebrew
+- Italy — Italian
+- Jamaica — English
+- Japan — Japanese
+- Jordan — Arabic
+- Kazakhstan — Kazakh, Russian
+- Kenya — English, Swahili
+- Kiribati — English
+- Kuwait — Arabic
+- Kyrgyzstan — Kyrgyz, Russian
+- Laos — Lao
+- Latvia — Latvian
+- Lebanon — Arabic
+- Lesotho — Sesotho, English
+- Liberia — English
+- Libya — Arabic
+- Liechtenstein — German
+- Lithuania — Lithuanian
+- Luxembourg — Luxembourgish, French
+- Madagascar — Malagasy, French
+- Malawi — English, Chichewa
+- Malaysia — Malay
+- Malta — Maltese, English
+- Marshall Islands — English
+- Mauritania — Arabic
+- Mauritius — Bhojpuri
+- Mexico — Spanish
+- Micronesia — English
+- Moldova — Romanian
+- Monaco — French
+- Mongolia — Mongolian
+- Montenegro — Montenegrin
+- Morocco — Arabic
+- Mozambique — Portuguese
+- Myanmar — Burmese
+- Namibia — English
+- Nauru — English
+- Nepal — Nepali
+- Netherlands — Dutch
+- New Zealand — English, Māori
+- Nicaragua — Spanish
+- Niger — Hausa
+- Nigeria — English
+- North Korea — Korean
+- North Macedonia — Macedonian, Albanian
+- Norway — Norwegian
+- Oman — Arabic
+- Pakistan — Urdu, English
+- Palau — English
+- Palestine — Arabic
+- Panama — Spanish
+- Papua New Guinea — English
+- Paraguay — Spanish, Guaraní
+- Peru — Spanish
+- Philippines — Filipino, English
+- Poland — Polish
+- Portugal — Portuguese
+- Qatar — Arabic
+- Republic of the Congo — French
+- Romania — Romanian
+- Russia — Russian
+- Rwanda — Kinyarwanda, English
+- Saint Kitts and Nevis — English
+- Saint Lucia — English
+- Saint Vincent and the Grenadines — English
+- Samoa — English
+- San Marino — Italian
+- São Tomé and Príncipe — Portuguese
+- Saudi Arabia — Arabic
+- Senegal — French
+- Serbia — Serbian
+- Seychelles — English
+- Sierra Leone — English
+- Singapore — English, Chinese (Mandarin)
+- Slovakia — Slovak
+- Slovenia — Slovene
+- Solomon Islands — English
+- Somalia — Somali, Arabic
+- South Africa — isiZulu, isiXhosa
+- South Korea — Korean
+- South Sudan — English
+- Spain — Spanish
+- Sri Lanka — Sinhala, Tamil
+- Sudan — Arabic, English
+- Suriname — Dutch
+- Sweden — Swedish
+- Switzerland — German, French
+- Syria — Arabic
+- Tajikistan — Tajik
+- Tanzania — Swahili, English
+- Thailand — Thai
+- Timor-Leste — Portuguese
+- Togo — French
+- Tonga — English
+- Trinidad and Tobago — English
+- Tunisia — Arabic
+- Türkiye — Turkish
+- Turkmenistan — Turkmen
+- Tuvalu — English
+- Uganda — English, Swahili
+- Ukraine — Ukrainian
+- United Arab Emirates — Arabic
+- United Kingdom — English, Polish
+- United States — English
+- Uruguay — Spanish, Portuguese
+- Uzbekistan — Uzbek
+- Vanuatu — English
+- Vatican City — Italian, Latin
+- Venezuela — Spanish
+- Vietnam — Vietnamese
+- Yemen — Arabic
+- Zambia — English
+- Zimbabwe — Shona
