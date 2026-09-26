@@ -52,15 +52,18 @@ The AI wrote a phased build plan (the roadmap in `AIHelper.md`) and worked throu
 | 9 | Frontend: a vanilla JS SPA (no build step) — hash router with lazy page imports, auth gate, 12 pages, shared line editor, all money handled as integer cents | `2f63afc` |
 | 10 | Export: 7 reports as CSV and PDF (ReportLab) downloads, wired into the SPA | `572a965` |
 | 11 | Seed & polish: `--seed` demo data (a full, balanced, demo-ready business), this document, README finalization | this phase |
+| 12 | MCP server: 19 curated tools (12 read, 7 write gated behind `MCP_ALLOW_WRITE`), 2 resources, 3 prompts, stdio + streamable-HTTP transports, bearer-token auth, `--print-config` client configs, in-memory client tests | this phase |
 
 Before writing any code, the AI also did a research step: it searched GitHub for existing open-source Python accounting applications to use as a reference architecture (documented in `AIHelper.md`), found the closest match was source-licensed and therefore not reusable, and adopted its *patterns* — single posting path, DB-level balance guard, void-as-reversal — implemented from scratch.
+
+Phase 12 got its own research pass first: the current MCP specification (2026-07-28), the official Python SDK v2 (verified against the actual installed wheel's source, not just the docs), Unreal Engine 5.8's experimental first-party "Unreal MCP" plugin (as a reference for keeping tool definitions decoupled from the transport and for generating ready-made client configs), and the accounting MCP ecosystem (Intuit's 145-tool QuickBooks passthrough vs. Xero's and community servers' ~29 curated tools — the consensus that curated, intent-oriented tools are more reliable for LLMs shaped the tool catalog).
 
 ## How the AI kept quality high without a human reviewer in the loop
 
 - **The domain checks itself.** Double-entry bookkeeping has built-in invariants: every entry must balance, the trial balance must tie, and the balance sheet must satisfy A = L + E. Tests assert these invariants on real data, so an arithmetic or posting mistake cannot pass silently.
 - **The database enforces rules.** The debit-XOR-credit CHECK constraint and non-negative money constraints make invalid states unrepresentable, not merely untested.
 - **Money is integer cents end-to-end.** No floats anywhere in the domain; conversion to currency strings happens only at the API/UI boundary.
-- **Two independent checkers.** `pytest` (167 tests) for behavior, `pyright` for types — both must be green after every step.
+- **Two independent checkers.** `pytest` (198 tests) for behavior, `pyright` for types — both must be green after every step.
 - **The frontend was validated by execution.** With no build step and no frontend test framework, each page was exercised through the real HTTP stack (TestClient smoke checks) and syntax-checked with `node --check`.
 
 ## What the human actually did

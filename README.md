@@ -97,21 +97,47 @@ Parsa set the goals, reviewed the output, and steered the project. All code was 
 
 ## Status
 
-The application is complete. All 12 build phases (0–11) are implemented and tested — 167 tests, all passing, with the type checker reporting zero errors. The full step-by-step build is visible in the git history, and [AI_WORKFLOW.md](AI_WORKFLOW.md) explains the process.
+The application is complete. All 13 build phases (0–12) are implemented and tested — 198 tests, all passing, with the type checker reporting zero errors. The full step-by-step build is visible in the git history, and [AI_WORKFLOW.md](AI_WORKFLOW.md) explains the process.
 
-## Using with an AI (MCP) — research done, implementation next
+## Using with an AI (MCP)
 
-The next phase connects the app to **any AI assistant** through [Model Context Protocol (MCP)](https://modelcontextprotocol.io) — the open standard that lets LLM clients (ChatGPT, Claude, or a local Qwen) call an application's typed tools. The goal: ask in plain English — *"What was March's payroll?"*, *"How much tax do we owe?"*, *"Which invoices are overdue?"* — and the AI answers with real numbers from the books, or (opt-in) records a transaction on your behalf.
+The app ships an [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server, so **any AI assistant** — ChatGPT, Claude, or a local Qwen in LM Studio — can drive it like an accountant. Ask in plain English — *"What was March's payroll?"*, *"How much tax do we owe?"*, *"Which invoices are overdue?"* — and the AI calls typed tools and answers with real numbers from the books, or (opt-in) records a transaction on your behalf.
 
-Before designing it, the AI studied the current state of MCP (2026-09-25):
+The server exposes **19 curated, intent-oriented tools** — deliberately not a raw API passthrough, because research on accounting MCP servers (Intuit's 145-tool QuickBooks server vs. Xero's and community servers' ~29 curated tools) shows curated tools are far more reliable for LLMs:
 
-- **The spec** (current revision **2026-07-28**) is now stateless, with structured tool output, streamable-HTTP transport, and OAuth 2.1 for remote servers. The official **Python SDK v2** generates tool schemas straight from type hints and docstrings.
-- **Unreal Engine 5.8** ships an **experimental first-party "Unreal MCP" plugin** that embeds an MCP server inside the editor so agents like Claude Code can spawn actors, edit materials, and run automation tests over local HTTP. Its architecture was studied as a reference: tool definitions are kept in a separate **Toolset Registry** (decoupled from the protocol layer), a **tool-search mode** keeps large tool catalogs out of the LLM's context, and a `GenerateClientConfig` command writes ready-made client configs. (It is loopback-only with no auth — our design is stricter, since this is financial data.)
-- **The ecosystem**: an official registry with ~9,700 servers, major apps (GitHub, Stripe, Notion, Linear, Sentry, Figma) all MCP-enabled, and a standard debugging client (MCP Inspector).
-- **Accounting prior art**: Intuit's official QuickBooks server (145 tools, full API passthrough) vs. Xero's official server and community servers with ~29 **curated, intent-oriented tools**. The consensus: curated tools are far more reliable for LLMs than API passthrough — so this project's design exposes ~18 focused tools (statements, ledger, search, invoices, bills, budgets, reconciliation, plus opt-in write tools) instead of mirroring every endpoint.
-- **Local models**: LM Studio hosts MCP servers natively (so a local Qwen can use them directly); Ollama is a model server, not an MCP client, and pairs with bridges like `ollmcp` or Cline.
+- **12 read tools, always on**: chart of accounts, income statement, balance sheet, trial balance, per-account ledger, free-text transaction search, invoices, bills, estimates, budget report, bank reconciliations.
+- **7 write tools, opt-in** (set `MCP_ALLOW_WRITE=1`): journal entries, invoices, invoice payments, invoice voids, bills, bill payments, budgets. Every write goes through the same single posting path as the web app, so the books balance by construction.
+- **2 resources**: the chart of accounts and the current trial balance, available to the model as standing context.
+- **3 prompts** (slash commands in clients like Claude): `/monthly_report`, `/tax_position`, `/cash_position`.
 
-The full design — tool catalog, transports, security, testing plan, and implementation order — is documented in [AIHelper.md](AIHelper.md) (section "Phase 12").
+Every tool result carries both integer cents and a formatted USD string, so even small local models can quote exact numbers. Errors come back as readable tool errors (e.g. *"Account 'Payroll' not found. Valid accounts: ..."*) that the model can recover from, not crashes.
+
+### Running the MCP server
+
+```bash
+python mcp_server.py            # stdio transport (default) — for local clients
+MCP_HTTP_TOKEN=your-secret python mcp_server.py --http   # streamable HTTP — for remote clients
+```
+
+HTTP mode binds `127.0.0.1:8765` (`--host` / `--port` to change) and refuses to start without the `MCP_HTTP_TOKEN` bearer token — financial data gets stricter auth than the loopback-no-auth default some other MCP servers ship.
+
+| Variable | Meaning |
+| --- | --- |
+| `ACCOUNTING_DB_PATH` | SQLite file to open (default: `accounting.db` at the project root — the same file the web app uses; WAL mode makes concurrent access safe) |
+| `MCP_ALLOW_WRITE` | Set to `1` to register the 7 write tools (default: read-only) |
+| `MCP_HTTP_TOKEN` | Bearer token required for `--http` mode |
+
+### Connecting a client
+
+`python mcp_server.py --print-config <client>` prints a ready-to-paste config for `lmstudio`, `claude-code`, `claude-desktop`, `cursor`, `ollmcp`, `qwen-code`, or `opencode` (add `--http` for the remote URL + bearer-header variant):
+
+- **LM Studio** (local Qwen): paste the `mcpServers` entry into LM Studio's MCP settings — a local Qwen can then ask the books questions directly.
+- **Claude Desktop / Claude Code / Cursor / Qwen Code**: paste the `mcpServers` entry into the client's MCP config file.
+- **Ollama**: Ollama is a model server, not an MCP client — use the bridge command it prints (`ollmcp mcp add accounting -- ...`), or point Cline / opencode at Ollama as the model backend.
+- **ChatGPT / OpenAI Agents SDK / Anthropic Messages API**: run `--http` and point the remote connector at `http://127.0.0.1:8765/mcp` with the bearer token.
+- **Debugging**: the standard debugging client is [MCP Inspector](https://github.com/modelcontextprotocol/inspector) (`npx @modelcontextprotocol/inspector`), or `mcp dev mcp_server.py` with the SDK's CLI extra.
+
+The design rationale — curated tools vs. API passthrough, write gating, token auth, the tool catalog — is documented in [AIHelper.md](AIHelper.md) (section "Phase 12").
 
 ## Features
 
@@ -126,6 +152,7 @@ The full design — tool catalog, transports, security, testing plan, and implem
 - **Auth** — single-user, first-run setup, signed cookie sessions
 - **Web UI** — a vanilla JS SPA with no build step
 - **Demo data** — a complete, balanced sample business via `--seed`
+- **MCP server** — any AI assistant can query the books (and optionally record transactions) through 19 curated tools, over stdio or streamable HTTP
 
 ## Running the app
 

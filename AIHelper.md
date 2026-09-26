@@ -12,11 +12,12 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status (build in progress)
 
-Phases 0–11 of the build plan are **complete and tested** (167/167 tests green). **Phase 12 (MCP server) is fully researched, designed, and implementation-verified against the actual `mcp==2.2.0` source (see "Phase 12" section below) but not yet implemented** — a fresh session should pick it up from there.
+All 13 phases of the build plan (0–12) are **complete and tested** (198/198 tests green). Phase 12 (MCP server) was researched, designed, and implementation-verified against the actual `mcp==2.2.0` source (see "Phase 12" section below), then implemented and smoke-tested over both transports. **The build is complete.**
 
 | File / Dir | State |
 | --- | --- |
 | `main.py` | uvicorn runner with `--host`, `--port`, `--seed` flags (`--seed` calls `app.seed.demo.seed_demo_data()` before the app starts) |
+| `mcp_server.py` | MCP entry point: argparse (`--http`, `--host`, `--port`, `--print-config <client>`); stdio by default, streamable-HTTP with `MCP_HTTP_TOKEN` bearer auth in `--http` mode (refuses to start without the token); `--print-config` for lmstudio/claude-code/claude-desktop/cursor/ollmcp/qwen-code/opencode |
 | `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), router includes (auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates, export), `/api/health`, static mount (serves the `static/` SPA at `/` with `html=True`) |
 | `app/database.py` | SQLite engine (`accounting.db` at root, overridable via `ACCOUNTING_DB_PATH` env var), WAL pragmas (`journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`), `Base`, `SessionLocal` (`expire_on_commit=False`), `get_db`, `init_db` (creates tables + `ALTER TABLE` guard adding `cleared`/`reconciliation_id` to a pre-existing `journal_lines` + seeds COA) |
 | `app/models/` | `Account` (+ `AccountType` enum), `User`, `JournalEntry` + `JournalLine` (CHECK debit-XOR-credit, provenance `source_type`/`source_id`, `is_voided`/`voided_by_id`, `cleared`/`reconciliation_id`), `Customer`/`Vendor`, `Item`, `Invoice` + `InvoiceLine` + `InvoicePayment`, `Estimate` + `EstimateLine`, `Bill` + `BillLine` (per-line `expense_account_id`) + `BillPayment`, `Budget` (account + date range + `budget_cents`), `Reconciliation` (account + statement date/balance + stored opening/cleared/difference) |
@@ -24,20 +25,21 @@ Phases 0–11 of the build plan are **complete and tested** (167/167 tests green
 | `app/services/` | `accounts.py` (CRUD + deactivate + journal-line guard + `get_account_by_number`), `auth.py` (pbkdf2 hashing, itsdangerous signed cookies), `journal.py` (single posting path `create_journal_entry` + void-as-reversal), `ledger.py` (`account_balance`, `general_ledger` running balance, `trial_balance`), `reports.py` (`income_statement`, `balance_sheet`), `parties.py` (customer/vendor CRUD), `items.py` (item CRUD + deactivate), `invoices.py` (create+post, pay, void; public `tax_cents` helper shared by estimates/bills), `estimates.py` (create, convert-to-invoice), `bills.py` (create+post, pay, void), `budgets.py` (CRUD + `budget_report` actual-vs-budget/variance), `reconciliation.py` (bank accounts, create/get/list/delete reconciliation, cleared-line locking), `export.py` (7 report row builders + `render_csv`/`render_pdf` renderers + `money` cents→dollars helper), `errors.py` (`NotFoundError`→404, `ConflictError`→409, `ValidationError`→422) |
 | `app/routers/` | `auth.py` (public), `accounts.py` + `journal.py` + `ledger.py` + `reports.py` + `parties.py` + `items.py` + `invoices.py` + `bills.py` + `budgets.py` + `reconciliation.py` + `estimates.py` + `export.py` (7 CSV/PDF download endpoints) (auth-protected) |
 | `app/dependencies.py` | `get_current_user` — cookie session check, 401 if missing/invalid/no user |
+| `app/mcp/` | `context.py` (per-call `get_session()`, `safe_tool` domain-error→`ToolError` wrapper, account/customer/vendor number-or-name resolvers, `parse_date`/`parse_month`, `check_choice`, `with_usd` dual-money walker), `tools.py` (12 read + 7 write tools, 2 resources, 3 prompts, raw-line validators), `server.py` (`build_server(http_token=, host=, port=)` + `StaticTokenVerifier` for HTTP bearer auth) |
 | `app/seed/coa.py` | 26-account standard COA, auto-seeded idempotently on every startup via `init_db` |
 | `app/seed/demo.py` | `seed_demo_data()` for `main.py --seed`: idempotent demo business (demo user, 3 customers, 3 vendors, 5 items, 4 manual entries, 5 invoices in all 4 statuses, 4 bills, 1 estimate, 4 budgets, 1 balanced Cash reconciliation) |
-| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py`, `test_journal.py`, `test_ledger.py`, `test_reports.py`, `test_parties_items.py`, `test_invoices.py`, `test_estimates.py`, `test_bills.py`, `test_budgets.py`, `test_reconciliation.py`, `test_export.py`, `test_demo_seed.py` — **167 tests, all passing** |
-| `requirements.txt` | fastapi, uvicorn[standard], SQLAlchemy 2.0, pydantic v2, itsdangerous, reportlab, pytest, httpx, pyright |
+| `tests/` | `conftest.py` (temp-DB env var, `app_client` anonymous + `client` authenticated fixtures), `test_health.py`, `test_accounts.py`, `test_auth.py`, `test_journal.py`, `test_ledger.py` (incl. `search_transactions`), `test_reports.py`, `test_parties_items.py`, `test_invoices.py`, `test_estimates.py`, `test_bills.py`, `test_budgets.py`, `test_reconciliation.py`, `test_export.py`, `test_demo_seed.py`, `test_mcp_server.py` (31 in-memory MCP client tests, anyio/asyncio) — **198 tests, all passing** |
+| `requirements.txt` | fastapi, uvicorn[standard], SQLAlchemy 2.0, pydantic v2, itsdangerous, reportlab, mcp>=2, pytest, httpx, pyright |
 | `pytest.ini` | filters 2 third-party deprecation warnings |
 | `pyrightconfig.json` | pins pyright to `.venv` (LSP needs opencode restart to pick up) |
 | `static/` | Vanilla JS SPA (no build step, ES modules): `index.html` + `app.css` (tab shell), `js/api.js` (fetch wrapper, cookies auto-sent), `js/ui.js` (money/date/escape/toast helpers), `js/doclines.js` (shared invoice/estimate/bill line editor), `js/router.js` (hash router, lazy page imports, auth gate), `js/pages/*.js` (login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export) |
 | `AI_WORKFLOW.md` | Public record of how the AI built the project phase by phase (Phase 11) |
 
-Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). All phases 0–11 implemented, committed, and pushed (HEAD `49a3c5c`). Phase 12 (MCP) is designed + API-verified, not yet implemented.
+Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). All 13 phases (0–12) implemented, committed, and pushed.
 
 ## Build Roadmap (approved plan — use as the work queue)
 
-Small steps, 1–2 files each, `pytest` green after every step. Phases 0–11 are done; **Phase 12 (MCP server) is the active work item** — research, design, and API verification against `mcp==2.2.0` are complete in the section below.
+Small steps, 1–2 files each, `pytest` green after every step. **All phases (0–12) are done — the build is complete.** The Phase 12 (MCP server) research, design, and implementation record is in the section below.
 
 | # | Phase | Status |
 | --- | --- | --- |
@@ -53,7 +55,7 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–11 ar
 | 9 | Frontend SPA: `static/index.html` + `app.css` (tab shell), `static/js/api.js` + `router.js` (hash-routed, lazy page imports), one page per step: login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export (placeholder) | **Done** |
 | 10 | Export: CSV service + router, PDF (ReportLab) + router, tests — 7 reports (general ledger, trial balance, income statement, balance sheet, journal, invoices, bills) as CSV/PDF downloads | **Done** |
 | 11 | Seed + polish: `app/seed/demo.py` + wire `--seed` flag, `AI_WORKFLOW.md`, README status update, full test run | **Done** |
-| 12 | **MCP server**: `mcp_server.py` + `app/mcp/` (tools/resources/prompts on Python SDK v2), stdio + streamable-HTTP transports, gated write tools, in-memory client tests, README "Using with an AI" section | **Pending** (researched + designed + API-verified against mcp 2.2.0, 2026-09-25 — see below) |
+| 12 | **MCP server**: `mcp_server.py` + `app/mcp/` (tools/resources/prompts on Python SDK v2), stdio + streamable-HTTP transports, gated write tools, in-memory client tests, README "Using with an AI" section | **Done** (implemented 2026-09-26 — see below) |
 
 ### Ledger & statements conventions (Phase 4, implemented)
 
@@ -132,9 +134,29 @@ Small steps, 1–2 files each, `pytest` green after every step. Phases 0–11 ar
 - **Seeded mix**: 3 customers, 3 vendors, 5 items; 4 manual entries (owner capital, equipment, 2× monthly rent); 5 invoices covering all four statuses (paid, partially_paid, open, void) + 1 open estimate; 4 bills (2 paid, 2 open, per-line expense accounts); 4 budgets (3 current-month, 1 previous-month).
 - **Balanced reconciliation**: clears **all** Cash lines dated on/before the last day of the previous month and sets the statement balance to the account's actual net balance at that date → `difference_cents == 0`, `is_balanced`.
 
-### Phase 12: MCP server (researched + designed 2026-09-25; plan verified against mcp 2.2.0 source — IMPLEMENT THIS)
+### MCP conventions (Phase 12, implemented)
+
+- **Tools wrap services, never duplicate logic**: every tool in `app/mcp/tools.py` calls the existing domain services (the single posting path for writes), so the MCP server and the web app can never disagree. Tools are plain `def` with typed params (the SDK reflects the input schema from the hints) and docstrings that read like public API docs — the LLM's only guidance.
+- **Per-call sessions**: `context.get_session()` opens one `SessionLocal()` per tool call (the protocol is stateless), commits on success, rolls back + closes in `finally`.
+- **Errors are tool errors, never JSON-RPC errors**: `@context.safe_tool` converts `NotFoundError`/`ConflictError`/`ValidationError` into `ToolError` (→ an `is_error=True` result the model reads and recovers from); resolvers raise `ToolError` listing the valid options.
+- **Dual money fields**: `context.with_usd()` recursively walks every tool result and adds `<key>_usd` (via `services.export.money`) beside every `*_cents` int and known unsuffixed cents key (`_MONEY_KEYS`: `amount`, `debit`, `credit`, `balance`, `opening_balance`, `closing_balance`, `net_income`, `total_*`), so small models can quote exact dollars.
+- **References accept number or name**: `resolve_account` (exact number, else case-insensitive name), `resolve_customer`/`resolve_vendor` (case-insensitive name) — the name lookups live in the MCP layer because the services are id-based.
+- **Gating**: 12 read tools always registered; 7 write tools only when `MCP_ALLOW_WRITE=1` (read in `build_server()` at call time, not import time, so tests toggle via monkeypatch).
+- **Transports & auth**: `mcp_server.py` → stdio by default; `--http` requires `MCP_HTTP_TOKEN` (refuses to start without it), binds `127.0.0.1:8765` by default, and wires `StaticTokenVerifier` + `AuthSettings` (issuer = resource URL = `http://{host}:{port}/mcp`) — the SDK then serves 401 + RFC 9728 discovery for remote clients. `--print-config <client>` prints ready-to-paste configs.
+- **Testing**: `tests/test_mcp_server.py` uses the SDK in-memory pattern — `Client(build_server(), raise_exceptions=True)` over anyio/asyncio against a fresh demo-seeded DB; asserts `structured_content`, `is_error` paths, write-tool gating, resources, and prompts.
+
+### Phase 12: MCP server (researched + designed 2026-09-25; implemented 2026-09-26)
 
 **Goal**: let any AI (ChatGPT, Claude, a local Qwen via LM Studio or Ollama) drive the app like an accountant — answer questions ("What was March's payroll?", "How much tax do we owe?", "Which invoices are overdue?") and, optionally, record transactions. The AI calls typed tools; the tools call the existing services (same single posting path — no logic duplication).
+
+#### Implementation notes (2026-09-26 — built as designed, with these deltas)
+
+- **12 read tools** (the design table lists 12 rows; the "11" in the prose was a miscount) + 7 write tools + 2 resources + 3 prompts, all in `app/mcp/tools.py`, registered by `build_server()` in `app/mcp/server.py`.
+- `build_server(*, http_token=None, host="127.0.0.1", port=8765)`: auth is wired **only when a token is passed** (stdio/in-memory use stays auth-free). `StaticTokenVerifier` (constant-time `hmac.compare_digest` → `AccessToken(token, client_id="accounting-client", scopes=[])`) + `AuthSettings(issuer_url=resource_server_url=AnyHttpUrl(f"http://{host}:{port}/mcp"), validate_token_resource=False)` — the explicit `False` avoids the SDK's deprecation warning. `AnyHttpUrl` wrapping is required (pyright rejects plain `str`).
+- `mcp_server.py` CLI: `--http` (requires `MCP_HTTP_TOKEN` env, else exit 2 with a clear message; binds `127.0.0.1:8765` by default), `--host`, `--port`, `--print-config <client>` for `lmstudio|claude-code|claude-desktop|cursor|ollmcp|qwen-code|opencode` (standard `mcpServers` JSON; opencode uses its `"mcp": {"name": {"type": "local", "command": [...]}}` shape per its docs; ollmcp prints a command; `--http` switches the output to URL + `Authorization: Bearer` header).
+- New service: `ledger.search_transactions(db, *, query, account_id, date_from, date_to, limit)` — free-text `ilike` on entry OR line description, newest first; direct service tests in `test_ledger.py`.
+- **Smoke-verified over real HTTP** (one-off script, not committed): 401 without token, 401 with wrong token, full `initialize` → `list_tools` (12 tools, writes gated off) → `call_tool("list_accounts")` round-trip with the token.
+- All 8 implementation-order steps below are complete; the "docs to update" items (README/AI_WORKFLOW/AIHelper) are done.
 
 #### Research summary (web research done 2026-09-25 — do NOT redo, just build on this)
 
@@ -264,7 +286,7 @@ All writes go through the existing services → single posting path → books ba
 - **AI_WORKFLOW.md**: add a Phase 12 entry (research → design → implementation).
 - **AIHelper.md**: update via the maintain-aihelper skill at phase completion (roadmap status, conventions section, metadata).
 
-**Implementation order (small steps, pytest green after each step):**
+**Implementation order (all steps complete 2026-09-26; kept as the build record):**
 1. Add `mcp>=2` to `requirements.txt`; install via aliyun mirror (network is flaky — retry if it fails); verify `import mcp` works. (anyio is already present — do not add it.)
 2. `app/mcp/context.py` (session manager + `_resolve_*` / `_parse_*` / `_with_usd` helpers) + `app/mcp/server.py` skeleton: `build_server()` registering ONE tool (`list_accounts`); `mcp_server.py` stdio entry; first in-memory client smoke test.
 3. New `app/services/ledger.py::search_transactions` + direct service tests.
@@ -274,9 +296,7 @@ All writes go through the existing services → single posting path → books ba
 7. HTTP transport (`TokenVerifier` + `AuthSettings` + `MCP_HTTP_TOKEN` enforcement) + `--print-config` + manual smoke with MCP Inspector (`mcp dev mcp_server.py`, needs `mcp[cli]` + `npx`) or a short httpx streamable-HTTP round-trip if `npx` is unavailable.
 8. README + AI_WORKFLOW.md + AIHelper updates; full `pytest` + `pyright app mcp_server.py` green; commit + push (user's standing preference).
 
-**Files to read in a fresh session (before writing any code):**
-- `AIHelper.md` — this section + "Established conventions" + "Environment & Tooling Notes"
-- Everything below was **read and verified 2026-09-25** — the signatures and return shapes in this section match the code. A fresh session may skim rather than re-read, but spot-check anything it is unsure about:
+**Service signatures the MCP layer builds on** (read and verified 2026-09-25; the signatures and return shapes match the code — spot-check anything you are unsure about):
   - `app/database.py` — engine, `SessionLocal`, `init_db`, `ACCOUNTING_DB_PATH`
   - `app/services/ledger.py` — `general_ledger(db, account_id, *, date_from, date_to, include_voided) -> dict` (lines carry line_id/date/entry_id/descriptions/debit/credit/balance/is_voided/cleared/reconciliation_id), `account_balance`, `trial_balance(db, *, as_of) -> dict`
   - `app/services/reports.py` — `income_statement(db, *, date_from, date_to) -> dict`, `balance_sheet(db, *, as_of) -> dict`
@@ -295,12 +315,12 @@ All writes go through the existing services → single posting path → books ba
 
 ## Architecture
 
-Stack: Python 3.12 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS SPA frontend (no build step, Phase 9) · ReportLab (PDF export) · pytest + TestClient.
+Stack: Python 3.12 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS SPA frontend (no build step, Phase 9) · ReportLab (PDF export) · MCP Python SDK v2 (`mcp>=2`, Phase 12) · pytest + TestClient.
 
 ```
 Accounting/
 ├── main.py            # entry point: uvicorn runner (+ --seed flag)
-├── mcp_server.py      # (Phase 12, pending) MCP entry point: stdio + streamable-HTTP
+├── mcp_server.py      # MCP entry point: stdio (default) + streamable-HTTP, --print-config
 ├── app/
 │   ├── main.py        # FastAPI app factory, mounts, DB init, exception handlers
 │   ├── database.py    # engine, session, schema init, COA seed hook
@@ -309,7 +329,7 @@ Accounting/
 │   ├── schemas/       # Pydantic v2 request/response models
 │   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills, budgets, reconciliation, export
 │   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates, export
-│   ├── mcp/           # (Phase 12, pending) context.py, tools.py, server.py — MCP tools/resources/prompts
+│   ├── mcp/           # context.py (sessions + helpers), tools.py (19 tools + 2 resources + 3 prompts), server.py (build_server + HTTP auth)
 │   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (demo data via --seed)
 ├── static/            # vanilla JS SPA (Phase 9): index.html + app.css, js/ (api, ui, doclines, router) + js/pages/ (12 pages)
 ├── tests/
@@ -323,7 +343,7 @@ Accounting/
 └── AI_WORKFLOW.md     # how the AI built the project (Phase 11)
 ```
 
-Layering: `routers → services → models (SQLAlchemy) → SQLite`. The frontend SPA (Phase 9) is a hash-routed ES-module app that calls REST `/api/*` endpoints via fetch (session cookie sent automatically).
+Layering: `routers → services → models (SQLAlchemy) → SQLite`. The frontend SPA (Phase 9) is a hash-routed ES-module app that calls REST `/api/*` endpoints via fetch (session cookie sent automatically). The MCP server (Phase 12) is a second entry point (`mcp_server.py`) that exposes the same services as typed MCP tools — it calls the services directly (never the routers), so both front doors share one domain implementation.
 
 ### Established conventions (follow these in new code)
 
@@ -395,7 +415,8 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and `opencode.jsonc` (`lsp.pyright.initialization.python.pythonPath`). If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
-- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (167 tests as of this update).
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (198 tests as of this update).
+- **Run MCP server**: `.venv\Scripts\python.exe mcp_server.py` (stdio) or `MCP_HTTP_TOKEN=... .venv\Scripts\python.exe mcp_server.py --http` (streamable HTTP at `http://127.0.0.1:8765/mcp`); `--print-config <client>` prints ready-to-paste client configs.
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` (pyright is installed in the venv and listed in `requirements.txt`; `pyrightconfig.json` pins it to `.venv`). Keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
 - **opencode.jsonc** is gitignored (local-only) and now contains the pyright venv config.
@@ -407,7 +428,7 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 
 ## AI Instructions
 
-- **Phase 12 (MCP server) is the active work item** — fully researched, designed, and implementation-verified against the actual `mcp==2.2.0` source in the "Phase 12" section above; a fresh session should read that section, then implement in the given order. Phases 0–11 are Done.
+- **All 13 phases (0–12) are Done** — the build is complete; any new work is post-build (features, fixes, polish).
 - Any new work should follow the same "small steps, tests green after each step" rhythm and the conventions below.
 - Follow the established conventions section exactly (layering, error handling, auth dependency, typed models, test fixtures).
 - Treat this document as the target design; verify against actual code — when code and this document disagree, update this document to match verified code.
@@ -422,14 +443,14 @@ Scope difference: our app is smaller — skip payroll, QBO sync, Stripe, OCR, no
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
 - DB file: `accounting.db` at project root (WAL mode)
-- Test suite: 167 tests, all passing (Phases 0–11, build complete)
+- Test suite: 198 tests, all passing (Phases 0–12, build complete)
 
 ## Metadata
 
-- Last Updated: 2026-09-25
+- Last Updated: 2026-09-26
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-25 (Phase 12 MCP: implementation plan verified — downloaded + extracted the actual `mcp==2.2.0` wheel from the aliyun mirror and read the source (MCPServer constructor incl. instructions/token_verifier/auth, run() transports, ToolError, in-memory Client dataclass, TokenVerifier/AuthSettings/AccessToken) plus live SDK docs (tools, structured-output, resources, prompts, run/asgi, run/authorization, handling-errors, testing); design adjusted to the verified API (raise ToolError for errors, dict[str, Any] returns, sync def tools, static-bearer TokenVerifier for HTTP, anyio already present, name-lookup helpers new to the MCP layer); all "read first" files read and signatures confirmed. Nothing implemented yet. Prior: Phase 12 research + design, README "Using with an AI (MCP)" research section)
+- Last Incremental Update: 2026-09-26 (Phase 12 MCP implemented: `app/mcp/{context,tools,server}.py` + `mcp_server.py` (stdio + streamable-HTTP with `MCP_HTTP_TOKEN` bearer auth via `StaticTokenVerifier` + `AuthSettings`, `--print-config` for 7 clients) + `ledger.search_transactions` + 31 in-memory client tests; HTTP smoke-verified (401/401/full round-trip); README "Using with an AI (MCP)" rewritten as implementation docs; AI_WORKFLOW.md Phase 12 entry added; suite now 198 tests, pyright 0 errors. Prior: 2026-09-25 Phase 12 plan verified against the actual `mcp==2.2.0` wheel source + live SDK docs)
 - Files Analyzed: web research (modelcontextprotocol.io spec 2026-07-28 + changelog, dev.epicgames.com UE 5.8 Unreal MCP docs, py.sdk.modelcontextprotocol.io, github.com/modelcontextprotocol/{python-sdk,servers}, LM Studio + Ollama MCP docs, accounting MCP servers), `mcp-2.2.0` wheel source (server/mcpserver/server.py, client/client.py, server/mcpserver/exceptions.py, server/auth/{provider,settings}.py, __init__.py), `app/database.py`, `app/services/{ledger,reports,errors,accounts,invoices,bills,estimates,budgets,reconciliation,parties,export}.py`, `app/models/{journal,account,invoice,bill,estimate}.py`, `app/schemas/{journal,invoice,bill,budget}.py`, `app/seed/demo.py`, `tests/conftest.py`, `pytest.ini`, `requirements.txt`, `pyrightconfig.json`, `README.md`, `AI_WORKFLOW.md`, `AIHelper.md`
 - Git Commit: `49a3c5c` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; all phases 0–11 committed and pushed)
-- Architecture Version: 0.12 (Phases 0–11 built; Phase 12 MCP designed + API-verified, pending implementation)
-- AIHelper Version: 4 (Phase 12 implementation plan verified against mcp 2.2.0 source; design adjusted to the verified API)
+- Architecture Version: 0.13 (Phases 0–12 built; the MCP server is a second entry point exposing the domain services over stdio + streamable-HTTP)
+- AIHelper Version: 5 (Phase 12 MCP marked implemented; MCP conventions section added; status/roadmap/metadata synced)

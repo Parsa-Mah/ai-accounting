@@ -9,7 +9,7 @@ Money is integer cents. Net balances are debit-positive (debits - credits).
 
 from datetime import date
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.account import Account
@@ -202,3 +202,64 @@ def trial_balance(db: Session, *, as_of: date | None = None) -> dict:
         "totals": {"debit": total_debit, "credit": total_credit},
         "balanced": total_debit == total_credit,
     }
+
+
+def search_transactions(
+    db: Session,
+    *,
+    query: str | None = None,
+    account_id: int | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    limit: int = 50,
+) -> list[dict]:
+    """Search journal activity, newest first.
+
+    Free-text ``query`` matches the entry description or any line
+    description (case-insensitive). Each row is one matching journal
+    line with its entry date and account number/name.
+    """
+    stmt = (
+        select(JournalLine, JournalEntry, Account)
+        .join(JournalEntry, JournalLine.entry_id == JournalEntry.id)
+        .join(Account, JournalLine.account_id == Account.id)
+    )
+    if query is not None:
+        like = f"%{query}%"
+        stmt = stmt.where(
+            or_(
+                JournalEntry.description.ilike(like),
+                JournalLine.description.ilike(like),
+            )
+        )
+    if account_id is not None:
+        stmt = stmt.where(JournalLine.account_id == account_id)
+    if date_from is not None:
+        stmt = stmt.where(JournalEntry.date >= date_from)
+    if date_to is not None:
+        stmt = stmt.where(JournalEntry.date <= date_to)
+    stmt = (
+        stmt.order_by(
+            JournalEntry.date.desc(), JournalEntry.id.desc(), JournalLine.id.desc()
+        )
+        .limit(limit)
+    )
+
+    rows = []
+    for line, entry, account in db.execute(stmt):
+        rows.append(
+            {
+                "line_id": line.id,
+                "entry_id": entry.id,
+                "date": entry.date,
+                "entry_description": entry.description,
+                "line_description": line.description,
+                "account_id": account.id,
+                "account_number": account.number,
+                "account_name": account.name,
+                "debit": line.debit,
+                "credit": line.credit,
+                "is_voided": entry.is_voided,
+            }
+        )
+    return rows

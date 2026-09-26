@@ -1,5 +1,10 @@
 """Tests for the ledger API (general ledger and trial balance)."""
 
+from datetime import date
+
+from app.database import SessionLocal
+from app.services import ledger as ledger_service
+
 
 def _account_id(client, number: str) -> int:
     accounts = {a["number"]: a for a in client.get("/api/accounts").json()}
@@ -126,3 +131,55 @@ def test_general_ledger_excludes_voided_when_requested(client):
     assert all(line["is_voided"] is False for line in filtered["lines"])
     assert [line["balance"] for line in filtered["lines"]] == [1000000, 1400000]
     assert filtered["closing_balance"] == 1400000
+
+
+def test_search_transactions_by_description(client):
+    _seed_basic(client)
+    with SessionLocal() as db:
+        rows = ledger_service.search_transactions(db, query="rent")
+    assert len(rows) == 2
+    assert all(row["entry_description"] == "Pay rent" for row in rows)
+    assert {row["account_number"] for row in rows} == {"5100", "1000"}
+    assert sum(row["debit"] for row in rows) == 100000
+    assert sum(row["credit"] for row in rows) == 100000
+
+
+def test_search_transactions_case_insensitive(client):
+    _seed_basic(client)
+    with SessionLocal() as db:
+        rows = ledger_service.search_transactions(db, query="RENT")
+    assert len(rows) == 2
+
+
+def test_search_transactions_account_and_date_filters(client):
+    _seed_basic(client)
+    cash = _account_id(client, "1000")
+    with SessionLocal() as db:
+        rows = ledger_service.search_transactions(db, account_id=cash)
+    assert len(rows) == 3
+    assert all(row["account_number"] == "1000" for row in rows)
+
+    with SessionLocal() as db:
+        rows = ledger_service.search_transactions(db, date_from=date(2026, 2, 1))
+    assert len(rows) == 2
+    assert all(row["entry_description"] == "Sale" for row in rows)
+
+    with SessionLocal() as db:
+        rows = ledger_service.search_transactions(
+            db, date_from=date(2026, 1, 1), date_to=date(2026, 1, 31)
+        )
+    assert {row["entry_description"] for row in rows} == {"Owner investment", "Pay rent"}
+
+
+def test_search_transactions_limit_and_order(client):
+    _seed_basic(client)
+    with SessionLocal() as db:
+        rows = ledger_service.search_transactions(db, limit=1)
+    assert len(rows) == 1
+    assert rows[0]["entry_description"] == "Sale"  # newest first
+
+    with SessionLocal() as db:
+        rows = ledger_service.search_transactions(db)
+    assert len(rows) == 6
+    dates = [row["date"] for row in rows]
+    assert dates == sorted(dates, reverse=True)
