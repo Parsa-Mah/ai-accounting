@@ -241,6 +241,6 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
 - Last Incremental Update: 2026-09-26 (i18n batch 1: added `static/i18n/{fr,de,it,es,pt}.json` (259 keys each), registered the 5 languages in `LANGS` (`static/js/i18n.js`), relaxed the `test_langs_registry_matches_files` parity check to compare sets (registry is in UI order, files sort alphabetically); updated status + dictionary count)
 - Files Analyzed: `static/i18n/{en,fr,de,it,es,pt}.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `AIHelper.md`
-- Git Commit: `fabc306` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; i18n batch 1 + this AIHelper sync are committed in the commit that follows)
+- Git Commit: `ec033b3` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.14 (i18n subsystem added: per-language JSON dictionaries + `t()` + language selector; English baseline wired)
 - AIHelper Version: 6 (cleanup: document reduced to durable project knowledge; build-process records removed)
