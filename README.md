@@ -18,6 +18,168 @@ To demonstrate that a **local, open-weight AI model running on a single consumer
 - To prove that capable AI coding no longer requires cloud APIs — a 27B-parameter model on a laptop-class mobile workstation is enough to build a full application.
 - As a public, verifiable example: the complete git history shows an AI authoring the project step by step.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Using with an AI (MCP)](#using-with-an-ai-mcp)
+- [Running the app](#running-the-app)
+- [Running the tests](#running-the-tests)
+- [Tech stack](#tech-stack)
+- [The AI](#the-ai)
+- [Details and configurations of Qwen AI](#details-and-configurations-of-qwen-ai)
+- [Hardware](#hardware)
+- [Author](#author)
+- [Status](#status)
+
+## Overview
+
+Accounting is a complete double-entry bookkeeping system for a small business. It covers the full accounting cycle: set up a chart of accounts, record journal entries, track the general ledger, produce financial statements, invoice customers and pay vendor bills, plan budgets, reconcile bank statements, and export reports as CSV or PDF. Everything is available through a web UI, a REST API, and an [MCP](https://modelcontextprotocol.io) server that lets AI assistants query the books.
+
+At a glance, the app includes:
+
+- **Double-entry core** — chart of accounts, journal entries, general ledger, trial balance
+- **Financial statements** — income statement and balance sheet (Assets = Liabilities + Equity by construction)
+- **Invoicing & AR** — flat tax, payments, partial payments, voids
+- **Estimates** — quotes that convert to invoices in one step
+- **Bills & AP** — per-line expense accounts, tax recoverable, payments, voids
+- **Budgets** — planned vs. actual with variance, over custom date ranges
+- **Bank reconciliation** — cleared-line locking and the classic difference rule
+- **Export** — 7 reports as CSV and PDF
+- **Auth** — single-user, first-run setup, signed cookie sessions
+- **Web UI** — a vanilla JS SPA with no build step
+- **Demo data** — a complete, balanced sample business via `--seed`
+- **MCP server** — any AI assistant can query the books (and optionally record transactions) through 19 curated tools, over stdio or streamable HTTP
+
+## Features
+
+### Double-entry core
+
+The foundation is a real double-entry bookkeeping engine. A standard 26-account chart of accounts is seeded automatically on first run, and every financial event — manual entries, invoices, payments, bills — posts through a single journal path that rejects any entry where debits do not equal credits. Voids are reversing entries, never deletions, so the full history of the books is preserved. On top of the journal sit the general ledger (per-account activity with opening balance and running balance) and the trial balance (every account in its natural debit or credit column).
+
+*Usecase:* record a $5,000 owner investment (debit Cash, credit Owner's Capital); when you realize the amount was wrong, void it — a reversing entry is posted, the original stays in the history, and the books remain balanced.
+
+### Financial statements
+
+The income statement reports revenue against expenses for any period, with the resulting net income. The balance sheet reports assets, liabilities, and equity as of a date — and because equity includes all-time net income, Assets = Liabilities + Equity holds by construction, not by coincidence.
+
+*Usecase:* check this month's profit on the income statement, then look at the company's net worth as of today on the balance sheet.
+
+### Invoicing & AR
+
+Manage customers and an item catalog, then build invoices from line items (quantity × unit price, amounts computed on the server, item names snapshotted onto the line so later item edits never rewrite history). A flat tax rate applies per invoice. Record payments — including partial payments — and the invoice status (open, partially paid, paid, void) is derived automatically. Invoices can be voided while they are still unpaid.
+
+*Usecase:* invoice a customer for 3 items at a 10% tax rate, receive a partial payment this week and the balance next month — the status updates itself at each step.
+
+### Estimates
+
+Create quotes that post nothing to the ledger. When a customer accepts, convert the estimate to an invoice in one step; the estimate is then marked converted and cannot be re-converted.
+
+*Usecase:* send a quote for a project; the customer approves it a week later — convert it to an invoice in one click and the books pick it up from there.
+
+### Bills & AP
+
+Manage vendors and record bills with a per-line expense account: each line is posted to the expense account you choose (validated to be an active expense account), with tax recoverable tracked separately. Pay bills from cash, or void them while unpaid.
+
+*Usecase:* record a $500 utility bill against Utilities expense and pay it from cash — the expense and the cash outflow are both captured in one flow.
+
+### Budgets
+
+Set a planned amount for any account over any custom date range. The budget report compares each budget to actual activity over that budget's own range, showing the variance and whether the account is within budget.
+
+*Usecase:* budget $2,000 per month for marketing; the report shows you spent $1,450 — $550 under budget.
+
+### Bank reconciliation
+
+Mark accounts as bank accounts, then match a bank statement (date + ending balance) against the journal lines. Matching lines are locked as cleared, and the classic difference rule — opening balance plus cleared activity versus the statement balance — shows exactly how far off the books are. Deleting a reconciliation un-clears its lines, and entries with cleared lines cannot be voided.
+
+*Usecase:* your bank statement ends at $12,345.67; select the matching transactions and the app shows a $0 difference — or flags the exact amount that does not reconcile.
+
+### Export
+
+Seven reports — general ledger, trial balance, income statement, balance sheet, journal, invoices, and bills — can be downloaded as CSV or PDF, with date-range and account filters where applicable. Money is rendered in dollars with two decimals.
+
+*Usecase:* export the income statement as a PDF to hand to your accountant, or the journal as a CSV to analyze in a spreadsheet.
+
+### Auth
+
+Single-user authentication: the first visit shows a setup screen to create the account, and afterwards every request is protected by a signed, HttpOnly cookie session with a 12-hour lifetime.
+
+*Usecase:* open the app for the first time, create the account on the setup screen, and stay logged in for 12 hours without re-entering the password.
+
+### Web UI
+
+A vanilla JavaScript SPA with no build step: 12 pages covering every feature, plus a dashboard with cards for cash, accounts receivable, accounts payable, and all-time net income alongside the recent journal entries.
+
+*Usecase:* open the app and glance at the dashboard to see the cash position and the latest activity before drilling into any page.
+
+### Demo data
+
+`python main.py --seed` seeds a complete, balanced sample business — customers, vendors, items, invoices covering every status, bills, budgets, and a balanced cash reconciliation — so the app demos well on first run. Log in as `demo` / `demo123`.
+
+*Usecase:* run the app with `--seed` and explore a realistic business in one command, with no manual setup.
+
+### MCP server
+
+The app ships a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server with 19 curated tools (12 read, 7 opt-in write), 2 resources, and 3 prompts, over stdio or streamable HTTP — so any AI assistant can query the books and, optionally, record transactions.
+
+*Usecase:* ask a local Qwen in LM Studio "which invoices are overdue?" and get an answer with real numbers from the books. Full setup is in the [next section](#using-with-an-ai-mcp).
+
+## Using with an AI (MCP)
+
+The app ships an [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server, so **any AI assistant** — ChatGPT, Claude, or a local Qwen in LM Studio — can drive it like an accountant. Ask in plain English — *"What was March's payroll?"*, *"How much tax do we owe?"*, *"Which invoices are overdue?"* — and the AI calls typed tools and answers with real numbers from the books, or (opt-in) records a transaction on your behalf.
+
+The server exposes **19 curated, intent-oriented tools** — deliberately not a raw API passthrough, because research on accounting MCP servers (Intuit's 145-tool QuickBooks server vs. Xero's and community servers' ~29 curated tools) shows curated tools are far more reliable for LLMs:
+
+- **12 read tools, always on**: chart of accounts, income statement, balance sheet, trial balance, per-account ledger, free-text transaction search, invoices, bills, estimates, budget report, bank reconciliations.
+- **7 write tools, opt-in** (set `MCP_ALLOW_WRITE=1`): journal entries, invoices, invoice payments, invoice voids, bills, bill payments, budgets. Every write goes through the same single posting path as the web app, so the books balance by construction.
+- **2 resources**: the chart of accounts and the current trial balance, available to the model as standing context.
+- **3 prompts** (slash commands in clients like Claude): `/monthly_report`, `/tax_position`, `/cash_position`.
+
+Every tool result carries both integer cents and a formatted USD string, so even small local models can quote exact numbers. Errors come back as readable tool errors (e.g. *"Account 'Payroll' not found. Valid accounts: ..."*) that the model can recover from, not crashes.
+
+### Running the MCP server
+
+```bash
+python mcp_server.py            # stdio transport (default) — for local clients
+MCP_HTTP_TOKEN=your-secret python mcp_server.py --http   # streamable HTTP — for remote clients
+```
+
+HTTP mode binds `127.0.0.1:8765` (`--host` / `--port` to change) and refuses to start without the `MCP_HTTP_TOKEN` bearer token — financial data gets stricter auth than the loopback-no-auth default some other MCP servers ship.
+
+| Variable | Meaning |
+| --- | --- |
+| `ACCOUNTING_DB_PATH` | SQLite file to open (default: `accounting.db` at the project root — the same file the web app uses; WAL mode makes concurrent access safe) |
+| `MCP_ALLOW_WRITE` | Set to `1` to register the 7 write tools (default: read-only) |
+| `MCP_HTTP_TOKEN` | Bearer token required for `--http` mode |
+
+### Connecting a client
+
+`python mcp_server.py --print-config <client>` prints a ready-to-paste config for `lmstudio`, `claude-code`, `claude-desktop`, `cursor`, `ollmcp`, `qwen-code`, or `opencode` (add `--http` for the remote URL + bearer-header variant):
+
+- **LM Studio** (local Qwen): paste the `mcpServers` entry into LM Studio's MCP settings — a local Qwen can then ask the books questions directly.
+- **Claude Desktop / Claude Code / Cursor / Qwen Code**: paste the `mcpServers` entry into the client's MCP config file.
+- **Ollama**: Ollama is a model server, not an MCP client — use the bridge command it prints (`ollmcp mcp add accounting -- ...`), or point Cline / opencode at Ollama as the model backend.
+- **ChatGPT / OpenAI Agents SDK / Anthropic Messages API**: run `--http` and point the remote connector at `http://127.0.0.1:8765/mcp` with the bearer token.
+- **Debugging**: the standard debugging client is [MCP Inspector](https://github.com/modelcontextprotocol/inspector) (`npx @modelcontextprotocol/inspector`), or `mcp dev mcp_server.py` with the SDK's CLI extra.
+
+The design rationale — curated tools vs. API passthrough, write gating, token auth, the tool catalog — is documented in [AIHelper.md](AIHelper.md) (section "MCP server").
+
+## Running the app
+
+```bash
+pip install -r requirements.txt
+python main.py --seed   # optional: seed demo data first
+```
+
+Then open <http://127.0.0.1:8000>. With `--seed`, log in as `demo` / `demo123`; without it, the first visit shows a setup screen to create the account.
+
+## Running the tests
+
+```bash
+pytest
+```
+
 ## Tech stack
 
 | Layer     | Technology                          |
@@ -98,73 +260,3 @@ Parsa set the goals, reviewed the output, and steered the project. All code was 
 ## Status
 
 The application is complete. All 13 build phases (0–12) are implemented and tested — 198 tests, all passing, with the type checker reporting zero errors. The full step-by-step build is visible in the git history, and [AI_WORKFLOW.md](AI_WORKFLOW.md) explains the process.
-
-## Using with an AI (MCP)
-
-The app ships an [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server, so **any AI assistant** — ChatGPT, Claude, or a local Qwen in LM Studio — can drive it like an accountant. Ask in plain English — *"What was March's payroll?"*, *"How much tax do we owe?"*, *"Which invoices are overdue?"* — and the AI calls typed tools and answers with real numbers from the books, or (opt-in) records a transaction on your behalf.
-
-The server exposes **19 curated, intent-oriented tools** — deliberately not a raw API passthrough, because research on accounting MCP servers (Intuit's 145-tool QuickBooks server vs. Xero's and community servers' ~29 curated tools) shows curated tools are far more reliable for LLMs:
-
-- **12 read tools, always on**: chart of accounts, income statement, balance sheet, trial balance, per-account ledger, free-text transaction search, invoices, bills, estimates, budget report, bank reconciliations.
-- **7 write tools, opt-in** (set `MCP_ALLOW_WRITE=1`): journal entries, invoices, invoice payments, invoice voids, bills, bill payments, budgets. Every write goes through the same single posting path as the web app, so the books balance by construction.
-- **2 resources**: the chart of accounts and the current trial balance, available to the model as standing context.
-- **3 prompts** (slash commands in clients like Claude): `/monthly_report`, `/tax_position`, `/cash_position`.
-
-Every tool result carries both integer cents and a formatted USD string, so even small local models can quote exact numbers. Errors come back as readable tool errors (e.g. *"Account 'Payroll' not found. Valid accounts: ..."*) that the model can recover from, not crashes.
-
-### Running the MCP server
-
-```bash
-python mcp_server.py            # stdio transport (default) — for local clients
-MCP_HTTP_TOKEN=your-secret python mcp_server.py --http   # streamable HTTP — for remote clients
-```
-
-HTTP mode binds `127.0.0.1:8765` (`--host` / `--port` to change) and refuses to start without the `MCP_HTTP_TOKEN` bearer token — financial data gets stricter auth than the loopback-no-auth default some other MCP servers ship.
-
-| Variable | Meaning |
-| --- | --- |
-| `ACCOUNTING_DB_PATH` | SQLite file to open (default: `accounting.db` at the project root — the same file the web app uses; WAL mode makes concurrent access safe) |
-| `MCP_ALLOW_WRITE` | Set to `1` to register the 7 write tools (default: read-only) |
-| `MCP_HTTP_TOKEN` | Bearer token required for `--http` mode |
-
-### Connecting a client
-
-`python mcp_server.py --print-config <client>` prints a ready-to-paste config for `lmstudio`, `claude-code`, `claude-desktop`, `cursor`, `ollmcp`, `qwen-code`, or `opencode` (add `--http` for the remote URL + bearer-header variant):
-
-- **LM Studio** (local Qwen): paste the `mcpServers` entry into LM Studio's MCP settings — a local Qwen can then ask the books questions directly.
-- **Claude Desktop / Claude Code / Cursor / Qwen Code**: paste the `mcpServers` entry into the client's MCP config file.
-- **Ollama**: Ollama is a model server, not an MCP client — use the bridge command it prints (`ollmcp mcp add accounting -- ...`), or point Cline / opencode at Ollama as the model backend.
-- **ChatGPT / OpenAI Agents SDK / Anthropic Messages API**: run `--http` and point the remote connector at `http://127.0.0.1:8765/mcp` with the bearer token.
-- **Debugging**: the standard debugging client is [MCP Inspector](https://github.com/modelcontextprotocol/inspector) (`npx @modelcontextprotocol/inspector`), or `mcp dev mcp_server.py` with the SDK's CLI extra.
-
-The design rationale — curated tools vs. API passthrough, write gating, token auth, the tool catalog — is documented in [AIHelper.md](AIHelper.md) (section "Phase 12").
-
-## Features
-
-- **Double-entry core** — chart of accounts, journal entries, general ledger, trial balance
-- **Financial statements** — income statement and balance sheet (Assets = Liabilities + Equity by construction)
-- **Invoicing & AR** — flat tax, payments, partial payments, voids
-- **Estimates** — quotes that convert to invoices in one step
-- **Bills & AP** — per-line expense accounts, tax recoverable, payments, voids
-- **Budgets** — planned vs. actual with variance, over custom date ranges
-- **Bank reconciliation** — cleared-line locking and the classic difference rule
-- **Export** — 7 reports as CSV and PDF
-- **Auth** — single-user, first-run setup, signed cookie sessions
-- **Web UI** — a vanilla JS SPA with no build step
-- **Demo data** — a complete, balanced sample business via `--seed`
-- **MCP server** — any AI assistant can query the books (and optionally record transactions) through 19 curated tools, over stdio or streamable HTTP
-
-## Running the app
-
-```bash
-pip install -r requirements.txt
-python main.py --seed   # optional: seed demo data first
-```
-
-Then open <http://127.0.0.1:8000>. With `--seed`, log in as `demo` / `demo123`; without it, the first visit shows a setup screen to create the account.
-
-## Running the tests
-
-```bash
-pytest
-```
