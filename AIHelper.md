@@ -14,7 +14,7 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 **Build complete.** All 13 phases (0–12) are implemented and tested: 204/204 tests passing (incl. 6 i18n parity tests), pyright 0 errors. Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Any new work is post-build (features, fixes, polish).
 
-**Post-build — i18n (UI localization) in progress.** Phase 0 is complete: i18n infrastructure (`js/i18n.js`), the English baseline dictionary (`static/i18n/en.json`), all 16 frontend JS files refactored to `t()`, a language selector (topbar + login), and `tests/test_i18n.py`. 42 more languages remain, to be added in batches of ~5 (RTL languages — Hebrew/Persian/Arabic — last). Only `en` is wired into `LANGS` so far.
+**Post-build — i18n (UI localization) in progress.** Phase 0 is complete: i18n infrastructure (`js/i18n.js`), the English baseline dictionary (`static/i18n/en.json`), all 16 frontend JS files refactored to `t()`, a language selector (topbar + login), and `tests/test_i18n.py`. Batch 1 is complete: 5 languages added (`fr, de, it, es, pt`) and wired into `LANGS`. 37 more languages remain, to be added in batches of ~5 (RTL languages — Hebrew/Persian/Arabic — last).
 
 ## Architecture
 
@@ -138,7 +138,7 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. The fronten
 **i18n (UI strings)**
 
 - **Language/translation only (Phase 0)**: every user-facing UI string is externalized to per-language JSON dictionaries. Locale-aware currency/date formatting, API-error translation, and export-label translation are **postponed** (see below).
-- **Dictionaries**: `static/i18n/{code}.json`, one per language. The browser consumes the `"ui"` section — flat `namespace.key -> string`. `en.json` is the baseline (259 keys, 17 namespaces: `app, nav, common, status, auth, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export, doclines`).
+- **Dictionaries**: `static/i18n/{code}.json`, one per language. The browser consumes the `"ui"` section — flat `namespace.key -> string`. `en.json` is the baseline (259 keys, 17 namespaces: `app, nav, common, status, auth, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export, doclines`). Six languages exist so far: `en, fr, de, it, es, pt`.
 - **Core** (`js/i18n.js`): `t(key, vars)` looks up `ui.<key>`, substitutes `{var}` placeholders, and falls back to English then to the raw key. The `LANGS` registry (`{code, name, dir?}`) drives the language `<select>`. Detection order: `localStorage("lang")` → `navigator.languages` → `"en"`. `initI18n()` loads the active dictionary (await it before the first render); `setLang()` persists the choice, sets `<html lang/dir>`, and dispatches an `i18n:changed` document event.
 - **Wiring**: `router.js` awaits `initI18n()` before the first render, wires the topbar `#lang-select`, and re-renders the current route on `i18n:changed`. Every page calls `t()` for user-facing strings; `statusBadge()` in `ui.js` resolves `status.<key>`; `export.js` resolves report names via a `labelKey` per report.
 - **Adding a language**: create `static/i18n/{code}.json` with the same `ui` keys (and same `{placeholder}` sets) as `en.json`, then append `{code, name, dir?}` to `LANGS`. `tests/test_i18n.py` enforces key + placeholder parity across dictionaries, that every static `t("…")` literal and dynamic key family (nav routes, `statusBadge` values, account types, export label keys) exists in `en.json`, and that `LANGS` matches the dictionary files on disk.
@@ -239,8 +239,8 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 
 - Last Updated: 2026-09-26
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-26 (i18n Phase 0: added `static/js/i18n.js` + `static/i18n/en.json`, refactored all 16 frontend JS files to `t()`, added language selector to `index.html`/`app.css`/`login.js`/`router.js`, added `tests/test_i18n.py`; documented the i18n subsystem + postponed items)
-- Files Analyzed: `static/js/i18n.js`, `static/i18n/en.json`, `static/js/router.js`, `static/js/ui.js`, `static/js/doclines.js`, `static/js/pages/*.js`, `tests/test_i18n.py`, `AIHelper.md`
-- Git Commit: `f185706` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; i18n Phase 0 changes are uncommitted)
+- Last Incremental Update: 2026-09-26 (i18n batch 1: added `static/i18n/{fr,de,it,es,pt}.json` (259 keys each), registered the 5 languages in `LANGS` (`static/js/i18n.js`), relaxed the `test_langs_registry_matches_files` parity check to compare sets (registry is in UI order, files sort alphabetically); updated status + dictionary count)
+- Files Analyzed: `static/i18n/{en,fr,de,it,es,pt}.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `AIHelper.md`
+- Git Commit: `fabc306` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; i18n batch 1 + this AIHelper sync are committed in the commit that follows)
 - Architecture Version: 0.14 (i18n subsystem added: per-language JSON dictionaries + `t()` + language selector; English baseline wired)
 - AIHelper Version: 6 (cleanup: document reduced to durable project knowledge; build-process records removed)

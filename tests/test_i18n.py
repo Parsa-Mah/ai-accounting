@@ -124,6 +124,7 @@ def test_langs_registry_matches_files():
     assert langs, "i18n.js LANGS registry not found"
     registry = re.findall(r'code:\s*"([a-z-]+)"', langs.group(1))
     files = _dict_codes()
-    assert registry == files, (
-        f"LANGS registry {registry} does not match dictionary files {files}"
+    assert set(registry) == set(files), (
+        f"LANGS registry {sorted(set(registry))} does not match dictionary files {files}"
     )
+    assert len(registry) == len(set(registry)), "duplicate codes in LANGS registry"

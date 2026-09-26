@@ -13,7 +13,14 @@
 // enforces key and placeholder parity across all dictionaries.
 
 // Available languages, in UI order. `dir` is set for RTL languages.
-export const LANGS = [{ code: "en", name: "English" }];
+export const LANGS = [
+  { code: "en", name: "English" },
+  { code: "fr", name: "Français" },
+  { code: "de", name: "Deutsch" },
+  { code: "it", name: "Italiano" },
+  { code: "es", name: "Español" },
+  { code: "pt", name: "Português" },
+];
 
 let current = "en";
 const cache = {};
