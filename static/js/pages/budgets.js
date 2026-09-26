@@ -11,6 +11,7 @@ import {
   showFormError,
   clearFormError,
 } from "../ui.js";
+import { t } from "../i18n.js";
 
 export default {
   async render(container) {
@@ -22,51 +23,51 @@ export default {
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Budgets</h1>
-          <p class="page-sub">Plan amounts per account and compare to actuals.</p>
+          <h1 class="page-title">${t("nav.budgets")}</h1>
+          <p class="page-sub">${t("budgets.subtitle")}</p>
         </div>
         <div class="btn-row">
-          <button id="toggle-new" class="btn primary" type="button">New budget</button>
+          <button id="toggle-new" class="btn primary" type="button">${t("budgets.new")}</button>
         </div>
       </div>
 
       <div id="new-card" class="card" style="display:none">
-        <h3 id="form-title">New budget</h3>
+        <h3 id="form-title">${t("budgets.new")}</h3>
         <form id="new-form" class="stack" novalidate>
           <input type="hidden" name="id" />
           <div class="form-row c2">
-            <label class="field"><span>Account</span>
+            <label class="field"><span>${t("common.account")}</span>
               <select name="account_id" id="budget-account" required>${accountOptions}</select>
             </label>
-            <label class="field"><span>Budget amount</span><input name="amount" inputmode="decimal" required /></label>
+            <label class="field"><span>${t("budgets.amount")}</span><input name="amount" inputmode="decimal" required /></label>
           </div>
           <div class="form-row c3">
-            <label class="field"><span>Start</span><input type="date" name="budget_start" required /></label>
-            <label class="field"><span>End</span><input type="date" name="budget_end" required /></label>
-            <label class="field"><span>Note</span><input name="note" /></label>
+            <label class="field"><span>${t("common.start")}</span><input type="date" name="budget_start" required /></label>
+            <label class="field"><span>${t("common.end")}</span><input type="date" name="budget_end" required /></label>
+            <label class="field"><span>${t("common.note")}</span><input name="note" /></label>
           </div>
           <div class="btn-row">
-            <button type="submit" class="btn primary">Save budget</button>
-            <button type="button" id="cancel-new" class="btn ghost">Cancel</button>
+            <button type="submit" class="btn primary">${t("budgets.save")}</button>
+            <button type="button" id="cancel-new" class="btn ghost">${t("common.cancel")}</button>
           </div>
         </form>
       </div>
 
       <div class="card">
-        <h2>Budget report</h2>
+        <h2>${t("budgets.report")}</h2>
         <div class="toolbar">
-          <label class="field"><span>From</span><input type="date" id="r-start" /></label>
-          <label class="field"><span>To</span><input type="date" id="r-end" /></label>
-          <label class="field"><span>Account</span>
-            <select id="r-account"><option value="">all</option>${accountOptions}</select>
+          <label class="field"><span>${t("common.from")}</span><input type="date" id="r-start" /></label>
+          <label class="field"><span>${t("common.to")}</span><input type="date" id="r-end" /></label>
+          <label class="field"><span>${t("common.account")}</span>
+            <select id="r-account"><option value="">${t("common.all")}</option>${accountOptions}</select>
           </label>
-          <button id="r-refresh" class="btn" type="button">Run report</button>
+          <button id="r-refresh" class="btn" type="button">${t("budgets.run_report")}</button>
         </div>
-        <div id="report-body"><div class="empty">Pick a date range and run the report.</div></div>
+        <div id="report-body"><div class="empty">${t("budgets.report_hint")}</div></div>
       </div>
 
       <div class="card">
-        <h2>All budgets</h2>
+        <h2>${t("budgets.all")}</h2>
         <div id="budgets-list"></div>
       </div>
     `;
@@ -80,7 +81,7 @@ export default {
       form.reset();
       form.querySelector('[name="id"]').value = "";
       editingId = null;
-      container.querySelector("#form-title").textContent = "New budget";
+      container.querySelector("#form-title").textContent = t("budgets.new");
       container.querySelector("#budget-account").disabled = false;
     }
 
@@ -88,12 +89,12 @@ export default {
       const hidden = newCard.style.display === "none";
       if (hidden) resetForm();
       newCard.style.display = hidden ? "" : "none";
-      toggleBtn.textContent = hidden ? "Hide form" : "New budget";
+      toggleBtn.textContent = hidden ? t("common.hide_form") : t("budgets.new");
     });
     container.querySelector("#cancel-new").addEventListener("click", () => {
       newCard.style.display = "none";
       resetForm();
-      toggleBtn.textContent = "New budget";
+      toggleBtn.textContent = t("budgets.new");
     });
 
     form.addEventListener("submit", async (e) => {
@@ -102,13 +103,13 @@ export default {
       const fd = new FormData(form);
       const amount = dollarsToCents(fd.get("amount"));
       if (Number.isNaN(amount) || amount < 0) {
-        showFormError(form, "Enter a valid budget amount.");
+        showFormError(form, t("budgets.err_valid_amount"));
         return;
       }
       const start = fd.get("budget_start");
       const end = fd.get("budget_end");
       if (start > end) {
-        showFormError(form, "Start must be on or before end.");
+        showFormError(form, t("budgets.err_date_order"));
         return;
       }
       try {
@@ -119,7 +120,7 @@ export default {
             budget_cents: amount,
             note: fd.get("note").trim() || null,
           });
-          toast("Budget updated", "success");
+          toast(t("budgets.updated"), "success");
         } else {
           await API.createBudget({
             account_id: Number(fd.get("account_id")),
@@ -128,11 +129,11 @@ export default {
             budget_cents: amount,
             note: fd.get("note").trim() || null,
           });
-          toast("Budget created", "success");
+          toast(t("budgets.created"), "success");
         }
         newCard.style.display = "none";
         resetForm();
-        toggleBtn.textContent = "New budget";
+        toggleBtn.textContent = t("budgets.new");
         await Promise.all([loadList(), loadReport()]);
       } catch (err) {
         showFormError(form, err.message);
@@ -148,9 +149,9 @@ export default {
       form.querySelector('[name="budget_start"]').value = b.budget_start;
       form.querySelector('[name="budget_end"]').value = b.budget_end;
       form.querySelector('[name="note"]').value = b.note || "";
-      container.querySelector("#form-title").textContent = `Edit budget #${b.id}`;
+      container.querySelector("#form-title").textContent = t("budgets.edit", { id: b.id });
       newCard.style.display = "";
-      toggleBtn.textContent = "Hide form";
+      toggleBtn.textContent = t("common.hide_form");
       newCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
@@ -160,7 +161,7 @@ export default {
       const end = container.querySelector("#r-end").value;
       const el = container.querySelector("#report-body");
       if (!start || !end) {
-        el.innerHTML = `<div class="empty">Pick a start and end date.</div>`;
+        el.innerHTML = `<div class="empty">${t("budgets.err_pick_dates")}</div>`;
         return;
       }
       const params = { start, end };
@@ -168,7 +169,7 @@ export default {
       if (account) params.account_id = account;
       const report = await API.budgetReport(params);
       if (report.rows.length === 0) {
-        el.innerHTML = `<div class="empty">No budgets fully contained in ${esc(fmtDate(start))} → ${esc(fmtDate(end))}.</div>`;
+        el.innerHTML = `<div class="empty">${t("budgets.no_contained", { start: esc(fmtDate(start)), end: esc(fmtDate(end)) })}</div>`;
         return;
       }
       el.innerHTML = `
@@ -176,12 +177,12 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>Account</th>
-                <th>Period</th>
-                <th class="num">Budget</th>
-                <th class="num">Actual</th>
-                <th class="num">Variance</th>
-                <th>Status</th>
+                <th>${t("common.account")}</th>
+                <th>${t("common.period")}</th>
+                <th class="num">${t("budgets.budget")}</th>
+                <th class="num">${t("budgets.actual")}</th>
+                <th class="num">${t("budgets.variance")}</th>
+                <th>${t("common.status")}</th>
               </tr>
             </thead>
             <tbody>
@@ -198,7 +199,7 @@ export default {
                 `)
                 .join("")}
               <tr class="total">
-                <td colspan="2">Totals</td>
+                <td colspan="2">${t("common.totals")}</td>
                 <td class="num">${fmtMoney(report.totals.budget_cents)}</td>
                 <td class="num">${fmtMoney(report.totals.actual_cents)}</td>
                 <td class="num">${fmtMoney(report.totals.variance_cents)}</td>
@@ -215,7 +216,7 @@ export default {
       const budgets = await API.listBudgets();
       const el = container.querySelector("#budgets-list");
       if (budgets.length === 0) {
-        el.innerHTML = `<div class="empty">No budgets yet.</div>`;
+        el.innerHTML = `<div class="empty">${t("budgets.no_match")}</div>`;
         return;
       }
       el.innerHTML = `
@@ -223,11 +224,11 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Account</th>
-                <th>Period</th>
-                <th class="num">Budget</th>
-                <th>Note</th>
+                <th>${t("common.id")}</th>
+                <th>${t("common.account")}</th>
+                <th>${t("common.period")}</th>
+                <th class="num">${t("budgets.budget")}</th>
+                <th>${t("common.note")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -241,8 +242,8 @@ export default {
                     <td class="num">${fmtMoney(b.budget_cents)}</td>
                     <td class="muted">${esc(b.note || "")}</td>
                     <td style="text-align:right;white-space:nowrap">
-                      <button class="btn sm" data-edit="${b.id}">Edit</button>
-                      <button class="btn sm danger" data-del="${b.id}">Delete</button>
+                      <button class="btn sm" data-edit="${b.id}">${t("common.edit")}</button>
+                      <button class="btn sm danger" data-del="${b.id}">${t("common.delete")}</button>
                     </td>
                   </tr>
                 `)
@@ -260,10 +261,10 @@ export default {
       el.querySelectorAll("[data-del]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = btn.dataset.del;
-          if (!window.confirm(`Delete budget #${id}?`)) return;
+          if (!window.confirm(t("budgets.delete_confirm", { id }))) return;
           try {
             await API.deleteBudget(id);
-            toast("Budget deleted", "success");
+            toast(t("budgets.deleted"), "success");
             await Promise.all([loadList(), loadReport()]);
           } catch (err) {
             toast(err.message, "error");

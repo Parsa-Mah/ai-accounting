@@ -122,6 +122,15 @@ body {
   white-space: nowrap;
 }
 
+.lang-select {
+  width: auto;
+  padding: 5px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  max-width: 170px;
+}
+
 /* ---------- Content ---------- */
 .content {
   flex: 1;

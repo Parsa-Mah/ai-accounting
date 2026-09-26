@@ -11,6 +11,7 @@ import {
   clearFormError,
   todayISO,
 } from "../ui.js";
+import { t } from "../i18n.js";
 
 export default {
   async render(container) {
@@ -25,43 +26,43 @@ export default {
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Reconciliation</h1>
-          <p class="page-sub">Match bank statements to cleared journal lines.</p>
+          <h1 class="page-title">${t("nav.reconciliation")}</h1>
+          <p class="page-sub">${t("reconciliation.subtitle")}</p>
         </div>
       </div>
 
-      ${bankAccounts.length === 0 ? '<div class="card"><div class="empty">No bank accounts yet. Create an account with a bank kind (e.g. checking) under Accounts.</div></div>' : ""}
+      ${bankAccounts.length === 0 ? `<div class="card"><div class="empty">${t("reconciliation.no_bank_accounts")}</div></div>` : ""}
 
       <div class="card">
-        <h2>New reconciliation</h2>
+        <h2>${t("reconciliation.new")}</h2>
         <form id="recon-form" class="stack" novalidate>
           <div class="form-row c3">
-            <label class="field"><span>Bank account</span>
+            <label class="field"><span>${t("reconciliation.bank_account")}</span>
               <select name="account_id" id="recon-account" required>${accountOptions}</select>
             </label>
-            <label class="field"><span>Statement date</span><input type="date" name="statement_date" value="${todayISO()}" required /></label>
-            <label class="field"><span>Statement balance</span><input name="statement_balance" inputmode="decimal" required /></label>
+            <label class="field"><span>${t("reconciliation.statement_date")}</span><input type="date" name="statement_date" value="${todayISO()}" required /></label>
+            <label class="field"><span>${t("reconciliation.statement_balance")}</span><input name="statement_balance" inputmode="decimal" required /></label>
           </div>
-          <label class="field"><span>Note (optional)</span><input name="note" /></label>
+          <label class="field"><span>${t("common.note_optional")}</span><input name="note" /></label>
 
           <div>
-            <div class="muted" style="margin-bottom:8px">Select the lines to clear against this statement:</div>
-            <div id="lines-body"><div class="empty">Choose a bank account to load its register.</div></div>
+            <div class="muted" style="margin-bottom:8px">${t("reconciliation.select_lines")}</div>
+            <div id="lines-body"><div class="empty">${t("reconciliation.choose_account")}</div></div>
           </div>
 
           <div class="btn-row">
-            <button type="submit" class="btn primary">Create reconciliation</button>
+            <button type="submit" class="btn primary">${t("reconciliation.create")}</button>
           </div>
         </form>
       </div>
 
       <div class="card">
-        <h2>Reconciliations</h2>
+        <h2>${t("reconciliation.list")}</h2>
         <div class="toolbar">
-          <label class="field"><span>Account</span>
-            <select id="f-account"><option value="">all</option>${accountOptions}</select>
+          <label class="field"><span>${t("common.account")}</span>
+            <select id="f-account"><option value="">${t("common.all")}</option>${accountOptions}</select>
           </label>
-          <button id="refresh" class="btn" type="button">Refresh</button>
+          <button id="refresh" class="btn" type="button">${t("common.refresh")}</button>
         </div>
         <div id="recons-list"></div>
       </div>
@@ -74,13 +75,13 @@ export default {
     async function loadLines() {
       const accountId = Number(form.querySelector("#recon-account").value);
       if (!accountId) {
-        linesBody.innerHTML = `<div class="empty">Choose a bank account to load its register.</div>`;
+        linesBody.innerHTML = `<div class="empty">${t("reconciliation.choose_account")}</div>`;
         return;
       }
       const gl = await API.generalLedger(accountId);
       const uncleared = gl.lines.filter((l) => !l.cleared);
       if (uncleared.length === 0) {
-        linesBody.innerHTML = `<div class="empty">No uncleared lines for this account.</div>`;
+        linesBody.innerHTML = `<div class="empty">${t("reconciliation.no_uncleared")}</div>`;
         return;
       }
       linesBody.innerHTML = `
@@ -89,10 +90,10 @@ export default {
             <thead>
               <tr>
                 <th style="width:40px"></th>
-                <th>Date</th>
-                <th>Description</th>
-                <th class="num">Debit</th>
-                <th class="num">Credit</th>
+                <th>${t("common.date")}</th>
+                <th>${t("common.description")}</th>
+                <th class="num">${t("common.debit")}</th>
+                <th class="num">${t("common.credit")}</th>
               </tr>
             </thead>
             <tbody>
@@ -123,12 +124,12 @@ export default {
         (c) => Number(c.dataset.lineId),
       );
       if (lineIds.length === 0) {
-        showFormError(form, "Select at least one line to clear.");
+        showFormError(form, t("reconciliation.err_select_lines"));
         return;
       }
       const balance = dollarsToCents(fd.get("statement_balance"));
       if (Number.isNaN(balance)) {
-        showFormError(form, "Enter a valid statement balance.");
+        showFormError(form, t("reconciliation.err_valid_balance"));
         return;
       }
       const body = {
@@ -141,8 +142,8 @@ export default {
       try {
         const recon = await API.createReconciliation(body);
         const msg = recon.is_balanced
-          ? "Reconciliation created — balanced"
-          : `Reconciliation created — difference ${fmtMoney(recon.difference_cents)}`;
+          ? t("reconciliation.created_balanced")
+          : t("reconciliation.created_difference", { amount: fmtMoney(recon.difference_cents) });
         toast(msg, recon.is_balanced ? "success" : "info");
         form.querySelector('[name="statement_balance"]').value = "";
         form.querySelector('[name="note"]').value = "";
@@ -159,7 +160,7 @@ export default {
       const recons = await API.listReconciliations(params);
       const el = container.querySelector("#recons-list");
       if (recons.length === 0) {
-        el.innerHTML = `<div class="empty">No reconciliations yet.</div>`;
+        el.innerHTML = `<div class="empty">${t("reconciliation.no_match")}</div>`;
         return;
       }
       el.innerHTML = `
@@ -167,15 +168,15 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Account</th>
-                <th>Statement date</th>
-                <th class="num">Statement</th>
-                <th class="num">Opening</th>
-                <th class="num">Cleared</th>
-                <th class="num">Difference</th>
-                <th>Lines</th>
-                <th>Status</th>
+                <th>${t("common.id")}</th>
+                <th>${t("common.account")}</th>
+                <th>${t("reconciliation.statement_date")}</th>
+                <th class="num">${t("reconciliation.statement")}</th>
+                <th class="num">${t("reconciliation.opening")}</th>
+                <th class="num">${t("common.cleared")}</th>
+                <th class="num">${t("reconciliation.difference")}</th>
+                <th>${t("reconciliation.lines")}</th>
+                <th>${t("common.status")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -192,7 +193,7 @@ export default {
                     <td class="num" style="color:${r.difference_cents === 0 ? "var(--success)" : "var(--warning)"}">${fmtMoney(r.difference_cents)}</td>
                     <td class="num">${r.line_count}</td>
                     <td>${r.is_balanced ? statusBadge("balanced") : statusBadge("outstanding")}</td>
-                    <td style="text-align:right"><button class="btn sm danger" data-del="${r.id}">Delete</button></td>
+                    <td style="text-align:right"><button class="btn sm danger" data-del="${r.id}">${t("common.delete")}</button></td>
                   </tr>
                 `)
                 .join("")}
@@ -203,10 +204,10 @@ export default {
       el.querySelectorAll("[data-del]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = btn.dataset.del;
-          if (!window.confirm(`Delete reconciliation #${id}? Its cleared lines will be un-cleared.`)) return;
+          if (!window.confirm(t("reconciliation.delete_confirm", { id }))) return;
           try {
             await API.deleteReconciliation(id);
-            toast("Reconciliation deleted", "success");
+            toast(t("reconciliation.deleted"), "success");
             await Promise.all([loadList(), loadLines()]);
           } catch (err) {
             toast(err.message, "error");

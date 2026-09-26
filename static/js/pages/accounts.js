@@ -1,68 +1,71 @@
 // pages/accounts.js — chart of accounts: list, filter, create, deactivate.
 import { API } from "../api.js";
 import { esc, statusBadge, toast, showFormError, clearFormError } from "../ui.js";
+import { t } from "../i18n.js";
 
 const TYPES = ["asset", "liability", "equity", "revenue", "expense"];
 
 export default {
   async render(container) {
+    const typeOptions = TYPES.map(
+      (type) => `<option value="${type}">${t(`accounts.type_${type}`)}</option>`,
+    ).join("");
+
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Accounts</h1>
-          <p class="page-sub">Your chart of accounts.</p>
+          <h1 class="page-title">${t("nav.accounts")}</h1>
+          <p class="page-sub">${t("accounts.subtitle")}</p>
         </div>
         <div class="btn-row">
-          <button id="toggle-new" class="btn primary" type="button">New account</button>
+          <button id="toggle-new" class="btn primary" type="button">${t("accounts.new")}</button>
         </div>
       </div>
 
       <div id="new-card" class="card" style="display:none">
-        <h3>New account</h3>
+        <h3>${t("accounts.new")}</h3>
         <form id="new-form" class="stack" novalidate>
           <div class="form-row c3">
-            <label class="field"><span>Number</span>
-              <input name="number" inputmode="numeric" placeholder="e.g. 1200" required />
+            <label class="field"><span>${t("common.number")}</span>
+              <input name="number" inputmode="numeric" placeholder="${t("accounts.ph_number")}" required />
             </label>
-            <label class="field"><span>Name</span>
-              <input name="name" placeholder="e.g. Utilities" required />
+            <label class="field"><span>${t("common.name")}</span>
+              <input name="name" placeholder="${t("accounts.ph_name")}" required />
             </label>
-            <label class="field"><span>Type</span>
-              <select name="type" required>
-                ${TYPES.map((t) => `<option value="${t}">${t}</option>`).join("")}
-              </select>
+            <label class="field"><span>${t("common.type")}</span>
+              <select name="type" required>${typeOptions}</select>
             </label>
           </div>
           <div class="form-row c3">
-            <label class="field"><span>Subtype (optional)</span>
-              <input name="subtype" placeholder="e.g. cogs" />
+            <label class="field"><span>${t("accounts.subtype_optional")}</span>
+              <input name="subtype" placeholder="${t("accounts.ph_subtype")}" />
             </label>
-            <label class="field"><span>Bank kind (optional)</span>
-              <input name="bank_kind" placeholder="checking / savings" />
+            <label class="field"><span>${t("accounts.bank_kind_optional")}</span>
+              <input name="bank_kind" placeholder="${t("accounts.ph_bank_kind")}" />
             </label>
-            <label class="field"><span>Description (optional)</span>
+            <label class="field"><span>${t("accounts.description_optional")}</span>
               <input name="description" />
             </label>
           </div>
           <div class="btn-row">
-            <button type="submit" class="btn primary">Create</button>
-            <button type="button" id="cancel-new" class="btn ghost">Cancel</button>
+            <button type="submit" class="btn primary">${t("common.create")}</button>
+            <button type="button" id="cancel-new" class="btn ghost">${t("common.cancel")}</button>
           </div>
         </form>
       </div>
 
       <div class="toolbar">
-        <label class="field"><span>Type</span>
+        <label class="field"><span>${t("common.type")}</span>
           <select id="filter-type">
-            <option value="">all</option>
-            ${TYPES.map((t) => `<option value="${t}">${t}</option>`).join("")}
+            <option value="">${t("common.all")}</option>
+            ${typeOptions}
           </select>
         </label>
         <label class="field" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:9px">
           <input type="checkbox" id="filter-inactive" style="width:auto" />
-          <span style="font-weight:500">Include inactive</span>
+          <span style="font-weight:500">${t("accounts.include_inactive")}</span>
         </label>
-        <button id="refresh" class="btn" type="button">Refresh</button>
+        <button id="refresh" class="btn" type="button">${t("common.refresh")}</button>
       </div>
 
       <div id="accounts-table"></div>
@@ -73,11 +76,11 @@ export default {
     toggleBtn.addEventListener("click", () => {
       const hidden = newCard.style.display === "none";
       newCard.style.display = hidden ? "" : "none";
-      toggleBtn.textContent = hidden ? "Hide form" : "New account";
+      toggleBtn.textContent = hidden ? t("common.hide_form") : t("accounts.new");
     });
     container.querySelector("#cancel-new").addEventListener("click", () => {
       newCard.style.display = "none";
-      toggleBtn.textContent = "New account";
+      toggleBtn.textContent = t("accounts.new");
     });
 
     const form = container.querySelector("#new-form");
@@ -95,10 +98,10 @@ export default {
       };
       try {
         await API.createAccount(body);
-        toast("Account created", "success");
+        toast(t("accounts.created"), "success");
         form.reset();
         newCard.style.display = "none";
-        toggleBtn.textContent = "New account";
+        toggleBtn.textContent = t("accounts.new");
         await load();
       } catch (err) {
         showFormError(form, err.message);
@@ -118,7 +121,7 @@ export default {
     function renderTable(accounts) {
       const el = container.querySelector("#accounts-table");
       if (accounts.length === 0) {
-        el.innerHTML = `<div class="empty">No accounts match.</div>`;
+        el.innerHTML = `<div class="empty">${t("accounts.no_match")}</div>`;
         return;
       }
       el.innerHTML = `
@@ -126,12 +129,12 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>Number</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Subtype</th>
-                <th>Bank</th>
-                <th>Status</th>
+                <th>${t("common.number")}</th>
+                <th>${t("common.name")}</th>
+                <th>${t("common.type")}</th>
+                <th>${t("accounts.subtype")}</th>
+                <th>${t("common.bank")}</th>
+                <th>${t("common.status")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -142,13 +145,13 @@ export default {
                   return `
                     <tr class="${a.is_active ? "" : "voided"}">
                       <td class="mono">${esc(a.number)}</td>
-                      <td>${esc(a.name)}${a.is_system ? ' <span class="badge">system</span>' : ""}</td>
+                      <td>${esc(a.name)}${a.is_system ? ` <span class="badge">${t("accounts.system")}</span>` : ""}</td>
                       <td><span class="badge">${esc(a.type)}</span></td>
                       <td class="muted">${esc(a.subtype || "")}</td>
                       <td class="muted">${esc(a.bank_kind || "")}</td>
                       <td>${statusBadge(a.is_active ? "active" : "inactive")}</td>
                       <td style="text-align:right">
-                        ${canDeactivate ? `<button class="btn sm danger" data-deactivate="${a.id}">Deactivate</button>` : ""}
+                        ${canDeactivate ? `<button class="btn sm danger" data-deactivate="${a.id}">${t("accounts.deactivate")}</button>` : ""}
                       </td>
                     </tr>
                   `;
@@ -161,10 +164,10 @@ export default {
       el.querySelectorAll("[data-deactivate]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = btn.dataset.deactivate;
-          if (!window.confirm("Deactivate this account? It will no longer be usable in new entries.")) return;
+          if (!window.confirm(t("accounts.deactivate_confirm"))) return;
           try {
             await API.deactivateAccount(id);
-            toast("Account deactivated", "success");
+            toast(t("accounts.deactivated"), "success");
             await load();
           } catch (err) {
             toast(err.message, "error");

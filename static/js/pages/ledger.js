@@ -1,6 +1,7 @@
 // pages/ledger.js — general ledger (per account) and trial balance.
 import { API } from "../api.js";
 import { fmtMoney, fmtDate, esc, statusBadge } from "../ui.js";
+import { t } from "../i18n.js";
 
 export default {
   async render(container) {
@@ -12,34 +13,34 @@ export default {
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Ledger</h1>
-          <p class="page-sub">Account activity and the trial balance.</p>
+          <h1 class="page-title">${t("nav.ledger")}</h1>
+          <p class="page-sub">${t("ledger.subtitle")}</p>
         </div>
       </div>
 
       <div class="card">
-        <h2>General ledger</h2>
+        <h2>${t("ledger.general")}</h2>
         <div class="toolbar">
-          <label class="field" style="min-width:240px"><span>Account</span>
+          <label class="field" style="min-width:240px"><span>${t("common.account")}</span>
             <select id="gl-account">${accountOptions}</select>
           </label>
-          <label class="field"><span>From</span><input type="date" id="gl-from" /></label>
-          <label class="field"><span>To</span><input type="date" id="gl-to" /></label>
+          <label class="field"><span>${t("common.from")}</span><input type="date" id="gl-from" /></label>
+          <label class="field"><span>${t("common.to")}</span><input type="date" id="gl-to" /></label>
           <label class="field" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:9px">
             <input type="checkbox" id="gl-voided" style="width:auto" checked />
-            <span style="font-weight:500">Include voided</span>
+            <span style="font-weight:500">${t("common.include_voided")}</span>
           </label>
-          <button id="gl-refresh" class="btn" type="button">Refresh</button>
+          <button id="gl-refresh" class="btn" type="button">${t("common.refresh")}</button>
         </div>
         <div id="gl-summary" class="muted" style="margin-bottom:10px"></div>
         <div id="gl-table"></div>
       </div>
 
       <div class="card">
-        <h2>Trial balance</h2>
+        <h2>${t("ledger.trial_balance")}</h2>
         <div class="toolbar">
-          <label class="field"><span>As of</span><input type="date" id="tb-asof" /></label>
-          <button id="tb-refresh" class="btn" type="button">Refresh</button>
+          <label class="field"><span>${t("common.as_of")}</span><input type="date" id="tb-asof" /></label>
+          <button id="tb-refresh" class="btn" type="button">${t("common.refresh")}</button>
         </div>
         <div id="tb-table"></div>
       </div>
@@ -60,14 +61,14 @@ export default {
 
     function renderGL(gl) {
       const summary = container.querySelector("#gl-summary");
-      summary.innerHTML = `
-        <b>${esc(gl.account_number)} ${esc(gl.account_name)}</b>
-        &middot; Opening <b>${fmtMoney(gl.opening_balance)}</b>
-        &middot; Closing <b>${fmtMoney(gl.closing_balance)}</b>
-      `;
+      summary.innerHTML = t("ledger.summary", {
+        account: `${esc(gl.account_number)} ${esc(gl.account_name)}`,
+        opening: fmtMoney(gl.opening_balance),
+        closing: fmtMoney(gl.closing_balance),
+      });
       const el = container.querySelector("#gl-table");
       if (gl.lines.length === 0) {
-        el.innerHTML = `<div class="empty">No activity for this account in the selected range.</div>`;
+        el.innerHTML = `<div class="empty">${t("ledger.no_activity")}</div>`;
         return;
       }
       el.innerHTML = `
@@ -75,13 +76,13 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Entry</th>
-                <th>Description</th>
-                <th class="num">Debit</th>
-                <th class="num">Credit</th>
-                <th class="num">Balance</th>
-                <th>Cleared</th>
+                <th>${t("common.date")}</th>
+                <th>${t("common.entry")}</th>
+                <th>${t("common.description")}</th>
+                <th class="num">${t("common.debit")}</th>
+                <th class="num">${t("common.credit")}</th>
+                <th class="num">${t("common.balance")}</th>
+                <th>${t("common.cleared")}</th>
               </tr>
             </thead>
             <tbody>
@@ -116,7 +117,7 @@ export default {
     function renderTB(tb) {
       const el = container.querySelector("#tb-table");
       if (tb.rows.length === 0) {
-        el.innerHTML = `<div class="empty">No balances yet.</div>`;
+        el.innerHTML = `<div class="empty">${t("ledger.no_balances")}</div>`;
         return;
       }
       el.innerHTML = `
@@ -124,11 +125,11 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>Number</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th class="num">Debit</th>
-                <th class="num">Credit</th>
+                <th>${t("common.number")}</th>
+                <th>${t("common.name")}</th>
+                <th>${t("common.type")}</th>
+                <th class="num">${t("common.debit")}</th>
+                <th class="num">${t("common.credit")}</th>
               </tr>
             </thead>
             <tbody>
@@ -144,7 +145,7 @@ export default {
                 `)
                 .join("")}
               <tr class="total">
-                <td colspan="3">Totals ${tb.balanced ? '<span class="badge success">balanced</span>' : '<span class="badge danger">out of balance</span>'}</td>
+                <td colspan="3">${t("common.totals")} ${tb.balanced ? `<span class="badge success">${t("ledger.tb_balanced")}</span>` : `<span class="badge danger">${t("ledger.tb_out_of_balance")}</span>`}</td>
                 <td class="num">${fmtMoney(tb.totals.debit)}</td>
                 <td class="num">${fmtMoney(tb.totals.credit)}</td>
               </tr>

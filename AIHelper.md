@@ -12,7 +12,9 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status
 
-**Build complete.** All 13 phases (0–12) are implemented and tested: 198/198 tests passing, pyright 0 errors. Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Any new work is post-build (features, fixes, polish).
+**Build complete.** All 13 phases (0–12) are implemented and tested: 204/204 tests passing (incl. 6 i18n parity tests), pyright 0 errors. Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Any new work is post-build (features, fixes, polish).
+
+**Post-build — i18n (UI localization) in progress.** Phase 0 is complete: i18n infrastructure (`js/i18n.js`), the English baseline dictionary (`static/i18n/en.json`), all 16 frontend JS files refactored to `t()`, a language selector (topbar + login), and `tests/test_i18n.py`. 42 more languages remain, to be added in batches of ~5 (RTL languages — Hebrew/Persian/Arabic — last). Only `en` is wired into `LANGS` so far.
 
 ## Architecture
 
@@ -32,7 +34,7 @@ Accounting/
 │   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates, export
 │   ├── mcp/           # context.py (sessions + helpers), tools.py (19 tools + 2 resources + 3 prompts), server.py (build_server + HTTP auth)
 │   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (demo data via --seed)
-├── static/            # vanilla JS SPA: index.html + app.css, js/ (api, ui, doclines, router) + js/pages/ (12 pages)
+├── static/            # vanilla JS SPA: index.html + app.css, i18n/ (per-language JSON dictionaries), js/ (api, ui, i18n, doclines, router) + js/pages/ (12 pages)
 ├── tests/
 ├── skills/            # AI skills shipped with the repo (use-aihelper, maintain-aihelper)
 ├── requirements.txt
@@ -133,6 +135,22 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. The fronten
 - **Shared line editor** (`js/doclines.js`): `createLineEditor({tbody, addBtn, items, expenseAccounts?, onTotal})` builds invoice/estimate/bill line rows (item auto-fills description+price, qty, unit price, live amount); bills pass `expenseAccounts` for the required per-line expense-account column.
 - **Routes**: `login, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export`.
 
+**i18n (UI strings)**
+
+- **Language/translation only (Phase 0)**: every user-facing UI string is externalized to per-language JSON dictionaries. Locale-aware currency/date formatting, API-error translation, and export-label translation are **postponed** (see below).
+- **Dictionaries**: `static/i18n/{code}.json`, one per language. The browser consumes the `"ui"` section — flat `namespace.key -> string`. `en.json` is the baseline (259 keys, 17 namespaces: `app, nav, common, status, auth, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export, doclines`).
+- **Core** (`js/i18n.js`): `t(key, vars)` looks up `ui.<key>`, substitutes `{var}` placeholders, and falls back to English then to the raw key. The `LANGS` registry (`{code, name, dir?}`) drives the language `<select>`. Detection order: `localStorage("lang")` → `navigator.languages` → `"en"`. `initI18n()` loads the active dictionary (await it before the first render); `setLang()` persists the choice, sets `<html lang/dir>`, and dispatches an `i18n:changed` document event.
+- **Wiring**: `router.js` awaits `initI18n()` before the first render, wires the topbar `#lang-select`, and re-renders the current route on `i18n:changed`. Every page calls `t()` for user-facing strings; `statusBadge()` in `ui.js` resolves `status.<key>`; `export.js` resolves report names via a `labelKey` per report.
+- **Adding a language**: create `static/i18n/{code}.json` with the same `ui` keys (and same `{placeholder}` sets) as `en.json`, then append `{code, name, dir?}` to `LANGS`. `tests/test_i18n.py` enforces key + placeholder parity across dictionaries, that every static `t("…")` literal and dynamic key family (nav routes, `statusBadge` values, account types, export label keys) exists in `en.json`, and that `LANGS` matches the dictionary files on disk.
+
+**i18n — postponed (not yet built)**
+
+- **Locale-aware money/date**: `fmtMoney` hardcodes `$` + `en-US` and `fmtDate` is plain ISO; switch to `Intl.NumberFormat`/`Intl.DateTimeFormat` keyed by the active language.
+- **API error translation**: server `detail` strings are English; needs stable error codes + a client-side mapping table.
+- **Export label translation**: PDF/CSV titles/headers are English; needs a `lang` query param threaded into `services/export.py`.
+- **RTL layout**: `dir=rtl` + an `app.css` directional audit, done with the final Hebrew/Persian/Arabic batch.
+- **Plural rules**: CLDR plurals; v1 `t()` uses `{n}` interpolation with optional `_one`/`_other` key variants.
+
 **Demo seed**
 
 - `app/seed/demo.py::seed_demo_data()` is the `--seed` entry point; `main.py` calls it **before** `create_app()`, so it calls `init_db()` itself.
@@ -181,6 +199,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 | 18 | Reconciliation: classic difference rule; cleared lines locked to their reconciliation; delete un-clears; void blocked on entries with cleared lines; `init_db` runs an `ALTER TABLE` guard for the new `journal_lines` columns | Locking + void guard keep reconciliations consistent with journal history; the guard preserves pre-existing databases since `create_all` never alters tables |
 | 19 | Demo seed: idempotent (marker-customer guard); demo user `demo`/`demo123` only when no user exists; dates relative to the current month; all data posted through the normal services; Cash reconciled to a balanced state | `--seed` must be safe to run repeatedly; relative dates keep statements/budgets current; posting through services guarantees the seeded books balance by construction |
 | 20 | MCP: Python SDK v2 (`MCPServer`, not legacy FastMCP); curated 19 intent-oriented tools (12 read + 7 write) instead of API passthrough; tools separated from transport; write tools gated behind `MCP_ALLOW_WRITE=1`; HTTP mode requires `MCP_HTTP_TOKEN` + loopback bind; dual money fields (cents + USD) in every tool result; errors returned in tool results, not JSON-RPC errors | Stateless MCP spec fits per-call sessions; accounting prior art (Intuit 145-tool passthrough vs Xero/community ~29-tool curated) favors curated tools for LLM reliability; LM Studio hosts MCP natively for local Qwen (Ollama needs an ollmcp bridge); financial data justifies token auth |
+| 21 | i18n: per-language JSON dictionaries (`static/i18n/{code}.json`) with a flat `ui` section + a `t()` helper in `js/i18n.js`; English baseline first, then ~5 languages per batch (RTL last); language/translation separated from locale-aware currency/date, API-error, and export-label translation (all postponed) | The vanilla SPA has no i18n and no build step, so plain JSON dictionaries + a small `t()` fit the stack; `tests/test_i18n.py` enforces key/placeholder parity so a new language can't drift; separating concerns keeps each phase small and independently testable |
 
 ## Environment & Tooling Notes
 
@@ -188,7 +207,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and the gitignored local `opencode.jsonc`. If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
-- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (198 tests).
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (204 tests).
 - **Run MCP server**: `.venv\Scripts\python.exe mcp_server.py` (stdio) or `MCP_HTTP_TOKEN=... .venv\Scripts\python.exe mcp_server.py --http` (streamable HTTP at `http://127.0.0.1:8765/mcp`); `--print-config <client>` prints ready-to-paste client configs.
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` — keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
@@ -214,14 +233,14 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
 - DB file: `accounting.db` at project root (WAL mode)
-- Test suite: 198 tests, all passing (build complete)
+- Test suite: 204 tests, all passing (build complete + i18n Phase 0)
 
 ## Metadata
 
 - Last Updated: 2026-09-26
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-26 (cleanup: removed completed build roadmap, Phase 12 research/design/build record, and reference-architecture research notes; merged per-phase convention sections into "Domain rules"; condensed the file-status table into "Critical files"; verified MCP tool inventory and 198-test suite)
-- Files Analyzed: `AIHelper.md` (full), repo file inventory, `app/mcp/tools.py` (tool/resource/prompt inventory), pytest run (198 passed)
-- Git Commit: `651b930` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
-- Architecture Version: 0.13 (Phases 0–12 built; the MCP server is a second entry point exposing the domain services over stdio + streamable-HTTP)
+- Last Incremental Update: 2026-09-26 (i18n Phase 0: added `static/js/i18n.js` + `static/i18n/en.json`, refactored all 16 frontend JS files to `t()`, added language selector to `index.html`/`app.css`/`login.js`/`router.js`, added `tests/test_i18n.py`; documented the i18n subsystem + postponed items)
+- Files Analyzed: `static/js/i18n.js`, `static/i18n/en.json`, `static/js/router.js`, `static/js/ui.js`, `static/js/doclines.js`, `static/js/pages/*.js`, `tests/test_i18n.py`, `AIHelper.md`
+- Git Commit: `f185706` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`; i18n Phase 0 changes are uncommitted)
+- Architecture Version: 0.14 (i18n subsystem added: per-language JSON dictionaries + `t()` + language selector; English baseline wired)
 - AIHelper Version: 6 (cleanup: document reduced to durable project knowledge; build-process records removed)

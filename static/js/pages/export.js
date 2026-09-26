@@ -1,19 +1,21 @@
 // pages/export.js — download reports as CSV or PDF.
 import { API } from "../api.js";
 import { esc, toast } from "../ui.js";
+import { t } from "../i18n.js";
 
 // Each report lists which optional fields it exposes. "account" is a required
 // account picker (general ledger); "account_opt"/"customer"/"vendor" are
 // optional filters; "from"/"to"/"asof" are date fields; "voided" toggles
-// whether voided documents/entries are included.
+// whether voided documents/entries are included. labelKey points at the
+// i18n key for the report's display name.
 const REPORTS = {
-  "general-ledger": { label: "General ledger", fields: ["account", "from", "to", "voided"] },
-  "trial-balance": { label: "Trial balance", fields: ["asof"] },
-  "income-statement": { label: "Income statement", fields: ["from", "to"] },
-  "balance-sheet": { label: "Balance sheet", fields: ["asof"] },
-  journal: { label: "Journal", fields: ["account_opt", "from", "to", "voided"] },
-  invoices: { label: "Invoices", fields: ["customer", "voided"] },
-  bills: { label: "Bills", fields: ["vendor", "voided"] },
+  "general-ledger": { labelKey: "export.gl", fields: ["account", "from", "to", "voided"] },
+  "trial-balance": { labelKey: "export.trial_balance", fields: ["asof"] },
+  "income-statement": { labelKey: "export.income_statement", fields: ["from", "to"] },
+  "balance-sheet": { labelKey: "export.balance_sheet", fields: ["asof"] },
+  journal: { labelKey: "export.journal", fields: ["account_opt", "from", "to", "voided"] },
+  invoices: { labelKey: "export.invoices", fields: ["customer", "voided"] },
+  bills: { labelKey: "export.bills", fields: ["vendor", "voided"] },
 };
 
 export default {
@@ -32,31 +34,31 @@ export default {
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Export</h1>
-          <p class="page-sub">Download your books as CSV or PDF.</p>
+          <h1 class="page-title">${t("nav.export")}</h1>
+          <p class="page-sub">${t("export.subtitle")}</p>
         </div>
       </div>
       <div class="card">
         <form id="export-form" class="toolbar" novalidate>
-          <label class="field" style="min-width:220px"><span>Report</span>
+          <label class="field" style="min-width:220px"><span>${t("export.report")}</span>
             <select id="ex-report">
               ${Object.entries(REPORTS)
-                .map(([key, r]) => `<option value="${key}">${esc(r.label)}</option>`)
+                .map(([key, r]) => `<option value="${key}">${t(r.labelKey)}</option>`)
                 .join("")}
             </select>
           </label>
           <div id="ex-fields" class="toolbar" style="flex:1"></div>
           <label class="field" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:9px">
-            <span style="font-weight:500">Format</span>
+            <span style="font-weight:500">${t("export.format")}</span>
             <select id="ex-format">
               <option value="csv">CSV</option>
               <option value="pdf">PDF</option>
             </select>
           </label>
-          <button class="btn primary" type="submit" style="align-self:flex-end">Download</button>
+          <button class="btn primary" type="submit" style="align-self:flex-end">${t("export.download")}</button>
         </form>
         <p class="muted" id="ex-note" style="margin-top:10px">
-          The file downloads directly; your session cookie is sent automatically.
+          ${t("export.note")}
         </p>
       </div>
     `;
@@ -68,21 +70,21 @@ export default {
     function fieldHtml(kind) {
       switch (kind) {
         case "account":
-          return `<label class="field" style="min-width:240px"><span>Account</span><select id="ex-account">${accountOptions}</select></label>`;
+          return `<label class="field" style="min-width:240px"><span>${t("common.account")}</span><select id="ex-account">${accountOptions}</select></label>`;
         case "account_opt":
-          return `<label class="field" style="min-width:240px"><span>Account (filter)</span><select id="ex-account"><option value="">All accounts</option>${accountOptions}</select></label>`;
+          return `<label class="field" style="min-width:240px"><span>${t("export.account_filter")}</span><select id="ex-account"><option value="">${t("export.all_accounts")}</option>${accountOptions}</select></label>`;
         case "customer":
-          return `<label class="field"><span>Customer (filter)</span><select id="ex-customer"><option value="">All customers</option>${partyOptions(customers)}</select></label>`;
+          return `<label class="field"><span>${t("export.customer_filter")}</span><select id="ex-customer"><option value="">${t("export.all_customers")}</option>${partyOptions(customers)}</select></label>`;
         case "vendor":
-          return `<label class="field"><span>Vendor (filter)</span><select id="ex-vendor"><option value="">All vendors</option>${partyOptions(vendors)}</select></label>`;
+          return `<label class="field"><span>${t("export.vendor_filter")}</span><select id="ex-vendor"><option value="">${t("export.all_vendors")}</option>${partyOptions(vendors)}</select></label>`;
         case "from":
-          return `<label class="field"><span>From</span><input type="date" id="ex-from" /></label>`;
+          return `<label class="field"><span>${t("common.from")}</span><input type="date" id="ex-from" /></label>`;
         case "to":
-          return `<label class="field"><span>To</span><input type="date" id="ex-to" /></label>`;
+          return `<label class="field"><span>${t("common.to")}</span><input type="date" id="ex-to" /></label>`;
         case "asof":
-          return `<label class="field"><span>As of</span><input type="date" id="ex-asof" /></label>`;
+          return `<label class="field"><span>${t("common.as_of")}</span><input type="date" id="ex-asof" /></label>`;
         case "voided":
-          return `<label class="field" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:9px"><input type="checkbox" id="ex-voided" style="width:auto" checked /><span style="font-weight:500">Include voided</span></label>`;
+          return `<label class="field" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:9px"><input type="checkbox" id="ex-voided" style="width:auto" checked /><span style="font-weight:500">${t("common.include_voided")}</span></label>`;
         default:
           return "";
       }
@@ -137,12 +139,12 @@ export default {
       e.preventDefault();
       const report = reportSel.value;
       if (report === "general-ledger" && !val("#ex-account")) {
-        toast("Choose an account to export its general ledger.", "error");
+        toast(t("export.err_no_account"), "error");
         return;
       }
       const params = buildParams();
       window.location.href = API.exportUrl(report, params);
-      toast(`Downloading ${REPORTS[report].label} (${params.format.toUpperCase()})…`, "info");
+      toast(t("export.downloading", { label: t(REPORTS[report].labelKey), format: params.format.toUpperCase() }), "info");
     });
 
     renderFields();

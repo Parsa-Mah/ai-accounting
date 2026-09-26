@@ -1,6 +1,7 @@
 // pages/statements.js — income statement and balance sheet.
 import { API } from "../api.js";
 import { fmtMoney, fmtDate, esc } from "../ui.js";
+import { t } from "../i18n.js";
 
 function lineRows(lines) {
   if (lines.length === 0) return `<tr><td class="muted" colspan="2">—</td></tr>`;
@@ -21,26 +22,26 @@ export default {
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Statements</h1>
-          <p class="page-sub">Financial statements derived from the ledger.</p>
+          <h1 class="page-title">${t("nav.statements")}</h1>
+          <p class="page-sub">${t("statements.subtitle")}</p>
         </div>
       </div>
 
       <div class="card">
-        <h2>Income statement</h2>
+        <h2>${t("statements.income")}</h2>
         <div class="toolbar">
-          <label class="field"><span>From</span><input type="date" id="is-from" /></label>
-          <label class="field"><span>To</span><input type="date" id="is-to" /></label>
-          <button id="is-refresh" class="btn" type="button">Refresh</button>
+          <label class="field"><span>${t("common.from")}</span><input type="date" id="is-from" /></label>
+          <label class="field"><span>${t("common.to")}</span><input type="date" id="is-to" /></label>
+          <button id="is-refresh" class="btn" type="button">${t("common.refresh")}</button>
         </div>
         <div id="is-body"></div>
       </div>
 
       <div class="card">
-        <h2>Balance sheet</h2>
+        <h2>${t("statements.balance_sheet")}</h2>
         <div class="toolbar">
-          <label class="field"><span>As of</span><input type="date" id="bs-asof" /></label>
-          <button id="bs-refresh" class="btn" type="button">Refresh</button>
+          <label class="field"><span>${t("common.as_of")}</span><input type="date" id="bs-asof" /></label>
+          <button id="bs-refresh" class="btn" type="button">${t("common.refresh")}</button>
         </div>
         <div id="bs-body"></div>
       </div>
@@ -56,21 +57,21 @@ export default {
       const range =
         is.date_from || is.date_to
           ? `${fmtDate(is.date_from) || "…"} → ${fmtDate(is.date_to) || "…"}`
-          : "All time";
+          : t("common.all_time");
       const ni = is.net_income;
       container.querySelector("#is-body").innerHTML = `
         <div class="muted" style="margin-bottom:10px">${esc(range)}</div>
         <div class="table-wrap">
           <table>
             <tbody>
-              <tr class="total"><td>Revenue</td><td></td></tr>
+              <tr class="total"><td>${t("statements.revenue")}</td><td></td></tr>
               ${lineRows(is.revenue)}
-              <tr class="total"><td>Total revenue</td><td class="num">${fmtMoney(is.total_revenue)}</td></tr>
-              <tr class="total"><td>Expenses</td><td></td></tr>
+              <tr class="total"><td>${t("statements.total_revenue")}</td><td class="num">${fmtMoney(is.total_revenue)}</td></tr>
+              <tr class="total"><td>${t("statements.expenses")}</td><td></td></tr>
               ${lineRows(is.expenses)}
-              <tr class="total"><td>Total expenses</td><td class="num">${fmtMoney(is.total_expenses)}</td></tr>
+              <tr class="total"><td>${t("statements.total_expenses")}</td><td class="num">${fmtMoney(is.total_expenses)}</td></tr>
               <tr class="total">
-                <td>Net income</td>
+                <td>${t("statements.net_income")}</td>
                 <td class="num" style="color:${ni < 0 ? "var(--danger)" : "var(--success)"}">${fmtMoney(ni)}</td>
               </tr>
             </tbody>
@@ -84,25 +85,25 @@ export default {
       const asof = container.querySelector("#bs-asof").value;
       if (asof) params.as_of = asof;
       const bs = await API.balanceSheet(params);
-      const asOf = bs.as_of ? fmtDate(bs.as_of) : "Current";
+      const asOf = bs.as_of ? fmtDate(bs.as_of) : t("statements.current");
       container.querySelector("#bs-body").innerHTML = `
         <div class="muted" style="margin-bottom:10px">
-          As of ${esc(asOf)}
-          ${bs.balanced ? '<span class="badge success">A = L + E</span>' : '<span class="badge danger">out of balance</span>'}
+          ${t("statements.as_of", { date: esc(asOf) })}
+          ${bs.balanced ? `<span class="badge success">${t("statements.badge_balanced")}</span>` : `<span class="badge danger">${t("statements.badge_out_of_balance")}</span>`}
         </div>
         <div class="table-wrap">
           <table>
             <tbody>
-              <tr class="total"><td>Assets</td><td></td></tr>
+              <tr class="total"><td>${t("statements.assets")}</td><td></td></tr>
               ${lineRows(bs.assets)}
-              <tr class="total"><td>Total assets</td><td class="num">${fmtMoney(bs.total_assets)}</td></tr>
-              <tr class="total"><td>Liabilities</td><td></td></tr>
+              <tr class="total"><td>${t("statements.total_assets")}</td><td class="num">${fmtMoney(bs.total_assets)}</td></tr>
+              <tr class="total"><td>${t("statements.liabilities")}</td><td></td></tr>
               ${lineRows(bs.liabilities)}
-              <tr class="total"><td>Total liabilities</td><td class="num">${fmtMoney(bs.total_liabilities)}</td></tr>
-              <tr class="total"><td>Equity</td><td></td></tr>
+              <tr class="total"><td>${t("statements.total_liabilities")}</td><td class="num">${fmtMoney(bs.total_liabilities)}</td></tr>
+              <tr class="total"><td>${t("statements.equity")}</td><td></td></tr>
               ${lineRows(bs.equity)}
-              <tr class="total"><td>Total equity</td><td class="num">${fmtMoney(bs.total_equity)}</td></tr>
-              <tr class="total"><td>Liabilities + equity</td><td class="num">${fmtMoney(bs.total_liabilities + bs.total_equity)}</td></tr>
+              <tr class="total"><td>${t("statements.total_equity")}</td><td class="num">${fmtMoney(bs.total_equity)}</td></tr>
+              <tr class="total"><td>${t("statements.liabilities_plus_equity")}</td><td class="num">${fmtMoney(bs.total_liabilities + bs.total_equity)}</td></tr>
             </tbody>
           </table>
         </div>

@@ -1,6 +1,7 @@
 // pages/dashboard.js — overview: key balances, period P&L, recent activity.
 import { API } from "../api.js";
 import { fmtMoney, fmtDate, esc, statusBadge } from "../ui.js";
+import { t } from "../i18n.js";
 
 function netByNumber(rows, number) {
   const row = rows.find((r) => r.number === number);
@@ -13,15 +14,15 @@ export default {
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Dashboard</h1>
-          <p class="page-sub">A snapshot of your books.</p>
+          <h1 class="page-title">${t("nav.dashboard")}</h1>
+          <p class="page-sub">${t("dashboard.subtitle")}</p>
         </div>
       </div>
       <div id="dash-cards" class="grid cols-4">
-        <div class="empty">Loading…</div>
+        <div class="empty">${t("common.loading")}</div>
       </div>
       <div class="card">
-        <h2>Recent journal entries</h2>
+        <h2>${t("dashboard.recent")}</h2>
         <div id="dash-recent"></div>
       </div>
     `;
@@ -38,10 +39,10 @@ export default {
     const netIncome = income.net_income;
 
     const cards = [
-      { label: "Cash", value: cash },
-      { label: "Accounts receivable", value: ar },
-      { label: "Accounts payable", value: ap },
-      { label: "Net income (all-time)", value: netIncome },
+      { label: t("dashboard.cash"), value: cash },
+      { label: t("dashboard.ar"), value: ar },
+      { label: t("dashboard.ap"), value: ap },
+      { label: t("dashboard.net_income"), value: netIncome },
     ];
 
     const cardsEl = container.querySelector("#dash-cards");
@@ -60,7 +61,7 @@ export default {
     const recentEl = container.querySelector("#dash-recent");
     const recent = entries.slice(0, 10);
     if (recent.length === 0) {
-      recentEl.innerHTML = `<div class="empty">No journal entries yet. Create one from the Journal tab.</div>`;
+      recentEl.innerHTML = `<div class="empty">${t("dashboard.no_entries")}</div>`;
       return;
     }
     recentEl.innerHTML = `
@@ -68,11 +69,11 @@ export default {
         <table>
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Source</th>
-              <th class="num">Amount</th>
-              <th>Status</th>
+              <th>${t("common.date")}</th>
+              <th>${t("common.description")}</th>
+              <th>${t("common.source")}</th>
+              <th class="num">${t("common.amount")}</th>
+              <th>${t("common.status")}</th>
             </tr>
           </thead>
           <tbody>

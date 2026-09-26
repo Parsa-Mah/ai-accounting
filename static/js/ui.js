@@ -1,4 +1,5 @@
 // ui.js — shared UI helpers: formatting, escaping, toasts, small builders.
+import { t } from "./i18n.js";
 
 // Format integer cents as USD. Negative values render with a leading minus.
 export function fmtMoney(cents) {
@@ -64,7 +65,9 @@ const STATUS_TONE = {
 
 export function statusBadge(status) {
   const tone = STATUS_TONE[status] || "";
-  const label = String(status || "").replace(/_/g, " ");
+  const key = "status." + String(status || "").trim().replace(/\s+/g, "_");
+  const translated = t(key);
+  const label = translated === key ? String(status || "").replace(/_/g, " ") : translated;
   return `<span class="badge ${tone}">${esc(label)}</span>`;
 }
 

@@ -4,19 +4,20 @@
 // default-exports { render(container) }. Routes that have no page module yet
 // render a "still being built" placeholder, so the shell works incrementally.
 import { API } from "./api.js";
+import { initI18n, lang, t, langOptions, wireLangSelect } from "./i18n.js";
 
 const NAV = [
-  ["dashboard", "Dashboard"],
-  ["accounts", "Accounts"],
-  ["journal", "Journal"],
-  ["ledger", "Ledger"],
-  ["statements", "Statements"],
-  ["invoices", "Invoices"],
-  ["estimates", "Estimates"],
-  ["bills", "Bills"],
-  ["budgets", "Budgets"],
-  ["reconciliation", "Reconciliation"],
-  ["export", "Export"],
+  "dashboard",
+  "accounts",
+  "journal",
+  "ledger",
+  "statements",
+  "invoices",
+  "estimates",
+  "bills",
+  "budgets",
+  "reconciliation",
+  "export",
 ];
 
 const LOADERS = {
@@ -55,11 +56,11 @@ async function ensureAuth() {
 function renderNav(active) {
   const nav = document.getElementById("nav");
   nav.innerHTML = "";
-  for (const [key, label] of NAV) {
+  for (const key of NAV) {
     const a = document.createElement("a");
     a.href = `#/${key}`;
     a.className = "nav-link" + (key === active ? " active" : "");
-    a.textContent = label;
+    a.textContent = t(`nav.${key}`);
     nav.appendChild(a);
   }
 }
@@ -68,7 +69,7 @@ function placeholder(container, name) {
   container.innerHTML = `
     <div class="card">
       <h2>${name}</h2>
-      <div class="empty">This page is still being built.</div>
+      <div class="empty">${t("common.page_under_construction")}</div>
     </div>
   `;
 }
@@ -111,7 +112,25 @@ async function render() {
 
 window.addEventListener("hashchange", render);
 
+function syncLangSelects() {
+  document.querySelectorAll(".lang-select").forEach((s) => (s.value = lang()));
+}
+
 async function init() {
+  await initI18n();
+  document.title = t("app.title");
+  document.getElementById("logout").textContent = t("common.logout");
+
+  const topSelect = document.getElementById("lang-select");
+  topSelect.innerHTML = langOptions(lang());
+  wireLangSelect(topSelect);
+
+  document.addEventListener("i18n:changed", async () => {
+    document.title = t("app.title");
+    syncLangSelects();
+    await render();
+  });
+
   const logoutBtn = document.getElementById("logout");
   logoutBtn.addEventListener("click", async () => {
     try {

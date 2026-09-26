@@ -11,6 +11,7 @@ import {
   todayISO,
   dollarsToCents,
 } from "../ui.js";
+import { t } from "../i18n.js";
 
 export default {
   async render(container) {
@@ -22,23 +23,23 @@ export default {
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Journal</h1>
-          <p class="page-sub">Every financial event posts through here.</p>
+          <h1 class="page-title">${t("nav.journal")}</h1>
+          <p class="page-sub">${t("journal.subtitle")}</p>
         </div>
         <div class="btn-row">
-          <button id="toggle-new" class="btn primary" type="button">New entry</button>
+          <button id="toggle-new" class="btn primary" type="button">${t("journal.new")}</button>
         </div>
       </div>
 
       <div id="new-card" class="card" style="display:none">
-        <h3>New journal entry</h3>
+        <h3>${t("journal.new_title")}</h3>
         <form id="new-form" class="stack" novalidate>
           <div class="form-row c2">
-            <label class="field"><span>Date</span>
+            <label class="field"><span>${t("common.date")}</span>
               <input type="date" name="date" value="${todayISO()}" required />
             </label>
-            <label class="field"><span>Description</span>
-              <input name="description" placeholder="e.g. Owner investment" required />
+            <label class="field"><span>${t("common.description")}</span>
+              <input name="description" placeholder="${t("journal.ph_description")}" required />
             </label>
           </div>
 
@@ -47,10 +48,10 @@ export default {
               <table>
                 <thead>
                   <tr>
-                    <th style="min-width:220px">Account</th>
-                    <th>Description</th>
-                    <th class="num" style="width:130px">Debit</th>
-                    <th class="num" style="width:130px">Credit</th>
+                    <th style="min-width:220px">${t("common.account")}</th>
+                    <th>${t("common.description")}</th>
+                    <th class="num" style="width:130px">${t("common.debit")}</th>
+                    <th class="num" style="width:130px">${t("common.credit")}</th>
                     <th style="width:40px"></th>
                   </tr>
                 </thead>
@@ -58,29 +59,29 @@ export default {
               </table>
             </div>
             <div class="btn-row" style="margin-top:10px">
-              <button type="button" id="add-line" class="btn">Add line</button>
+              <button type="button" id="add-line" class="btn">${t("common.add_line")}</button>
               <span id="balance" class="muted"></span>
             </div>
           </div>
 
           <div class="btn-row">
-            <button type="submit" class="btn primary">Post entry</button>
-            <button type="button" id="cancel-new" class="btn ghost">Cancel</button>
+            <button type="submit" class="btn primary">${t("journal.post")}</button>
+            <button type="button" id="cancel-new" class="btn ghost">${t("common.cancel")}</button>
           </div>
         </form>
       </div>
 
       <div class="toolbar">
-        <label class="field"><span>From</span><input type="date" id="f-from" /></label>
-        <label class="field"><span>To</span><input type="date" id="f-to" /></label>
-        <label class="field"><span>Account</span>
-          <select id="f-account"><option value="">all</option>${accountOptions}</select>
+        <label class="field"><span>${t("common.from")}</span><input type="date" id="f-from" /></label>
+        <label class="field"><span>${t("common.to")}</span><input type="date" id="f-to" /></label>
+        <label class="field"><span>${t("common.account")}</span>
+          <select id="f-account"><option value="">${t("common.all")}</option>${accountOptions}</select>
         </label>
         <label class="field" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:9px">
           <input type="checkbox" id="f-voided" style="width:auto" checked />
-          <span style="font-weight:500">Include voided</span>
+          <span style="font-weight:500">${t("common.include_voided")}</span>
         </label>
-        <button id="refresh" class="btn" type="button">Refresh</button>
+        <button id="refresh" class="btn" type="button">${t("common.refresh")}</button>
       </div>
 
       <div id="journal-table"></div>
@@ -92,11 +93,11 @@ export default {
     toggleBtn.addEventListener("click", () => {
       const hidden = newCard.style.display === "none";
       newCard.style.display = hidden ? "" : "none";
-      toggleBtn.textContent = hidden ? "Hide form" : "New entry";
+      toggleBtn.textContent = hidden ? t("common.hide_form") : t("journal.new");
     });
     container.querySelector("#cancel-new").addEventListener("click", () => {
       newCard.style.display = "none";
-      toggleBtn.textContent = "New entry";
+      toggleBtn.textContent = t("journal.new");
     });
 
     const tbody = container.querySelector("#lines");
@@ -106,10 +107,10 @@ export default {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td><select class="line-account">${accountOptions}</select></td>
-        <td><input class="line-desc" placeholder="optional" /></td>
+        <td><input class="line-desc" placeholder="${t("common.optional")}" /></td>
         <td><input class="line-debit num" inputmode="decimal" placeholder="0.00" /></td>
         <td><input class="line-credit num" inputmode="decimal" placeholder="0.00" /></td>
-        <td style="text-align:center"><button type="button" class="line-remove" title="Remove line">&times;</button></td>
+        <td style="text-align:center"><button type="button" class="line-remove" title="${t("common.remove_line")}">&times;</button></td>
       `;
       tbody.appendChild(tr);
       tr.querySelector(".line-remove").addEventListener("click", () => {
@@ -132,9 +133,13 @@ export default {
       const diff = d - c;
       const state =
         diff === 0
-          ? `<span class="muted">Balanced</span>`
-          : `<span style="color:var(--danger)">Off by ${fmtMoney(diff)}</span>`;
-      balanceEl.innerHTML = `Debits <b>${fmtMoney(d)}</b> &middot; Credits <b>${fmtMoney(c)}</b> &middot; ${state}`;
+          ? `<span class="muted">${t("journal.balanced")}</span>`
+          : `<span style="color:var(--danger)">${t("journal.off_by", { amount: fmtMoney(diff) })}</span>`;
+      balanceEl.innerHTML = t("journal.totals", {
+        debits: fmtMoney(d),
+        credits: fmtMoney(c),
+        state,
+      });
     }
 
     container.querySelector("#add-line").addEventListener("click", addLine);
@@ -155,11 +160,11 @@ export default {
         const debit = dollarsToCents(tr.querySelector(".line-debit").value);
         const credit = dollarsToCents(tr.querySelector(".line-credit").value);
         if (Number.isNaN(debit) || Number.isNaN(credit)) {
-          showFormError(form, "A line has an invalid amount.");
+          showFormError(form, t("journal.err_invalid_amount"));
           return;
         }
         if (debit > 0 && credit > 0) {
-          showFormError(form, "A line has both a debit and a credit. Each line is one or the other.");
+          showFormError(form, t("journal.err_both_sides"));
           return;
         }
         if (debit === 0 && credit === 0) continue; // skip empty lines
@@ -171,25 +176,28 @@ export default {
         });
       }
       if (lines.length === 0) {
-        showFormError(form, "Add at least one line with a debit or credit.");
+        showFormError(form, t("journal.err_no_lines"));
         return;
       }
       const totalDebit = lines.reduce((s, l) => s + l.debit, 0);
       const totalCredit = lines.reduce((s, l) => s + l.credit, 0);
       if (totalDebit !== totalCredit) {
-        showFormError(form, `Entry does not balance: debits ${fmtMoney(totalDebit)} vs credits ${fmtMoney(totalCredit)}.`);
+        showFormError(
+          form,
+          t("journal.err_unbalanced", { debits: fmtMoney(totalDebit), credits: fmtMoney(totalCredit) }),
+        );
         return;
       }
 
       try {
         await API.createJournal({ date, description, lines });
-        toast("Entry posted", "success");
+        toast(t("journal.posted"), "success");
         form.reset();
         form.querySelector('[name="date"]').value = todayISO();
         tbody.innerHTML = "";
         addLine();
         newCard.style.display = "none";
-        toggleBtn.textContent = "New entry";
+        toggleBtn.textContent = t("journal.new");
         await load();
       } catch (err) {
         showFormError(form, err.message);
@@ -214,7 +222,7 @@ export default {
     function renderTable(entries) {
       const el = container.querySelector("#journal-table");
       if (entries.length === 0) {
-        el.innerHTML = `<div class="empty">No journal entries match.</div>`;
+        el.innerHTML = `<div class="empty">${t("journal.no_match")}</div>`;
         return;
       }
       el.innerHTML = `
@@ -222,12 +230,12 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Source</th>
-                <th class="num">Amount</th>
-                <th>Status</th>
+                <th>${t("common.id")}</th>
+                <th>${t("common.date")}</th>
+                <th>${t("common.description")}</th>
+                <th>${t("common.source")}</th>
+                <th class="num">${t("common.amount")}</th>
+                <th>${t("common.status")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -245,7 +253,7 @@ export default {
                       <td class="num">${fmtMoney(total)}</td>
                       <td>${e.is_voided ? statusBadge("void") : statusBadge("active")}</td>
                       <td style="text-align:right">
-                        ${canVoid ? `<button class="btn sm danger" data-void="${e.id}">Void</button>` : ""}
+                        ${canVoid ? `<button class="btn sm danger" data-void="${e.id}">${t("common.void")}</button>` : ""}
                       </td>
                     </tr>
                   `;
@@ -258,10 +266,10 @@ export default {
       el.querySelectorAll("[data-void]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = btn.dataset.void;
-          if (!window.confirm(`Void entry #${id}? This posts a reversing entry (history is kept).`)) return;
+          if (!window.confirm(t("journal.void_confirm", { id }))) return;
           try {
             await API.voidJournal(id);
-            toast("Entry voided", "success");
+            toast(t("journal.voided"), "success");
             await load();
           } catch (err) {
             toast(err.message, "error");

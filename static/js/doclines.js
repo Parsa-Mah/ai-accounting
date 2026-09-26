@@ -4,6 +4,7 @@
 // quantity, unit price (typed in dollars). Bills add a required expense account.
 // Money is kept as integer cents internally; the UI shows dollars.
 import { esc, dollarsToCents, fmtMoney } from "./ui.js";
+import { t } from "./i18n.js";
 
 export function createLineEditor({
   tbody,
@@ -13,7 +14,7 @@ export function createLineEditor({
   onTotal = null,
 }) {
   function itemOptions() {
-    const custom = `<option value="">— custom line —</option>`;
+    const custom = `<option value="">${t("doclines.custom")}</option>`;
     const opts = items
       .map(
         (i) =>
@@ -39,12 +40,12 @@ export function createLineEditor({
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><select class="line-item">${itemOptions()}</select></td>
-      <td><input class="line-desc" placeholder="Description" /></td>
+      <td><input class="line-desc" placeholder="${t("common.description")}" /></td>
       <td style="width:70px"><input class="line-qty" type="number" min="1" value="1" /></td>
       <td style="width:110px"><input class="line-price" inputmode="decimal" placeholder="0.00" /></td>
       ${expenseCell}
       <td class="num line-amount"></td>
-      <td style="width:40px;text-align:center"><button type="button" class="line-remove" title="Remove line">&times;</button></td>
+      <td style="width:40px;text-align:center"><button type="button" class="line-remove" title="${t("common.remove_line")}">&times;</button></td>
     `;
     tbody.appendChild(tr);
 

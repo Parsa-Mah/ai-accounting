@@ -12,6 +12,7 @@ import {
   todayISO,
 } from "../ui.js";
 import { createLineEditor } from "../doclines.js";
+import { t } from "../i18n.js";
 
 export default {
   async render(container) {
@@ -26,26 +27,26 @@ export default {
     container.innerHTML = `
       <div class="page-head">
         <div>
-          <h1 class="page-title">Invoices</h1>
-          <p class="page-sub">Bill customers (accounts receivable).</p>
+          <h1 class="page-title">${t("nav.invoices")}</h1>
+          <p class="page-sub">${t("invoices.subtitle")}</p>
         </div>
         <div class="btn-row">
-          <button id="toggle-new" class="btn primary" type="button">New invoice</button>
+          <button id="toggle-new" class="btn primary" type="button">${t("invoices.new")}</button>
         </div>
       </div>
 
       <div id="new-card" class="card" style="display:none">
-        <h3>New invoice</h3>
+        <h3>${t("invoices.new")}</h3>
         <form id="new-form" class="stack" novalidate>
           <div class="form-row c3">
-            <label class="field"><span>Customer</span>
-              <select name="customer_id" required>${customerOptions || '<option value="">No customers yet</option>'}</select>
+            <label class="field"><span>${t("common.customer")}</span>
+              <select name="customer_id" required>${customerOptions || `<option value="">${t("common.no_customers")}</option>`}</select>
             </label>
-            <label class="field"><span>Date</span><input type="date" name="date" value="${todayISO()}" required /></label>
-            <label class="field"><span>Due date</span><input type="date" name="due_date" /></label>
+            <label class="field"><span>${t("common.date")}</span><input type="date" name="date" value="${todayISO()}" required /></label>
+            <label class="field"><span>${t("common.due_date")}</span><input type="date" name="due_date" /></label>
           </div>
           <div class="form-row c2">
-            <label class="field"><span>Tax rate (%)</span><input name="tax_rate" type="number" min="0" max="100" step="0.01" value="0" /></label>
+            <label class="field"><span>${t("common.tax_rate")}</span><input name="tax_rate" type="number" min="0" max="100" step="0.01" value="0" /></label>
           </div>
 
           <div class="line-editor">
@@ -53,11 +54,11 @@ export default {
               <table>
                 <thead>
                   <tr>
-                    <th style="min-width:180px">Item</th>
-                    <th>Description</th>
-                    <th>Qty</th>
-                    <th>Unit price</th>
-                    <th class="num">Amount</th>
+                    <th style="min-width:180px">${t("common.item")}</th>
+                    <th>${t("common.description")}</th>
+                    <th>${t("common.qty")}</th>
+                    <th>${t("common.unit_price")}</th>
+                    <th class="num">${t("common.amount")}</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -65,42 +66,42 @@ export default {
               </table>
             </div>
             <div class="btn-row" style="margin-top:10px">
-              <button type="button" id="add-line" class="btn">Add line</button>
+              <button type="button" id="add-line" class="btn">${t("common.add_line")}</button>
               <span id="totals" class="muted"></span>
             </div>
           </div>
 
           <div class="btn-row">
-            <button type="submit" class="btn primary">Create invoice</button>
-            <button type="button" id="cancel-new" class="btn ghost">Cancel</button>
+            <button type="submit" class="btn primary">${t("invoices.create")}</button>
+            <button type="button" id="cancel-new" class="btn ghost">${t("common.cancel")}</button>
           </div>
         </form>
       </div>
 
       <div id="pay-card" class="card" style="display:none">
-        <h3>Record payment</h3>
+        <h3>${t("invoices.record_payment")}</h3>
         <form id="pay-form" class="stack" novalidate>
           <div class="form-row c3">
-            <label class="field"><span>Amount</span><input name="amount" inputmode="decimal" required /></label>
-            <label class="field"><span>Date</span><input type="date" name="date" value="${todayISO()}" /></label>
-            <label class="field"><span>Note</span><input name="note" /></label>
+            <label class="field"><span>${t("common.amount")}</span><input name="amount" inputmode="decimal" required /></label>
+            <label class="field"><span>${t("common.date")}</span><input type="date" name="date" value="${todayISO()}" /></label>
+            <label class="field"><span>${t("common.note")}</span><input name="note" /></label>
           </div>
           <div class="btn-row">
-            <button type="submit" class="btn primary">Record payment</button>
-            <button type="button" id="cancel-pay" class="btn ghost">Cancel</button>
+            <button type="submit" class="btn primary">${t("invoices.record_payment")}</button>
+            <button type="button" id="cancel-pay" class="btn ghost">${t("common.cancel")}</button>
           </div>
         </form>
       </div>
 
       <div class="toolbar">
-        <label class="field"><span>Customer</span>
-          <select id="f-customer"><option value="">all</option>${customerOptions}</select>
+        <label class="field"><span>${t("common.customer")}</span>
+          <select id="f-customer"><option value="">${t("common.all")}</option>${customerOptions}</select>
         </label>
         <label class="field" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:9px">
           <input type="checkbox" id="f-voided" style="width:auto" checked />
-          <span style="font-weight:500">Include voided</span>
+          <span style="font-weight:500">${t("common.include_voided")}</span>
         </label>
-        <button id="refresh" class="btn" type="button">Refresh</button>
+        <button id="refresh" class="btn" type="button">${t("common.refresh")}</button>
       </div>
 
       <div id="invoices-table"></div>
@@ -112,11 +113,11 @@ export default {
     toggleBtn.addEventListener("click", () => {
       const hidden = newCard.style.display === "none";
       newCard.style.display = hidden ? "" : "none";
-      toggleBtn.textContent = hidden ? "Hide form" : "New invoice";
+      toggleBtn.textContent = hidden ? t("common.hide_form") : t("invoices.new");
     });
     container.querySelector("#cancel-new").addEventListener("click", () => {
       newCard.style.display = "none";
-      toggleBtn.textContent = "New invoice";
+      toggleBtn.textContent = t("invoices.new");
     });
 
     const totalsEl = container.querySelector("#totals");
@@ -127,7 +128,11 @@ export default {
       onTotal: (subtotal) => {
         const rate = Number(container.querySelector('#new-form [name="tax_rate"]').value) || 0;
         const tax = Math.round(subtotal * rate / 100);
-        totalsEl.innerHTML = `Subtotal <b>${fmtMoney(subtotal)}</b> &middot; Tax <b>${fmtMoney(tax)}</b> &middot; Total <b>${fmtMoney(subtotal + tax)}</b>`;
+        totalsEl.innerHTML = t("doclines.totals", {
+          subtotal: fmtMoney(subtotal),
+          tax: fmtMoney(tax),
+          total: fmtMoney(subtotal + tax),
+        });
       },
     });
     container.querySelector('#new-form [name="tax_rate"]').addEventListener("input", editor.update);
@@ -139,16 +144,16 @@ export default {
       const fd = new FormData(form);
       const lines = editor.lines();
       if (lines.length === 0) {
-        showFormError(form, "Add at least one line.");
+        showFormError(form, t("doclines.err_no_lines"));
         return;
       }
       for (const l of lines) {
         if (Number.isNaN(l.unit_price_cents)) {
-          showFormError(form, "A line has an invalid unit price.");
+          showFormError(form, t("doclines.err_invalid_price"));
           return;
         }
         if (!l.item_id && !l.description) {
-          showFormError(form, "Each line needs an item or a description.");
+          showFormError(form, t("doclines.err_no_item_or_desc"));
           return;
         }
       }
@@ -161,14 +166,14 @@ export default {
       };
       try {
         await API.createInvoice(body);
-        toast("Invoice created", "success");
+        toast(t("invoices.created"), "success");
         form.reset();
         form.querySelector('[name="date"]').value = todayISO();
         form.querySelector('[name="tax_rate"]').value = "0";
         container.querySelector("#lines").innerHTML = "";
         editor.addLine();
         newCard.style.display = "none";
-        toggleBtn.textContent = "New invoice";
+        toggleBtn.textContent = t("invoices.new");
         await load();
       } catch (err) {
         showFormError(form, err.message);
@@ -189,7 +194,7 @@ export default {
       const fd = new FormData(payForm);
       const amount = Math.round(Number(fd.get("amount").replace(/[$,\s]/g, "")) * 100);
       if (!amount || amount <= 0) {
-        showFormError(payForm, "Enter a valid amount.");
+        showFormError(payForm, t("common.err_valid_amount"));
         return;
       }
       try {
@@ -198,7 +203,7 @@ export default {
           date: fd.get("date") || null,
           note: fd.get("note").trim() || null,
         });
-        toast("Payment recorded", "success");
+        toast(t("invoices.payment_recorded"), "success");
         payCard.style.display = "none";
         payTarget = null;
         await load();
@@ -230,7 +235,7 @@ export default {
     function renderTable(invoices) {
       const el = container.querySelector("#invoices-table");
       if (invoices.length === 0) {
-        el.innerHTML = `<div class="empty">No invoices yet.</div>`;
+        el.innerHTML = `<div class="empty">${t("invoices.no_match")}</div>`;
         return;
       }
       el.innerHTML = `
@@ -238,13 +243,13 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Due</th>
-                <th class="num">Total</th>
-                <th class="num">Paid</th>
-                <th>Status</th>
+                <th>${t("common.id")}</th>
+                <th>${t("common.customer")}</th>
+                <th>${t("common.date")}</th>
+                <th>${t("common.due")}</th>
+                <th class="num">${t("common.total")}</th>
+                <th class="num">${t("common.paid")}</th>
+                <th>${t("common.status")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -263,8 +268,8 @@ export default {
                       <td class="num">${fmtMoney(inv.paid_cents)}</td>
                       <td>${statusBadge(inv.status)}</td>
                       <td style="text-align:right;white-space:nowrap">
-                        ${canPay ? `<button class="btn sm" data-pay="${inv.id}">Pay</button> ` : ""}
-                        ${canVoid ? `<button class="btn sm danger" data-void="${inv.id}">Void</button>` : ""}
+                        ${canPay ? `<button class="btn sm" data-pay="${inv.id}">${t("common.pay")}</button> ` : ""}
+                        ${canVoid ? `<button class="btn sm danger" data-void="${inv.id}">${t("common.void")}</button>` : ""}
                       </td>
                     </tr>
                   `;
@@ -283,10 +288,10 @@ export default {
       el.querySelectorAll("[data-void]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = btn.dataset.void;
-          if (!window.confirm(`Void invoice #${id}? This reverses its journal entry.`)) return;
+          if (!window.confirm(t("invoices.void_confirm", { id }))) return;
           try {
             await API.voidInvoice(id);
-            toast("Invoice voided", "success");
+            toast(t("invoices.voided"), "success");
             await load();
           } catch (err) {
             toast(err.message, "error");
