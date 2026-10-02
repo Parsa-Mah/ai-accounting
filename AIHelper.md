@@ -138,12 +138,12 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. The fronten
 **i18n (UI strings)**
 
 - **Language/translation only (Phase 0)**: every user-facing UI string is externalized to per-language JSON dictionaries. Locale-aware currency/date formatting, API-error translation, and export-label translation are **postponed** (see below).
-- **Dictionaries**: `static/i18n/{code}.json`, one per language. The browser consumes the `"ui"` section — flat `namespace.key -> string`. `en.json` is the baseline (259 keys, 17 namespaces: `app, nav, common, status, auth, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export, doclines`). Six languages exist so far: `en, fr, de, it, es, pt`.
+- **Dictionaries**: `static/i18n/{code}.json`, one per language. The browser consumes the `"ui"` section — flat `namespace.key -> string`. `en.json` is the baseline (259 keys, 17 namespaces: `app, nav, common, status, auth, dashboard, accounts, journal, ledger, statements, invoices, estimates, bills, budgets, reconciliation, export, doclines`). Eleven languages exist so far: `en, fr, de, it, es, pt, sq, be, bg, ca, hr`.
 - **Core** (`js/i18n.js`): `t(key, vars)` looks up `ui.<key>`, substitutes `{var}` placeholders, and falls back to English then to the raw key. The `LANGS` registry (`{code, name, dir?}`) drives the language `<select>`. Detection order: `localStorage("lang")` → `navigator.languages` → `"en"`. `initI18n()` loads the active dictionary (await it before the first render); `setLang()` persists the choice, sets `<html lang/dir>`, and dispatches an `i18n:changed` document event.
 - **Wiring**: `router.js` awaits `initI18n()` before the first render, wires the topbar `#lang-select`, and re-renders the current route on `i18n:changed`. Every page calls `t()` for user-facing strings; `statusBadge()` in `ui.js` resolves `status.<key>`; `export.js` resolves report names via a `labelKey` per report.
 - **Adding a language**: create `static/i18n/{code}.json` with the same `ui` keys (and same `{placeholder}` sets) as `en.json`, then append `{code, name, dir?}` to `LANGS`. `tests/test_i18n.py` enforces key + placeholder parity across dictionaries, that every static `t("…")` literal and dynamic key family (nav routes, `statusBadge` values, account types, export label keys) exists in `en.json`, and that `LANGS` matches the dictionary files on disk.
 
-**i18n — language queue (78 to add; target 84 total)**
+**i18n — language queue (73 to add; target 84 total)**
 
 Localization target is **84 languages**. Eleven are done (`en, fr, de, it, es, pt, sq, be, bg, ca, hr`); the 73 below are the authoritative queue — each will get a `static/i18n/{code}.json` dictionary + a `LANGS` entry, added in batches of ~5 (RTL — Hebrew/Persian/Arabic — last). The user's requested list was curated: languages the model cannot translate reliably (low-resource, or sign languages) were dropped, and a country counts as "supported" only if it keeps at least one language (see README "Languages supported").
 
@@ -250,10 +250,10 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 
 ## Metadata
 
-- Last Updated: 2026-09-26
+- Last Updated: 2026-10-02
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-09-26 (i18n language queue: set the 84-language localization target; curated a 78-language queue — grouped by region with ISO codes — plus the excluded-language curation notes; added the README "Languages supported" per-country list (191 countries); added a "Post-build: i18n localization" section to `AI_WORKFLOW.md`; status line updated to reference the queue)
-- Files Analyzed: `static/i18n/{en,fr,de,it,es,pt}.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `README.md`, `AI_WORKFLOW.md`, `AIHelper.md`
-- Git Commit: `ec033b3` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
+- Last Incremental Update: 2026-10-02 (i18n batch 2: added 5 language dictionaries `sq, be, bg, ca, hr` (259 keys each) + `LANGS` entries; status/queue updated to 11 done / 73 queued; Western & Central Europe queue group 26→21)
+- Files Analyzed: `static/i18n/{en,sq,be,bg,ca,hr}.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `AIHelper.md`
+- Git Commit: `ac53e17` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.14 (i18n subsystem added: per-language JSON dictionaries + `t()` + language selector; English baseline wired)
 - AIHelper Version: 7 (i18n: 84-language target + curated 78-language queue + curation notes; README "Languages supported" country list)
