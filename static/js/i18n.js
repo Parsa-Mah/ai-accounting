@@ -20,6 +20,11 @@ export const LANGS = [
   { code: "it", name: "Italiano" },
   { code: "es", name: "Español" },
   { code: "pt", name: "Português" },
+  { code: "sq", name: "Shqip" },
+  { code: "be", name: "Беларуская" },
+  { code: "bg", name: "Български" },
+  { code: "ca", name: "Català" },
+  { code: "hr", name: "Hrvatski" },
 ];
 
 let current = "en";
