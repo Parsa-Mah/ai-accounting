@@ -255,6 +255,6 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
 - Last Incremental Update: 2026-10-02 (i18n: added Persian `fa` (259 keys) as the first RTL language + RTL layout — `applyHtmlAttrs()` on initial load, logical `text-align` in `app.css` + inline action cells; status/queue updated to 12 done / 72 queued)
 - Files Analyzed: `static/i18n/fa.json`, `static/js/i18n.js`, `static/app.css`, `static/js/pages/{bills,accounts,invoices,reconciliation,estimates,journal,budgets}.js`, `tests/test_i18n.py`, `AIHelper.md`
-- Git Commit: `ac53e17` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
+- Git Commit: `50f9502` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.15 (RTL layout: `dir` applied on initial load + logical `text-align` in CSS/inline; first RTL language `fa`)
 - AIHelper Version: 8 (i18n: Persian `fa` + RTL layout implemented; 12 done / 72 queued)
