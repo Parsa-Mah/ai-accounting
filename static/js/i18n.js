@@ -25,6 +25,7 @@ export const LANGS = [
   { code: "bg", name: "Български" },
   { code: "ca", name: "Català" },
   { code: "hr", name: "Hrvatski" },
+  { code: "fa", name: "فارسی", dir: "rtl" },
 ];
 
 let current = "en";
@@ -62,6 +63,7 @@ let ready = null;
 export function initI18n() {
   if (!ready) {
     current = detectLang();
+    applyHtmlAttrs();
     ready = loadDict(current).catch(() => loadDict("en"));
   }
   return ready;

@@ -74,14 +74,22 @@ Once the core build was done, the project turned to localizing the web interface
 - fixed the target at **84 languages** (6 done, 78 queued) and recorded it as the authoritative queue in `AIHelper.md`, grouped by region with ISO codes;
 - wrote the README's **"Languages supported"** section — 191 countries, each listing only its supported languages — and removed the four countries whose only languages were dropped (Burkina Faso, Eritrea, Maldives, Mali).
 
-The 78 queued languages are added in batches of ~5 (RTL — Hebrew/Persian/Arabic — last); each batch is a full 259-key dictionary + a `LANGS` entry + a green parity test.
+The queued languages are added in batches of ~5; each batch is a full 259-key dictionary + a `LANGS` entry + a green parity test.
+
+**Batch 2 — next five.** Five more dictionaries added (`sq, be, bg, ca, hr`) and registered in `LANGS` — 11 done, 73 queued.
+
+**Persian + RTL — the first right-to-left language, pulled forward.** The plan was to do the RTL languages (Hebrew, Persian, Arabic) last. Persian (`fa`) was instead done early, on its own, to establish the RTL layout once — so the later RTL languages inherit it for free. Two changes made that work:
+- `applyHtmlAttrs()` now runs on initial load (inside `initI18n()`), not only when the user switches language — a Persian browser gets `dir="rtl"` on first paint, not after a manual switch.
+- `app.css` swapped its two directional rules for logical properties (`text-align: start` on headers, `text-align: end` on numeric and action cells), so the entire layout mirrors under `dir="rtl"` with no `[dir="rtl"]` overrides.
+
+That brings the count to **12 done, 72 queued** (RTL remaining: Hebrew, Arabic).
 
 ## How the AI kept quality high without a human reviewer in the loop
 
 - **The domain checks itself.** Double-entry bookkeeping has built-in invariants: every entry must balance, the trial balance must tie, and the balance sheet must satisfy A = L + E. Tests assert these invariants on real data, so an arithmetic or posting mistake cannot pass silently.
 - **The database enforces rules.** The debit-XOR-credit CHECK constraint and non-negative money constraints make invalid states unrepresentable, not merely untested.
 - **Money is integer cents end-to-end.** No floats anywhere in the domain; conversion to currency strings happens only at the API/UI boundary.
-- **Two independent checkers.** `pytest` (198 tests) for behavior, `pyright` for types — both must be green after every step.
+- **Two independent checkers.** `pytest` (204 tests) for behavior, `pyright` for types — both must be green after every step.
 - **The frontend was validated by execution.** With no build step and no frontend test framework, each page was exercised through the real HTTP stack (TestClient smoke checks) and syntax-checked with `node --check`.
 
 ## What the human actually did

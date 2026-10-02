@@ -193,7 +193,7 @@ export default {
                     <td class="num" style="color:${r.difference_cents === 0 ? "var(--success)" : "var(--warning)"}">${fmtMoney(r.difference_cents)}</td>
                     <td class="num">${r.line_count}</td>
                     <td>${r.is_balanced ? statusBadge("balanced") : statusBadge("outstanding")}</td>
-                    <td style="text-align:right"><button class="btn sm danger" data-del="${r.id}">${t("common.delete")}</button></td>
+                    <td style="text-align:end"><button class="btn sm danger" data-del="${r.id}">${t("common.delete")}</button></td>
                   </tr>
                 `)
                 .join("")}

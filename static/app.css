@@ -256,7 +256,7 @@ table {
 }
 
 thead th {
-  text-align: left;
+  text-align: start;
   font-weight: 600;
   color: var(--text-muted);
   background: var(--surface-2);
@@ -283,7 +283,7 @@ tbody tr:hover {
 
 td.num,
 th.num {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
   font-family: var(--mono);
   font-size: 12.5px;

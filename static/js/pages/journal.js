@@ -252,7 +252,7 @@ export default {
                       <td><span class="badge">${esc(e.source_type)}</span></td>
                       <td class="num">${fmtMoney(total)}</td>
                       <td>${e.is_voided ? statusBadge("void") : statusBadge("active")}</td>
-                      <td style="text-align:right">
+                      <td style="text-align:end">
                         ${canVoid ? `<button class="btn sm danger" data-void="${e.id}">${t("common.void")}</button>` : ""}
                       </td>
                     </tr>

@@ -267,7 +267,7 @@ export default {
                       <td class="num">${fmtMoney(inv.total_cents)}</td>
                       <td class="num">${fmtMoney(inv.paid_cents)}</td>
                       <td>${statusBadge(inv.status)}</td>
-                      <td style="text-align:right;white-space:nowrap">
+                      <td style="text-align:end;white-space:nowrap">
                         ${canPay ? `<button class="btn sm" data-pay="${inv.id}">${t("common.pay")}</button> ` : ""}
                         ${canVoid ? `<button class="btn sm danger" data-void="${inv.id}">${t("common.void")}</button>` : ""}
                       </td>

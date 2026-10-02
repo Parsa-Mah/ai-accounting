@@ -241,7 +241,7 @@ export default {
                     <td class="mono">${esc(fmtDate(b.budget_start))} → ${esc(fmtDate(b.budget_end))}</td>
                     <td class="num">${fmtMoney(b.budget_cents)}</td>
                     <td class="muted">${esc(b.note || "")}</td>
-                    <td style="text-align:right;white-space:nowrap">
+                    <td style="text-align:end;white-space:nowrap">
                       <button class="btn sm" data-edit="${b.id}">${t("common.edit")}</button>
                       <button class="btn sm danger" data-del="${b.id}">${t("common.delete")}</button>
                     </td>

@@ -150,7 +150,7 @@ export default {
                       <td class="muted">${esc(a.subtype || "")}</td>
                       <td class="muted">${esc(a.bank_kind || "")}</td>
                       <td>${statusBadge(a.is_active ? "active" : "inactive")}</td>
-                      <td style="text-align:right">
+                      <td style="text-align:end">
                         ${canDeactivate ? `<button class="btn sm danger" data-deactivate="${a.id}">${t("accounts.deactivate")}</button>` : ""}
                       </td>
                     </tr>

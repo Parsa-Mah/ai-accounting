@@ -202,7 +202,7 @@ export default {
                       <td class="num">${fmtMoney(est.tax_cents)}</td>
                       <td class="num">${fmtMoney(est.total_cents)}</td>
                       <td>${statusBadge(est.status)}</td>
-                      <td style="text-align:right">
+                      <td style="text-align:end">
                         ${canConvert ? `<button class="btn sm primary" data-convert="${est.id}">${t("estimates.convert")}</button>` : ""}
                       </td>
                     </tr>
