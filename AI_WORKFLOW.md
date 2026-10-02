@@ -74,7 +74,7 @@ Once the core build was done, the project turned to localizing the web interface
 - fixed the target at **84 languages** (6 done, 78 queued) and recorded it as the authoritative queue in `AIHelper.md`, grouped by region with ISO codes;
 - wrote the README's **"Languages supported"** section — 191 countries, each listing only its supported languages — and removed the four countries whose only languages were dropped (Burkina Faso, Eritrea, Maldives, Mali).
 
-The queued languages are added in batches of ~5; each batch is a full 259-key dictionary + a `LANGS` entry + a green parity test.
+The queued languages are added in batches of ~3; each batch is a full 259-key dictionary + a `LANGS` entry + a green parity test.
 
 **Batch 2 — next five.** Five more dictionaries added (`sq, be, bg, ca, hr`) and registered in `LANGS` — 11 done, 73 queued.
 

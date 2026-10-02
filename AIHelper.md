@@ -12,9 +12,11 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 ## Current Project Status
 
-**Build complete.** All 13 phases (0–12) are implemented and tested: 204/204 tests passing (incl. 6 i18n parity tests), pyright 0 errors. Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Any new work is post-build (features, fixes, polish).
+**Build complete.** All 13 phases (0–12) are implemented and tested: 208/208 tests passing (incl. 6 i18n + 4 README i18n parity tests), pyright 0 errors. Git: branch `main`, tracking `origin/main` (GitHub: `Parsa-Mah/ai-accounting`). Any new work is post-build (features, fixes, polish).
 
-**Post-build — i18n (UI localization) in progress.** Phase 0 is complete: i18n infrastructure (`js/i18n.js`), the English baseline dictionary (`static/i18n/en.json`), all 16 frontend JS files refactored to `t()`, a language selector (topbar + login), and `tests/test_i18n.py`. Batch 1 is complete: 5 languages added (`fr, de, it, es, pt`); Batch 2 is complete: 5 more added (`sq, be, bg, ca, hr`) — all wired into `LANGS`. The localization target is now **84 languages** (12 done, 72 queued — see "i18n — language queue" below), to be added in batches of ~5 (RTL languages — Hebrew/Arabic — last). Persian `fa` is done and is the first RTL language; it also introduced the RTL layout. The README's "Languages supported" section lists the per-country coverage.
+**Post-build — i18n (UI localization) in progress.** Phase 0 is complete: i18n infrastructure (`js/i18n.js`), the English baseline dictionary (`static/i18n/en.json`), all 16 frontend JS files refactored to `t()`, a language selector (topbar + login), and `tests/test_i18n.py`. Batch 1 is complete: 5 languages added (`fr, de, it, es, pt`); Batch 2 is complete: 5 more added (`sq, be, bg, ca, hr`) — all wired into `LANGS`. The localization target is now **84 languages** (12 done, 72 queued — see "i18n — language queue" below), to be added in batches of ~3 (RTL languages — Hebrew/Arabic — last). Persian `fa` is done and is the first RTL language; it also introduced the RTL layout. The README's "Languages supported" section lists the per-country coverage.
+
+**Post-build — README translations in progress.** The README is translated per language to a root `README.{code}.md` (English baseline `README.md`) with a generated language-switcher block linking them. Two of 84 are done (`en`, `fa`); 82 queued, added in the same batches of ~3 (RTL last). See "README translations" below.
 
 ## Architecture
 
@@ -146,7 +148,7 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. The fronten
 
 **i18n — language queue (72 to add; target 84 total)**
 
-Localization target is **84 languages**. Twelve are done (`en, fr, de, it, es, pt, sq, be, bg, ca, hr, fa`); the 72 below are the authoritative queue — each will get a `static/i18n/{code}.json` dictionary + a `LANGS` entry, added in batches of ~5 (RTL — Hebrew/Arabic — last). The user's requested list was curated: languages the model cannot translate reliably (low-resource, or sign languages) were dropped, and a country counts as "supported" only if it keeps at least one language (see README "Languages supported").
+Localization target is **84 languages**. Twelve are done (`en, fr, de, it, es, pt, sq, be, bg, ca, hr, fa`); the 72 below are the authoritative queue — each will get a `static/i18n/{code}.json` dictionary + a `LANGS` entry, added in batches of ~3 (RTL — Hebrew/Arabic — last). The user's requested list was curated: languages the model cannot translate reliably (low-resource, or sign languages) were dropped, and a country counts as "supported" only if it keeps at least one language (see README "Languages supported").
 
 - **Western & Central Europe (21):** Czech `cs`, Danish `da`, Estonian `et`, Finnish `fi`, Greek `el`, Hungarian `hu`, Icelandic `is`, Irish `ga`, Latvian `lv`, Lithuanian `lt`, Luxembourgish `lb`, Macedonian `mk`, Norwegian `no`, Polish `pl`, Romanian `ro`, Russian `ru`, Serbian `sr`, Slovene `sl`, Slovak `sk`, Swedish `sv`, Ukrainian `uk`
 - **Middle East, Caucasus & Central Asia (15):** Arabic `ar`, Armenian `hy`, Azerbaijani `az`, Dari `prs`, Georgian `ka`, Hebrew `he`, Kazakh `kk`, Kurdish `ku`, Kyrgyz `ky`, Maltese `mt`, Pashto `ps`, Tajik `tg`, Turkmen `tk`, Turkish `tr`, Uzbek `uz`
@@ -163,6 +165,13 @@ Localization target is **84 languages**. Twelve are done (`en, fr, de, it, es, p
 - **API error translation**: server `detail` strings are English; needs stable error codes + a client-side mapping table.
 - **Export label translation**: PDF/CSV titles/headers are English; needs a `lang` query param threaded into `services/export.py`.
 - **Plural rules**: CLDR plurals; v1 `t()` uses `{n}` interpolation with optional `_one`/`_other` key variants.
+
+**README translations**
+
+- **Convention**: one README per language at the repo root, `README.{code}.md` (`{code}` = the `LANGS` code); `README.md` is the English baseline. GitHub renders only the root `README.md`, so the others are alternate-language copies, not the default.
+- **Switcher**: each README carries a generated language-switcher block between `<!-- readme-switcher:start -->` / `<!-- readme-switcher:end -->` markers (a `<details>` + 4-column table of native-language names, current language bolded, `en` → `README.md`). Regenerate with `.venv\Scripts\python.exe scripts\update_readme_switcher.py` after adding/removing a README or a `LANGS` entry — never hand-edit the block.
+- **Parity**: `tests/test_readme_i18n.py` enforces that every `README.{code}.md` code is in `LANGS`, the switcher block is byte-identical to the script output, and each translation structurally matches English (same heading-level sequence, identical code blocks, identical external-URL set).
+- **Status**: 2 of 84 done (`en`, `fa`); 82 queued. Translated in the same batches of ~3 as the app dictionaries (RTL — Hebrew/Arabic — last). `README.fa.md` (Persian, the first translation) follows GitHub's TOC anchor rules (lowercase; ZWNJ/combining marks/punctuation stripped; spaces → hyphens).
 
 **Demo seed**
 
@@ -214,6 +223,8 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 | 20 | MCP: Python SDK v2 (`MCPServer`, not legacy FastMCP); curated 19 intent-oriented tools (12 read + 7 write) instead of API passthrough; tools separated from transport; write tools gated behind `MCP_ALLOW_WRITE=1`; HTTP mode requires `MCP_HTTP_TOKEN` + loopback bind; dual money fields (cents + USD) in every tool result; errors returned in tool results, not JSON-RPC errors | Stateless MCP spec fits per-call sessions; accounting prior art (Intuit 145-tool passthrough vs Xero/community ~29-tool curated) favors curated tools for LLM reliability; LM Studio hosts MCP natively for local Qwen (Ollama needs an ollmcp bridge); financial data justifies token auth |
 | 21 | i18n: per-language JSON dictionaries (`static/i18n/{code}.json`) with a flat `ui` section + a `t()` helper in `js/i18n.js`; English baseline first, then ~5 languages per batch (RTL last); language/translation separated from locale-aware currency/date, API-error, and export-label translation (all postponed) | The vanilla SPA has no i18n and no build step, so plain JSON dictionaries + a small `t()` fit the stack; `tests/test_i18n.py` enforces key/placeholder parity so a new language can't drift; separating concerns keeps each phase small and independently testable |
 | 22 | RTL layout established with Persian (`fa`), pulled ahead of the "RTL last" plan: `applyHtmlAttrs()` runs on initial load (inside `initI18n()`, not only on language switch); `app.css` uses logical properties (`text-align: start` on `thead th`, `text-align: end` on `.num` and inline action cells) so the layout mirrors under `dir="rtl"` with no `[dir="rtl"]` overrides | Doing RTL once with a real language validates the approach and makes the remaining RTL languages (Hebrew, Arabic) trivial — a dictionary + a `dir:"rtl"` `LANGS` entry; logical properties keep the CSS direction-agnostic and DRY |
+| 23 | README translations: one `README.{code}.md` per language at the repo root (`README.md` = English baseline); a generated language-switcher block (`scripts\update_readme_switcher.py`, between `readme-switcher:start/end` markers); `tests/test_readme_i18n.py` enforces code∈LANGS + switcher sync + structural parity with English | GitHub renders only the root `README.md`, so per-language files are alternate copies; the generated switcher + parity test keep 84 READMEs consistent without manual maintenance; the root layout (user's choice) is simpler than subfolders or a single multilingual file |
+| 24 | Translation batch size: ~3 languages per batch (reduced from ~5), applied to both the app dictionaries and the README translations | User request; smaller batches keep each AI step reviewable and independently test-green |
 
 ## Environment & Tooling Notes
 
@@ -221,7 +232,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and the gitignored local `opencode.jsonc`. If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
-- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (204 tests).
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (208 tests).
 - **Run MCP server**: `.venv\Scripts\python.exe mcp_server.py` (stdio) or `MCP_HTTP_TOKEN=... .venv\Scripts\python.exe mcp_server.py --http` (streamable HTTP at `http://127.0.0.1:8765/mcp`); `--print-config <client>` prints ready-to-paste client configs.
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` — keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
@@ -247,14 +258,14 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
 - DB file: `accounting.db` at project root (WAL mode)
-- Test suite: 204 tests, all passing (build complete + i18n Phase 0)
+- Test suite: 208 tests, all passing (build complete + i18n Phase 0 + README i18n)
 
 ## Metadata
 
 - Last Updated: 2026-10-02
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-10-02 (i18n: added Persian `fa` (259 keys) as the first RTL language + RTL layout — `applyHtmlAttrs()` on initial load, logical `text-align` in `app.css` + inline action cells; status/queue updated to 12 done / 72 queued)
-- Files Analyzed: `static/i18n/fa.json`, `static/js/i18n.js`, `static/app.css`, `static/js/pages/{bills,accounts,invoices,reconciliation,estimates,journal,budgets}.js`, `tests/test_i18n.py`, `AIHelper.md`
+- Last Incremental Update: 2026-10-02 (README translations: root `README.{code}.md` convention + `README.fa.md` (Persian, first translation) + generated switcher (`scripts\update_readme_switcher.py`) + `tests/test_readme_i18n.py`; translation batch size ~5 → ~3; README status 2/84 done)
+- Files Analyzed: `README.md`, `README.fa.md`, `scripts\update_readme_switcher.py`, `tests/test_readme_i18n.py`, `AI_WORKFLOW.md`, `AIHelper.md`
 - Git Commit: `50f9502` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.15 (RTL layout: `dir` applied on initial load + logical `text-align` in CSS/inline; first RTL language `fa`)
-- AIHelper Version: 8 (i18n: Persian `fa` + RTL layout implemented; 12 done / 72 queued)
+- AIHelper Version: 9 (README translations: root `README.{code}.md` convention + generated switcher + parity test; batch size ~3; 2/84 READMEs done)

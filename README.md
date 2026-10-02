@@ -1,5 +1,15 @@
 # Accounting
 
+<!-- readme-switcher:start -->
+<details>
+<summary>Read this README in another language</summary>
+
+| | | | |
+| --- | --- | --- | --- |
+| **English** | [فارسی](README.fa.md) |  |  |
+</details>
+<!-- readme-switcher:end -->
+
 A full-featured double-entry accounting web application — **written entirely by AI**, from architecture to code to tests.
 
 ## What is this project?
@@ -260,7 +270,7 @@ Parsa set the goals, reviewed the output, and steered the project. All code was 
 
 ## Status
 
-The application is complete. All 13 build phases (0–12) are implemented and tested — 198 tests, all passing, with the type checker reporting zero errors. The full step-by-step build is visible in the git history, and [AI_WORKFLOW.md](AI_WORKFLOW.md) explains the process.
+The application is complete. All 13 build phases (0–12) are implemented and tested — 208 tests, all passing, with the type checker reporting zero errors. The full step-by-step build is visible in the git history, and [AI_WORKFLOW.md](AI_WORKFLOW.md) explains the process.
 
 ## Languages supported
 
