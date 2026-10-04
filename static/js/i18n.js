@@ -26,6 +26,9 @@ export const LANGS = [
   { code: "ca", name: "Català" },
   { code: "hr", name: "Hrvatski" },
   { code: "fa", name: "فارسی", dir: "rtl" },
+  { code: "cs", name: "Čeština" },
+  { code: "da", name: "Dansk" },
+  { code: "et", name: "Eesti" },
 ];
 
 let current = "en";
