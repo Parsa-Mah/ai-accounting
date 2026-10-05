@@ -29,6 +29,9 @@ export const LANGS = [
   { code: "cs", name: "Čeština" },
   { code: "da", name: "Dansk" },
   { code: "et", name: "Eesti" },
+  { code: "fi", name: "Suomi" },
+  { code: "el", name: "Ελληνικά" },
+  { code: "hu", name: "Magyar" },
 ];
 
 let current = "en";
