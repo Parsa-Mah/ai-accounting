@@ -38,6 +38,9 @@ export const LANGS = [
   { code: "lt", name: "Lietuvių" },
   { code: "lb", name: "Lëtzebuergesch" },
   { code: "mk", name: "Македонски" },
+  { code: "no", name: "Norsk" },
+  { code: "pl", name: "Polski" },
+  { code: "ro", name: "Română" },
 ];
 
 let current = "en";
