@@ -41,6 +41,9 @@ export const LANGS = [
   { code: "no", name: "Norsk" },
   { code: "pl", name: "Polski" },
   { code: "ro", name: "Română" },
+  { code: "ru", name: "Русский" },
+  { code: "sr", name: "Српски" },
+  { code: "sl", name: "Slovenščina" },
 ];
 
 let current = "en";
