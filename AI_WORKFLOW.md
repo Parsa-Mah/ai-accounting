@@ -84,6 +84,12 @@ The queued languages are added in batches of ~3; each batch is a full 259-key di
 
 That brings the count to **12 done, 72 queued** (RTL remaining: Hebrew, Arabic).
 
+## Post-build: semantic codebase index (open-codebase-index)
+
+The workflow's navigation was upgraded with an opencode plugin, **open-codebase-index**: a semantic search index over the repository. It embeds every code chunk with **Google's Gemma embedding model (`embeddinggemma-2`, 768 dimensions)** served locally through LM Studio, and an auto-indexer with a file watcher keeps the index fresh as files change. Everything stays local — the embeddings come from the same machine that runs the code model. The per-project index lives in `.opencode/index/` (gitignored); the plugin is registered in the global opencode config (`~/.opencode/opencode.json`) with its embedding settings in `~/.config/opencode/codebase-index.json`.
+
+This complements `AIHelper.md` rather than replacing it: the knowledge base answers *"what is this project and what rules govern it"*, while the index answers *"where is this behavior implemented?"* The plugin adds semantic search (`codebase_search`), metadata-only location lookup (`codebase_peek`), authoritative definition lookup (`implementation_lookup`), call-graph queries (`call_graph`, `call_graph_path`), repository-scale context (`codebase_context`, `architecture_context`), duplicate detection (`find_similar`), and index management (`index_status`, `index_codebase`, `index_health_check`). A verification pass on 2026-10-09 confirmed all tools working: 1,012 chunks indexed, semantic hits scoring 0.95–1.00, and `find_similar` correctly surfacing the near-duplicate balance helpers in `app/services/budgets.py` and `app/services/reconciliation.py`.
+
 ## How the AI kept quality high without a human reviewer in the loop
 
 - **The domain checks itself.** Double-entry bookkeeping has built-in invariants: every entry must balance, the trial balance must tie, and the balance sheet must satisfy A = L + E. Tests assert these invariants on real data, so an arithmetic or posting mistake cannot pass silently.

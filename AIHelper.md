@@ -240,6 +240,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - **Run MCP server**: `.venv\Scripts\python.exe mcp_server.py` (stdio) or `MCP_HTTP_TOKEN=... .venv\Scripts\python.exe mcp_server.py --http` (streamable HTTP at `http://127.0.0.1:8765/mcp`); `--print-config <client>` prints ready-to-paste client configs.
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` — keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
+- **Semantic index (open-codebase-index plugin)**: opencode plugin giving the AI semantic search over the repo. Embeddings via LM Studio — Google Gemma embedding model `text-embedding-embeddinggemma-2`, 768 dimensions, `http://127.0.0.1:1234/v1` — with auto-index + file watcher. Per-project index at `.opencode/index/` (gitignored, rebuildable via `index_codebase`); plugin registered globally in `~/.opencode/opencode.json`, embedding config in `~/.config/opencode/codebase-index.json` (neither is in this repo). Tools: `index_status` (readiness), `codebase_search` (semantic), `codebase_peek` (metadata only), `implementation_lookup` (definitions), `call_graph`/`call_graph_path` (call relationships), `codebase_context`/`architecture_context` (repo orientation), `find_similar` (duplicates), `code_communities`/`pr_impact` (module boundaries/blast radius), `index_health_check` (stale cleanup). Verified working 2026-10-09: 1,012 chunks, semantic scores 0.95–1.00.
 
 ## Known Limitations
 
@@ -250,6 +251,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 
 - The build is complete; any new work is post-build (features, fixes, polish) and should follow the same "small steps, tests green after each step" rhythm.
 - Follow the established conventions section exactly (layering, error handling, auth dependency, typed models, test fixtures).
+- For codebase navigation, prefer the open-codebase-index tools over blind grep: `codebase_search` for behavior-level questions, `implementation_lookup` for known symbols, `call_graph` for callers/callees; fall back to `grep` for exact/exhaustive literal matches.
 - Treat this document as the target design; verify against actual code — when code and this document disagree, update this document to match verified code.
 - Keep the AI-authorship framing intact in any docs the AI writes.
 - Run tests (`.venv\Scripts\python.exe -m pytest`) and keep them green after changes.
@@ -268,8 +270,8 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 
 - Last Updated: 2026-10-09
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-10-09 (Batch 11 app translations added: `prs`, `ka`, `he` — 39/84 app languages done, 45 queued; RTL-last ordering rule dropped)
-- Files Analyzed: `static/i18n/prs.json`, `static/i18n/ka.json`, `static/i18n/he.json`, `static/js/i18n.js`, `AIHelper.md`
-- Git Commit: `4d46560` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
+- Last Incremental Update: 2026-10-09 (open-codebase-index semantic search plugin installed + verified: Gemma embeddinggemma-2 768-dim embeddings via LM Studio, auto-index + watcher, `.opencode/index/` gitignored; tooling note + navigation instruction added)
+- Files Analyzed: `~/.config/opencode/codebase-index.json`, `~/.opencode/opencode.json`, `.opencode/index/` (index status), `AI_WORKFLOW.md`, `AIHelper.md`, `.gitignore`
+- Git Commit: `70f0bb8` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.15 (RTL layout: `dir` applied on initial load + logical `text-align` in CSS/inline; RTL languages `fa`, `ar`, `prs`, `he`)
-- AIHelper Version: 19 (Batch 11 app translations `prs`/`ka`/`he` — 39/84 done, 45 queued; RTL-last ordering rule dropped)
+- AIHelper Version: 20 (open-codebase-index plugin: semantic search tooling documented; no app architecture change)

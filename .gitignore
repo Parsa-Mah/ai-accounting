@@ -232,3 +232,6 @@ Thumbs.db
 
 # Local opencode config (LSP enablement)
 opencode.jsonc
+
+# opencode semantic index artifacts (open-codebase-index plugin; rebuildable)
+.opencode/
