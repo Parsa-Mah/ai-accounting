@@ -50,6 +50,9 @@ export const LANGS = [
   { code: "ar", name: "العربية", dir: "rtl" },
   { code: "hy", name: "Հայերեն" },
   { code: "az", name: "Azərbaycanca" },
+  { code: "prs", name: "دری", dir: "rtl" },
+  { code: "ka", name: "ქართული" },
+  { code: "he", name: "עברית", dir: "rtl" },
 ];
 
 let current = "en";
