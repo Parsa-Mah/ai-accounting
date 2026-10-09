@@ -47,6 +47,9 @@ export const LANGS = [
   { code: "sk", name: "Slovenčina" },
   { code: "sv", name: "Svenska" },
   { code: "uk", name: "Українська" },
+  { code: "ar", name: "العربية", dir: "rtl" },
+  { code: "hy", name: "Հայերեն" },
+  { code: "az", name: "Azərbaycanca" },
 ];
 
 let current = "en";
