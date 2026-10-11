@@ -53,6 +53,10 @@ export const LANGS = [
   { code: "prs", name: "دری", dir: "rtl" },
   { code: "ka", name: "ქართული" },
   { code: "he", name: "עברית", dir: "rtl" },
+  { code: "kk", name: "Қазақша" },
+  { code: "ckb", name: "کوردی سۆرانی", dir: "rtl" },
+  { code: "kmr", name: "Kurmancî" },
+  { code: "ky", name: "Кыргызча" },
 ];
 
 let current = "en";
