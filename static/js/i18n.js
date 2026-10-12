@@ -57,6 +57,9 @@ export const LANGS = [
   { code: "ckb", name: "کوردی سۆرانی", dir: "rtl" },
   { code: "kmr", name: "Kurmancî" },
   { code: "ky", name: "Кыргызча" },
+  { code: "mt", name: "Malti" },
+  { code: "ps", name: "پښتو", dir: "rtl" },
+  { code: "tg", name: "Тоҷикӣ" },
 ];
 
 let current = "en";
