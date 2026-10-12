@@ -127,7 +127,7 @@
     "journal.off_by": "جیاوازی {amount}",
     "journal.totals": "دەبت <b>{debits}</b> · کرێدیت <b>{credits}</b> · {state}",
     "journal.err_invalid_amount": "هێڵێک بڕی هەڵەیەکی هەیە.",
-    "journal.err_both_sides": "هێڵێک تەنها دەبت یان کرێدیت هەیە. هەر هێڵێک تەنها یەکێکە.",
+    "journal.err_both_sides": "هێڵێک هەردوو دەبت و کرێدیتی هەیە. هەر هێڵێک دەبێت تەنها یەکێکیان هەبێت.",
     "journal.err_no_lines": "لە کەمترین هێڵێک لەگەڵ دەبت یان کرێدیت زیادبکە.",
     "journal.err_unbalanced": "تۆمارەکە هاوسەنگ نییە: دەبت {debits} بەرامبەر کرێدیت {credits}.",
     "journal.posted": "تۆمارەکە تۆمارکرا",
