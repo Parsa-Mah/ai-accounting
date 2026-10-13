@@ -60,6 +60,9 @@ export const LANGS = [
   { code: "mt", name: "Malti" },
   { code: "ps", name: "پښتو", dir: "rtl" },
   { code: "tg", name: "Тоҷикӣ" },
+  { code: "tk", name: "Türkmençe" },
+  { code: "tr", name: "Türkçe" },
+  { code: "uz", name: "Oʻzbekcha" },
 ];
 
 let current = "en";
