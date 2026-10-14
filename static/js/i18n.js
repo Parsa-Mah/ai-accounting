@@ -63,6 +63,9 @@ export const LANGS = [
   { code: "tk", name: "Türkmençe" },
   { code: "tr", name: "Türkçe" },
   { code: "uz", name: "Oʻzbekcha" },
+  { code: "bn", name: "বাংলা" },
+  { code: "bho", name: "भोजपुरी" },
+  { code: "dz", name: "རྫོང་ཁ་" },
 ];
 
 let current = "en";
