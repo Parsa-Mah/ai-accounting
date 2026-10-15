@@ -66,6 +66,9 @@ export const LANGS = [
   { code: "bn", name: "বাংলা" },
   { code: "bho", name: "भोजपुरी" },
   { code: "dz", name: "རྫོང་ཁ་" },
+  { code: "hi", name: "हिन्दी" },
+  { code: "ne", name: "नेपाली" },
+  { code: "ta", name: "தமிழ்" },
 ];
 
 let current = "en";
