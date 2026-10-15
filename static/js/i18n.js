@@ -72,6 +72,9 @@ export const LANGS = [
   { code: "ur", name: "اردو", dir: "rtl" },
   { code: "my", name: "မြန်မာ" },
   { code: "zh", name: "中文" },
+  { code: "fil", name: "Filipino" },
+  { code: "id", name: "Bahasa Indonesia" },
+  { code: "ja", name: "日本語" },
 ];
 
 let current = "en";
