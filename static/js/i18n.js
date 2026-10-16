@@ -75,6 +75,9 @@ export const LANGS = [
   { code: "fil", name: "Filipino" },
   { code: "id", name: "Bahasa Indonesia" },
   { code: "ja", name: "日本語" },
+  { code: "km", name: "ខ្មែរ" },
+  { code: "ko", name: "한국어" },
+  { code: "lo", name: "ລາວ" },
 ];
 
 let current = "en";
