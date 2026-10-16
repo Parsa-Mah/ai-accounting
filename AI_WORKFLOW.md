@@ -90,6 +90,26 @@ The workflow's navigation was upgraded with an opencode plugin, **open-codebase-
 
 This complements `AIHelper.md` rather than replacing it: the knowledge base answers *"what is this project and what rules govern it"*, while the index answers *"where is this behavior implemented?"* The plugin adds semantic search (`codebase_search`), metadata-only location lookup (`codebase_peek`), authoritative definition lookup (`implementation_lookup`), call-graph queries (`call_graph`, `call_graph_path`), repository-scale context (`codebase_context`, `architecture_context`), duplicate detection (`find_similar`), and index management (`index_status`, `index_codebase`, `index_health_check`). A verification pass on 2026-10-09 confirmed all tools working: 1,012 chunks indexed, semantic hits scoring 0.95–1.00, and `find_similar` correctly surfacing the near-duplicate balance helpers in `app/services/budgets.py` and `app/services/reconciliation.py`.
 
+## Post-build: external review and the AI-full-control roadmap
+
+On 2026-10-16 the project received an external analysis — written by ChatGPT from the public repository and this project's documentation, not from running the code. Its verdict, in short:
+
+- **Not a barebones ledger.** A recognizable double-entry foundation — chart of accounts, balanced journal, general ledger, trial balance, statements, invoicing, AR/AP, budgets, reconciliation, MCP access — with two design decisions called out as good engineering: routing every financial event through the single posting path, and preserving void history as reversing entries instead of deleting transactions.
+- **Not yet production-ready.** The documented scope stops at single-user auth, a flat per-document tax rate, USD-only formatting, and no bank feeds, inventory, multi-currency, audit trail, or period locking.
+- **Priorities, in order:** (1) correctness, control, and compliance — audit trail, period locks, configurable tax for one chosen jurisdiction, roles and approvals, a period-end workflow; (2) everyday workflow automation — bank-statement import, smarter reconciliation, recurring invoices/bills, credit notes, cash-flow reporting, document management, import and backup; (3) deployability — backups, security, accountant-ready reports. Plus a warning against chasing QuickBooks/Xero feature parity.
+- **The strategic insight that was adopted:** don't compete on feature count — position the app as *open-source, self-hosted, local-first, AI-native accounting*: a real double-entry ledger with a local AI assistant that works directly on the books through typed tools, with answers traceable to actual records and actions requiring explicit approval.
+
+That insight reframed the post-translation work. The human set the goal: **the AI should be able to fully control the application**, not merely assist. A gap check against the code showed why that is real work: the MCP server — the AI's hands — exposes 12 read + 7 write tools, so the AI can read most of the books and post invoices, bills, journal entries, and budgets, but it cannot manage the chart of accounts, create customers or vendors, manage items or estimates, void a bill, run a bank reconciliation, or export a report.
+
+The resulting roadmap is recorded in `AIHelper.md` (decision #30) and starts after the 85-language localization rollout is complete — or when the human decides it is time — under the same rhythm: small steps, green tests, one commit per step.
+
+1. **Safe full control.** First an actor-aware audit trail (`AuditLog` + actor identity — human user vs AI client — via `after_flush` hooks) so every AI action is traceable; then grow the MCP surface to full parity with the app, batch by batch.
+2. **Period locking.** Locked accounting periods that neither the AI nor the human can quietly rewrite, with a controlled reopen.
+3. **The AI command center.** A chat page where the local model operates the books through the typed tools: traceable answers with links to the supporting transactions, and proposed actions the user approves or rejects before anything posts through the single posting path.
+4. **AI-driven workflow extensions.** Recurring transactions, bank-statement import with suggested matches, one-jurisdiction tax, dimensions/projects — each just more tools the AI can use.
+
+Multi-user roles, multi-currency, multi-entity consolidation, and revenue recognition are explicitly deferred: they are orthogonal to "one company's books, fully controlled by a local AI."
+
 ## How the AI kept quality high without a human reviewer in the loop
 
 - **The domain checks itself.** Double-entry bookkeeping has built-in invariants: every entry must balance, the trial balance must tie, and the balance sheet must satisfy A = L + E. Tests assert these invariants on real data, so an arithmetic or posting mistake cannot pass silently.

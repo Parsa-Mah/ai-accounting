@@ -18,6 +18,8 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 **Post-build — README translations in progress.** The README is translated per language to a root `README.{code}.md` (English baseline `README.md`) with a generated language-switcher block linking them. Two of 85 are done (`en`, `fa`); 83 queued. **README translations are deliberately decoupled from the app-dictionary language batches** — a language batch touches only `static/i18n/{code}.json` + `LANGS`; the READMEs are translated later, in their own batches, following the same queue order (Kurdish is two variants — `ckb` + `kmr`). See "README translations" below.
 
+**Post-translation roadmap (queued):** make the AI the **full controller** of the application — audit trail + MCP parity → period locking → AI command center → workflow extensions. Starts when the 85-language rollout is complete or when the user decides it is time (user decision 2026-10-16). See "Post-Translation Roadmap" below and decision #30.
+
 ## Architecture
 
 Stack: Python 3.12 · FastAPI + uvicorn · SQLAlchemy 2.0 · SQLite (`accounting.db`) · vanilla HTML/CSS/JS SPA frontend (no build step) · ReportLab (PDF export) · MCP Python SDK v2 (`mcp>=2`) · pytest + TestClient.
@@ -184,7 +186,7 @@ Localization target is **85 languages**. Sixty-four are done (`en, fr, de, it, e
 **MCP server**
 
 - **Tools wrap services, never duplicate logic**: every tool in `app/mcp/tools.py` calls the existing domain services (single posting path for writes), so the MCP server and the web app can never disagree. Tools are plain `def` with typed params (the SDK reflects the input schema from the hints) and docstrings that read like public API docs — the LLM's only guidance.
-- **Surface**: 12 read tools (always registered) + 7 write tools (only when `MCP_ALLOW_WRITE=1`, read at `build_server()` call time so tests can toggle via monkeypatch) + 2 resources (`accounting://accounts`, `accounting://trial-balance`) + 3 prompts (`monthly_report`, `tax_position`, `cash_position`), registered by `build_server()` in `app/mcp/server.py`.
+- **Surface**: 12 read tools (always registered) + 7 write tools (only when `MCP_ALLOW_WRITE=1`, read at `build_server()` call time so tests can toggle via monkeypatch) + 2 resources (`accounting://accounts`, `accounting://trial-balance`) + 3 prompts (`monthly_report`, `tax_position`, `cash_position`), registered by `build_server()` in `app/mcp/server.py`. The surface does **not** yet cover the whole app (no account/party/item management, no estimate writes, no `void_bill`, no reconciliation create/delete, no export) — growing it to full parity is queued Phase 1b (see Post-Translation Roadmap).
 - **Per-call sessions**: `context.get_session()` opens one `SessionLocal()` per tool call (the protocol is stateless), commits on success, rolls back + closes in `finally`.
 - **Errors are tool errors, never JSON-RPC errors**: `@context.safe_tool` converts `NotFoundError`/`ConflictError`/`ValidationError` into `ToolError` (→ `is_error=True` result the model reads and recovers from); resolvers raise `ToolError` listing the valid options.
 - **Dual money fields**: `context.with_usd()` recursively walks every tool result and adds `<key>_usd` (via `services.export.money`) beside every `*_cents` int and known unsuffixed cents key, so small models can quote exact dollars.
@@ -196,6 +198,22 @@ Localization target is **85 languages**. Sixty-four are done (`en, fr, de, it, e
 ## Scope
 
 Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-company, job costing. In scope: accounts, customers, vendors, items, invoices, estimates, payments, bills, journal, bank register + reconciliation, reports, budgets, tax, auth, seed data, MCP access.
+
+## Post-Translation Roadmap — AI Full Control (queued)
+
+**Start:** after the 85-language i18n + README rollout is complete, or when the user decides it is time. Same rhythm: small steps, tests green after each step, one commit per step. **Goal (user decision, 2026-10-16):** the AI must be able to **fully control** the application — not just assist. Optimized for AI-native control of one company's books, *not* for QuickBooks/Xero feature parity.
+
+| Phase | What | Notes |
+| --- | --- | --- |
+| 1a | **Actor identity + audit trail** | `AuditLog` model + actor contextvar (`user:<id>` from the web, `ai:<client>` from MCP) + SQLAlchemy `after_flush` hooks on the written models (the planned pattern from Known Limitations). Done **first**, so every AI action is traceable before the AI's control expands. |
+| 1b | **MCP parity** | Grow the MCP surface to 100% of the app's capabilities. Today: 12 read + 7 write tools (`app/mcp/tools.py`). Missing: account create/update/deactivate, customer/vendor list+create+update, item CRUD, estimate create/convert/void, `void_bill`/`get_bill`, budget list/get/update/delete, reconciliation list-bank-accounts/create/delete, journal list/get/void, report export (CSV content), demo seed. Each tool wraps an existing service — same pattern as the current write tools, no new domain logic; batched by domain, `tests/test_mcp_server.py` green after each batch. |
+| 2 | **Period locking** | `Period` model (`is_locked`) + a guard in the single posting path and the edit/void paths (409 inside a locked period, controlled reopen). Protects the books from human *and* AI mistakes once the AI has full write access. |
+| 3 | **AI command center** | Chat page in the SPA: natural-language question → local LLM acts through the typed MCP tools → **traceable answers with links to the supporting transactions** → **proposed actions** → user approves/rejects → posts through the single posting path. The differentiator no incumbent offers with local privacy; only possible after Phase 1. Largest, most open-ended phase. |
+| 4 | **AI-driven workflow extensions** | Pick by value: recurring transactions, bank CSV import + suggested matches, configurable tax (one jurisdiction), dimensions/projects. Each adds more tools the AI can use. |
+
+**Explicitly deferred** (orthogonal to "one company's books, fully controlled by a local AI"): multi-user roles/MFA, multi-currency ledger, multi-entity consolidation, multiple accounting books, IFRS 15/ASC 606 revenue recognition.
+
+**Provenance:** an external analysis (ChatGPT, 2026-10-16, from the public repo + this document — not from running the code) confirmed the double-entry foundation is real and independently named the same gaps (no audit trail, no period locking, flat tax, single-user auth); its top strategic recommendation — position as local-first, AI-native accounting with a traceable assistant on typed tools instead of chasing feature parity — is what this roadmap implements. Full write-up in `AI_WORKFLOW.md` ("Post-build: external review and the AI-full-control roadmap").
 
 ## Decision Log
 
@@ -230,6 +248,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 | 27 | i18n queue ordering: drop the "RTL last" rule — continue the queue in its listed regional order; RTL languages get `dir: "rtl"` in their `LANGS` entry but are no longer deferred to the end of the queue | Persian `fa` already established and validated the RTL layout (decision #22), so deferring RTL languages no longer serves a purpose — adding an RTL language is now trivial (a dictionary + a `dir:"rtl"` entry). User request (2026-10-09). Supersedes the "RTL last" ordering noted in decisions #21/#26. |
 | 28 | Dev workflow: adopt the `open-codebase-index` opencode plugin for semantic code navigation — embeddings from Google's Gemma embedding model (`embeddinggemma-2`, 768 dims) served locally via LM Studio; auto-index + file watcher; per-project index in `.opencode/index/` (gitignored); plugin + embedding config live in global opencode config (`~/.opencode/opencode.json`, `~/.config/opencode/codebase-index.json`), not in this repo | Complements `AIHelper.md` ("what is this project and what rules govern it") with "where is this behavior implemented?" lookups (semantic search, definition lookup, call graph); keeps all inference local, consistent with the project's local-model premise; the index is a rebuildable artifact, so nothing index-related needs to be committed. Installed + verified 2026-10-09. |
 | 29 | Kurdish localized as two distinct variants — Central/Sorani `ckb` (Arabic script, `dir: "rtl"`) and Northern/Kurmanji `kmr` (Latin script, LTR) — instead of a single generic `ku`, raising the localization target from 84 to 85 languages | The generic ISO 639-1 code `ku` is ambiguous and cannot be used twice (two `ku.json` files collide; two `ku` `LANGS` entries fail the unique-code parity test). The standard ISO 639-3 codes are consistent with the existing `prs` (Dari) precedent of a 3-letter code for a language without a unique 2-letter one; the RTL variant reuses the validated RTL layout (decision #22). User request (2026-10-12). |
+| 30 | Post-translation roadmap: make the AI the **full controller** of the app — (1a) actor-aware audit trail first, (1b) MCP surface grown to full parity with the app, (2) period locking, (3) AI command center (chat UI, local LLM acting through typed tools, traceable answers, human-approved actions), (4) workflow extensions (recurring transactions, bank CSV import, one-jurisdiction tax, dimensions). Multi-user roles, multi-currency, multi-entity consolidation, and revenue recognition explicitly deferred | User decision (2026-10-16): "the AI should control this application at full." An external (ChatGPT) analysis of the public repo confirmed the gaps (no audit trail, no period locking, flat tax, single-user auth) and recommended local-first AI-native positioning over QuickBooks/Xero feature parity; the roadmap adopts that prioritization reframed around AI control. Audit trail comes first so the expanded AI control is traceable from day one; MCP parity is achievable without new domain logic because every tool wraps an existing service through the single posting path |
 
 ## Environment & Tooling Notes
 
@@ -246,7 +265,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 ## Known Limitations
 
 - No frontend unit tests yet (validated via `node --check` + a TestClient smoke script).
-- No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks).
+- No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks — scheduled as Phase 1a of the Post-Translation Roadmap, with actor identity for human vs AI writes).
 
 ## AI Instructions
 
@@ -271,8 +290,8 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 
 - Last Updated: 2026-10-16
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-10-16 (batch 19 i18n: added `km`/`ko`/`lo` dictionaries + `LANGS` entries, 64/85 done; all LTR; Korean terminology web-verified, Khmer + Lao core terms verified from Cambodian/Lao accounting sources (fmis.gov.kh, help.bansi.la, Bansi Academy) with several terms flagged for native review; no architecture change)
-- Files Analyzed: `static/i18n/{km,ko,lo}.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `AIHelper.md`
-- Git Commit: `433e953` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
-- Architecture Version: 0.15 (RTL layout: `dir` applied on initial load + logical `text-align` in CSS/inline; RTL languages `fa`, `ar`, `prs`, `he`, `ckb`, `ps`, `ur`)
-- AIHelper Version: 29 (batch 19 i18n: added `km`/`ko`/`lo`, 64/85 done; no app architecture change)
+- Last Incremental Update: 2026-10-16 (post-translation roadmap recorded — AI full control: audit trail + MCP parity → period locking → AI command center → workflow extensions; decision #30; cross-refs in Current Status, MCP Surface, Known Limitations; no code change)
+- Files Analyzed: `app/mcp/tools.py`, `app/mcp/server.py`, `AI_WORKFLOW.md`, `AIHelper.md`
+- Git Commit: `32fc0a8` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
+- Architecture Version: 0.15 (unchanged — the roadmap is a queued plan, no implemented architecture change; RTL layout: `dir` applied on initial load + logical `text-align` in CSS/inline; RTL languages `fa`, `ar`, `prs`, `he`, `ckb`, `ps`, `ur`)
+- AIHelper Version: 30 (post-translation roadmap + decision #30 recorded; no app architecture change)
