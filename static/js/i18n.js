@@ -78,6 +78,9 @@ export const LANGS = [
   { code: "km", name: "ខ្មែរ" },
   { code: "ko", name: "한국어" },
   { code: "lo", name: "ລາວ" },
+  { code: "ms", name: "Bahasa Melayu" },
+  { code: "mn", name: "Монгол" },
+  { code: "si", name: "සිංහල" },
 ];
 
 let current = "en";
