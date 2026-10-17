@@ -6,7 +6,7 @@
 
 | | | | |
 | --- | --- | --- | --- |
-| **English** | [فارسی](README.fa.md) |  |  |
+| **English** | [فارسی](README.fa.md) | [עברית](README.he.md) |  |
 </details>
 <!-- readme-switcher:end -->
 
