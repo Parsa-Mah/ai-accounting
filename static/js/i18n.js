@@ -81,6 +81,9 @@ export const LANGS = [
   { code: "ms", name: "Bahasa Melayu" },
   { code: "mn", name: "Монгол" },
   { code: "si", name: "සිංහල" },
+  { code: "th", name: "ไทย" },
+  { code: "vi", name: "Tiếng Việt" },
+  { code: "am", name: "አማርኛ" },
 ];
 
 let current = "en";
