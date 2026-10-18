@@ -84,6 +84,9 @@ export const LANGS = [
   { code: "th", name: "ไทย" },
   { code: "vi", name: "Tiếng Việt" },
   { code: "am", name: "አማርኛ" },
+  { code: "ny", name: "Chichewa" },
+  { code: "ha", name: "Hausa" },
+  { code: "rw", name: "Kinyarwanda" },
 ];
 
 let current = "en";
