@@ -292,6 +292,6 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
 - Last Incremental Update: 2026-10-19 (i18n batch 22: `ny`/`ha`/`rw` dictionaries + `LANGS` entries; 73/85 app languages done, 12 queued; no code change)
 - Files Analyzed: `static/i18n/ny.json`, `static/i18n/ha.json`, `static/i18n/rw.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `AIHelper.md`
-- Git Commit: `aa4dd32` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
+- Git Commit: `0f29578` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
 - Architecture Version: 0.15 (unchanged — the roadmap is a queued plan, no implemented architecture change; RTL layout: `dir` applied on initial load + logical `text-align` in CSS/inline; RTL languages `fa`, `ar`, `prs`, `he`, `ckb`, `ps`, `ur`)
 - AIHelper Version: 34 (i18n batch 22 recorded; no app architecture change)
