@@ -90,6 +90,9 @@ export const LANGS = [
   { code: "mg", name: "Malagasy" },
   { code: "sn", name: "chiShona" },
   { code: "so", name: "Soomaali" },
+  { code: "st", name: "Sesotho" },
+  { code: "sw", name: "Kiswahili" },
+  { code: "ss", name: "siSwati" },
 ];
 
 let current = "en";

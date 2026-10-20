@@ -274,7 +274,7 @@ The application is complete. All 13 build phases (0–12) are implemented and te
 
 ## Languages supported
 
-The web interface is localized into **84 languages**. The list below covers every country where at least one supported language is spoken; each entry shows the supported language(s) for that country.
+The web interface is localized into **85 languages**. The list below covers every country where at least one supported language is spoken; each entry shows the supported language(s) for that country.
 
 - Afghanistan — Dari, Pashto
 - Albania — Albanian
