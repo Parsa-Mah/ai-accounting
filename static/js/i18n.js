@@ -87,6 +87,9 @@ export const LANGS = [
   { code: "ny", name: "Chichewa" },
   { code: "ha", name: "Hausa" },
   { code: "rw", name: "Kinyarwanda" },
+  { code: "mg", name: "Malagasy" },
+  { code: "sn", name: "chiShona" },
+  { code: "so", name: "Soomaali" },
 ];
 
 let current = "en";
