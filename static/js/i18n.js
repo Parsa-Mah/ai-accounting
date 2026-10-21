@@ -93,6 +93,8 @@ export const LANGS = [
   { code: "st", name: "Sesotho" },
   { code: "sw", name: "Kiswahili" },
   { code: "ss", name: "siSwati" },
+  { code: "xh", name: "isiXhosa" },
+  { code: "zu", name: "isiZulu" },
 ];
 
 let current = "en";
