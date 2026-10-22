@@ -12,6 +12,8 @@ from mcp.server.mcpserver.exceptions import ToolError
 from sqlalchemy.orm import Session
 
 from app.mcp import context
+from app.models.account import AccountType
+from app.schemas.account import AccountCreate, AccountRead, AccountUpdate
 from app.schemas.bill import BillLineCreate, BillRead
 from app.schemas.budget import BudgetCreate
 from app.schemas.estimate import EstimateRead
@@ -34,6 +36,7 @@ from app.services import reports
 INVOICE_STATUSES = ("open", "partially_paid", "paid", "void")
 BILL_STATUSES = ("open", "partially_paid", "paid", "void")
 ESTIMATE_STATUSES = ("open", "converted")
+ACCOUNT_TYPES = ("asset", "liability", "equity", "revenue", "expense")
 
 
 @context.safe_tool
@@ -732,6 +735,85 @@ def deactivate_item(item_id: int) -> dict[str, Any]:
         return context.with_usd(ItemRead.model_validate(item).model_dump(mode="json"))
 
 
+@context.safe_tool
+def create_account(
+    number: str,
+    name: str,
+    type: str,
+    subtype: str | None = None,
+    description: str | None = None,
+    bank_kind: str | None = None,
+) -> dict[str, Any]:
+    """Create a new account in the chart of accounts.
+
+    ``number`` is 1-10 digits (e.g. '5800'); ``name`` must be unique;
+    ``type`` is one of: asset, liability, equity, revenue, expense.
+    ``subtype`` and ``description`` are optional labels. Set
+    ``bank_kind`` (e.g. 'checking' or 'savings') to make the account a
+    bank account available for reconciliation. Use for 'add a
+    Contractor Expense account numbered 5800'.
+    """
+    if not number.isdigit() or not 1 <= len(number) <= 10:
+        raise ToolError(f"'number' must be 1-10 digits, e.g. '5800' (got '{number}')")
+    context.check_choice(type, ACCOUNT_TYPES, "type")
+    with context.get_session() as db:
+        account = accounts.create_account(
+            db,
+            AccountCreate(
+                number=number,
+                name=name,
+                type=AccountType(type),
+                subtype=subtype,
+                description=description,
+                bank_kind=bank_kind,
+            ),
+        )
+        return AccountRead.model_validate(account).model_dump(mode="json")
+
+
+@context.safe_tool
+def update_account(
+    account: str,
+    name: str | None = None,
+    description: str | None = None,
+    bank_kind: str | None = None,
+) -> dict[str, Any]:
+    """Update an account; only the provided fields change.
+
+    ``account`` is a number ('5400') or name ('Office Supplies
+    Expense'). Omitted fields keep their current values. Use to rename
+    an account or fix its description, e.g. 'rename 5400 to Office
+    Supplies'. Deactivate with deactivate_account.
+    """
+    with context.get_session() as db:
+        account_obj = context.resolve_account(db, account)
+        changes: dict[str, Any] = {
+            "name": name,
+            "description": description,
+            "bank_kind": bank_kind,
+        }
+        data = AccountUpdate(
+            **{key: value for key, value in changes.items() if value is not None}
+        )
+        updated = accounts.update_account(db, account_obj.id, data)
+        return AccountRead.model_validate(updated).model_dump(mode="json")
+
+
+@context.safe_tool
+def deactivate_account(account: str) -> dict[str, Any]:
+    """Deactivate an account so it cannot be used on new entries.
+
+    ``account`` is a number or name. Refuses system accounts (Cash,
+    Accounts Receivable, ...) and accounts with journal history.
+    History is never modified. Use for 'retire the old Marketing
+    Expense account'.
+    """
+    with context.get_session() as db:
+        account_obj = context.resolve_account(db, account)
+        updated = accounts.deactivate_account(db, account_obj.id)
+        return AccountRead.model_validate(updated).model_dump(mode="json")
+
+
 # --- Resources ---------------------------------------------------------
 
 
@@ -840,6 +922,9 @@ def write_tools() -> list[Callable[..., Any]]:
         create_item,
         update_item,
         deactivate_item,
+        create_account,
+        update_account,
+        deactivate_account,
     ]
 
 

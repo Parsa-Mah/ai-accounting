@@ -58,6 +58,9 @@ WRITE_TOOL_NAMES = {
     "create_item",
     "update_item",
     "deactivate_item",
+    "create_account",
+    "update_account",
+    "deactivate_account",
 }
 
 
@@ -690,3 +693,125 @@ async def test_deactivate_item_hides_from_default_list(write_server) -> None:
         )
     assert "Logo Design" not in {row["name"] for row in default_rows}
     assert "Logo Design" in {row["name"] for row in all_rows}
+
+
+@pytest.mark.anyio
+async def test_create_account_round_trip(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        created = await client.call_tool(
+            "create_account",
+            {"number": "5800", "name": "Contractor Expense", "type": "expense"},
+        )
+        assert created.is_error is False
+        body = created.structured_content
+        assert body["number"] == "5800"
+        assert body["name"] == "Contractor Expense"
+        assert body["type"] == "expense"
+        assert body["subtype"] is None
+        assert body["is_system"] is False
+        assert body["is_active"] is True
+
+        listed = _rows(await client.call_tool("list_accounts", {}))
+    assert any(row["number"] == "5800" for row in listed)
+
+
+@pytest.mark.anyio
+async def test_create_account_duplicate_number_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "create_account",
+            {"number": "1000", "name": "Cash Two", "type": "asset"},
+        )
+    assert result.is_error is True
+    text = _text(result)
+    assert "1000" in text
+    assert "already exists" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_create_account_invalid_type_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "create_account",
+            {"number": "5800", "name": "Contractor Expense", "type": "bogus"},
+        )
+    assert result.is_error is True
+    text = _text(result)
+    assert "Invalid type" in text
+    assert "expense" in text
+
+
+@pytest.mark.anyio
+async def test_create_account_bad_number_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "create_account",
+            {"number": "1A", "name": "Bad Number", "type": "expense"},
+        )
+    assert result.is_error is True
+    assert "digit" in _text(result).lower()
+
+
+@pytest.mark.anyio
+async def test_update_account_partial_keeps_other_fields(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "update_account",
+            {
+                "account": "5400",
+                "name": "Office Supplies",
+                "description": "Pens, paper, toner",
+            },
+        )
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["name"] == "Office Supplies"
+    assert body["description"] == "Pens, paper, toner"
+    assert body["number"] == "5400"
+    assert body["type"] == "expense"
+    assert body["subtype"] == "supplies"
+
+
+@pytest.mark.anyio
+async def test_update_account_missing_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "update_account", {"account": "9999", "name": "Ghost"}
+        )
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_deactivate_account_marks_inactive_in_list(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        created = await client.call_tool(
+            "create_account",
+            {"number": "5800", "name": "Contractor Expense", "type": "expense"},
+        )
+        assert created.is_error is False
+        result = await client.call_tool("deactivate_account", {"account": "5800"})
+        assert result.is_error is False
+        assert result.structured_content["is_active"] is False
+
+        listed = _rows(await client.call_tool("list_accounts", {}))
+    row = next(row for row in listed if row["number"] == "5800")
+    assert row["active"] is False
+
+
+@pytest.mark.anyio
+async def test_deactivate_system_account_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("deactivate_account", {"account": "Cash"})
+    assert result.is_error is True
+    assert "system" in _text(result).lower()
+
+
+@pytest.mark.anyio
+async def test_deactivate_used_account_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("deactivate_account", {"account": "5100"})
+    assert result.is_error is True
+    assert "journal entries" in _text(result).lower()
