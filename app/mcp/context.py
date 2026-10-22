@@ -20,6 +20,7 @@ from app.database import SessionLocal
 from app.models.account import Account
 from app.models.party import Customer, Vendor
 from app.services import accounts as accounts_service
+from app.services import audit as audit_service
 from app.services import parties
 from app.services.errors import ConflictError, NotFoundError, ValidationError
 from app.services.export import money
@@ -44,9 +45,12 @@ def get_session() -> Iterator[Session]:
     """One DB session per tool call: commit on success, close in finally.
 
     Services commit internally on success; the outer commit is a no-op
-    safety net, and the rollback undoes partial work on failure.
+    safety net, and the rollback undoes partial work on failure. The MCP
+    actor (``ai:<MCP_CLIENT_NAME>``) is set for the call, so every write
+    is audited as the AI client rather than ``system``.
     """
     db = SessionLocal()
+    token = audit_service.set_actor(audit_service.ai_actor())
     try:
         yield db
         db.commit()
@@ -55,6 +59,7 @@ def get_session() -> Iterator[Session]:
         raise
     finally:
         db.close()
+        audit_service.reset_actor(token)
 
 
 def safe_tool(fn: F) -> F:

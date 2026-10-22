@@ -1,6 +1,7 @@
 """SQLAlchemy ORM models."""
 
 from app.models.account import Account, AccountType
+from app.models.audit import AuditLog
 from app.models.bill import Bill, BillLine, BillPayment
 from app.models.budget import Budget
 from app.models.estimate import Estimate, EstimateLine
@@ -14,6 +15,7 @@ from app.models.user import User
 __all__ = [
     "Account",
     "AccountType",
+    "AuditLog",
     "Bill",
     "BillLine",
     "BillPayment",

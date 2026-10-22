@@ -70,8 +70,13 @@ def _ensure_journal_line_columns(db) -> None:
 def init_db():
     from app import models  # noqa: F401  (registers models on Base.metadata)
     from app.seed.coa import seed_coa
+    # Local import: a module-level one would cycle
+    # database -> services.audit -> models.audit -> database.
+    from app.services import audit as audit_service
 
     Base.metadata.create_all(engine)
+    # Before seeding, so the COA seed itself is audited (as ``system``).
+    audit_service.install_hooks()
     db = SessionLocal()
     try:
         _ensure_journal_line_columns(db)
