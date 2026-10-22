@@ -18,7 +18,7 @@ Python accounting web application (double-entry bookkeeping core + invoicing, AR
 
 **Post-build — README translations in progress.** The README is translated per language to a root `README.{code}.md` (English baseline `README.md`) with a generated language-switcher block linking them. Three of 85 are done (`en`, `fa`, `he`); 82 queued. **README translations are deliberately decoupled from the app-dictionary language batches** — a language batch touches only `static/i18n/{code}.json` + `LANGS`; the READMEs are translated later, in their own batches, following the same queue order (Kurdish is two variants — `ckb` + `kmr`). See "README translations" below.
 
-**Post-translation roadmap (queued):** make the AI the **full controller** of the application — audit trail + MCP parity → period locking → AI command center → workflow extensions. Starts when the 85-language rollout is complete or when the user decides it is time (user decision 2026-10-16). See "Post-Translation Roadmap" below and decision #30.
+**Post-translation roadmap (in progress):** make the AI the **full controller** of the application — **Phase 1a (actor identity + audit trail) implemented 2026-10-22** → MCP parity → period locking → AI command center → workflow extensions. Started when the user decided it was time (user decision 2026-10-16). See "Post-Translation Roadmap" below, decisions #30–#31, and the "Audit trail" domain rule.
 
 ## Architecture
 
@@ -32,9 +32,9 @@ Accounting/
 │   ├── main.py        # FastAPI app factory, mounts, DB init, exception handlers
 │   ├── database.py    # engine, session, schema init, COA seed hook
 │   ├── dependencies.py# get_current_user (cookie session auth)
-│   ├── models/        # Account, AccountType, User, JournalEntry, JournalLine, Customer, Vendor, Item, Invoice, Estimate, Bill, Budget, Reconciliation
+│   ├── models/        # Account, AccountType, User, JournalEntry, JournalLine, Customer, Vendor, Item, Invoice, Estimate, Bill, Budget, Reconciliation, AuditLog
 │   ├── schemas/       # Pydantic v2 request/response models
-│   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills, budgets, reconciliation, export
+│   ├── services/      # domain logic: accounts, auth, errors, journal, ledger, reports, parties, items, invoices, estimates, bills, budgets, reconciliation, export, audit
 │   ├── routers/       # auth, accounts, journal, ledger, reports, parties, items, invoices, bills, budgets, reconciliation, estimates, export
 │   ├── mcp/           # context.py (sessions + helpers), tools.py (19 tools + 2 resources + 3 prompts), server.py (build_server + HTTP auth)
 │   └── seed/          # coa.py (standard COA, auto-seeded); demo.py (demo data via --seed)
@@ -59,7 +59,8 @@ Layering: `routers → services → models (SQLAlchemy) → SQLite`. The fronten
 | `main.py` | uvicorn runner; `--host`/`--port`/`--seed` (`--seed` calls `seed_demo_data()` before startup) |
 | `mcp_server.py` | MCP entry: stdio by default; `--http` (requires `MCP_HTTP_TOKEN`), `--host`/`--port`, `--print-config <client>` |
 | `app/main.py` | `create_app()` factory: `init_db()`, domain-exception handlers (404/409), all routers, `/api/health`, static SPA mount at `/` |
-| `app/database.py` | SQLite engine (`accounting.db` at root, `ACCOUNTING_DB_PATH` override), WAL pragmas, `Base`/`SessionLocal`/`get_db`, `init_db` (tables + `ALTER TABLE` guard + COA seed) |
+| `app/database.py` | SQLite engine (`accounting.db` at root, `ACCOUNTING_DB_PATH` override), WAL pragmas, `Base`/`SessionLocal`/`get_db`, `init_db` (tables + `ALTER TABLE` guard + installs audit hook + COA seed) |
+| `app/services/audit.py` | Audit trail: actor contextvar (`set_actor`/`ai_actor`) + idempotent `Session` hook (`after_flush` buffer → `after_commit` follow-up-transaction write → `after_rollback` clear); installed from `init_db()` |
 | `app/seed/coa.py` | 26-account standard COA, auto-seeded idempotently by `init_db` |
 | `app/seed/demo.py` | `seed_demo_data()` for `--seed` (idempotent demo business) |
 | `tests/conftest.py` | temp-DB env var; `app_client` (anonymous) + `client` (authenticated admin) fixtures |
@@ -195,6 +196,17 @@ Localization target is **85 languages**. All 85 are done (`en, fr, de, it, es, p
 - **SDK**: Python MCP SDK **v2** (`mcp>=2`, `MCPServer` — not legacy FastMCP); plain `def` tools run in a thread pool (sync SQLAlchemy is fine); the return type annotation is the output schema (return plain dicts/lists, no Pydantic output models); `ToolError` from `mcp.server.mcpserver.exceptions`.
 - **Testing**: `tests/test_mcp_server.py` uses the SDK in-memory pattern — `Client(build_server(), raise_exceptions=True)` over anyio/asyncio against a fresh demo-seeded DB.
 
+**Audit trail (Phase 1a)**
+
+- **What**: an append-only `audit_log` table — one row per **committed** write: `actor`, `action` (`create`/`update`/`delete`), `model` (ORM class name), `record_id`, `timestamp`. Services and routers are audit-unaware; a centralized Session hook does the logging, so the single-posting-path convention is untouched. No read endpoint/UI yet (deferred; Phase 3's command center will consume the trail).
+- **Actor identity**: a contextvar (default `system`) set at the two front doors — `user:<id>` in `get_current_user` (web) and `ai:<MCP_CLIENT_NAME>` in `context.get_session()` (MCP; env read **at call time**, default `ai:mcp`, so tests can monkeypatch after `build_server()`). The COA seed, `--seed` demo data, and first-run auth setup log as `system` (the auth router does not go through `get_current_user`).
+- **Skip set (negative)**: `AuditLog` (recursion guard) + the four line-item child models (`JournalLine`, `InvoiceLine`, `BillLine`, `EstimateLine` — audited through their parent). Any **future** model is audited by default (fail-safe for "every AI action is traceable").
+- **Mechanism**: `app/services/audit.py::install_hooks()` (idempotent `_installed` flag; called from `init_db()` **before** `seed_coa`, so the COA seed itself is audited) registers on the **`Session` class** so every session is covered. `after_flush` buffers `(model, action, record_id)` into `session.info` — at `after_flush` time the session's `new`/`dirty`/`deleted` sets still hold the flushed objects (`finalize_flush_changes` runs after the event; the `flush_context` arg is a `UOWTransaction` with no per-flush object lists in SQLAlchemy 2.0). `after_commit` writes the buffered rows in a **follow-up transaction** via a fresh `SessionLocal()`. `after_rollback` clears the buffer, so nothing uncommitted is ever audited.
+- **Constraint (why not same-transaction)**: SQLAlchemy 2.0.54 blocks re-entrant `flush()` ("Session is already flushing") and committing inside `after_commit` ("committed" state), so audit rows commit in a follow-up transaction (microseconds after the change they describe) rather than atomically with it.
+- **Front-door note**: `get_current_user` is **`async`** (not sync) on purpose — a sync dependency runs in a throwaway threadpool context, so a contextvar set there never reaches the endpoint's commits; async runs in the request's task context, so the actor propagates.
+- **Granularity**: one row per **distinct change** — a record flushed mid-operation then modified yields `create` + `update` (e.g. `create_invoice` flushes to assign `invoice.id`, then sets `entry_id` on commit).
+- **Tests**: `tests/test_audit.py` (5 tests): web write as `user:1` (gate), MCP write as `ai:mcp`/`ai:opencode`, budget create/update/delete lifecycle, one-row-per-change + no line items, COA seed as `system`.
+
 ## Scope
 
 Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-company, job costing. In scope: accounts, customers, vendors, items, invoices, estimates, payments, bills, journal, bank register + reconciliation, reports, budgets, tax, auth, seed data, MCP access.
@@ -205,7 +217,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 
 | Phase | What | Notes |
 | --- | --- | --- |
-| 1a | **Actor identity + audit trail** | `AuditLog` model + actor contextvar (`user:<id>` from the web, `ai:<client>` from MCP) + SQLAlchemy `after_flush` hooks on the written models (the planned pattern from Known Limitations). Done **first**, so every AI action is traceable before the AI's control expands. |
+| 1a | **Actor identity + audit trail** | ✅ **Done (2026-10-22).** `AuditLog` model + actor contextvar (`user:<id>` web, `ai:<client>` MCP, `system` seed) + a centralized idempotent Session hook (`after_flush` buffer → `after_commit` follow-up-transaction write; SQLAlchemy 2.0 blocks the originally-planned same-transaction re-flush). See the "Audit trail" domain rule. Done **first**, so every AI action is traceable before the AI's control expands. |
 | 1b | **MCP parity** | Grow the MCP surface to 100% of the app's capabilities. Today: 12 read + 7 write tools (`app/mcp/tools.py`). Missing: account create/update/deactivate, customer/vendor list+create+update, item CRUD, estimate create/convert/void, `void_bill`/`get_bill`, budget list/get/update/delete, reconciliation list-bank-accounts/create/delete, journal list/get/void, report export (CSV content), demo seed. Each tool wraps an existing service — same pattern as the current write tools, no new domain logic; batched by domain, `tests/test_mcp_server.py` green after each batch. |
 | 2 | **Period locking** | `Period` model (`is_locked`) + a guard in the single posting path and the edit/void paths (409 inside a locked period, controlled reopen). Protects the books from human *and* AI mistakes once the AI has full write access. |
 | 3 | **AI command center** | Chat page in the SPA: natural-language question → local LLM acts through the typed MCP tools → **traceable answers with links to the supporting transactions** → **proposed actions** → user approves/rejects → posts through the single posting path. The differentiator no incumbent offers with local privacy; only possible after Phase 1. Largest, most open-ended phase. |
@@ -249,6 +261,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 | 28 | Dev workflow: adopt the `open-codebase-index` opencode plugin for semantic code navigation — embeddings from Google's Gemma embedding model (`embeddinggemma-2`, 768 dims) served locally via LM Studio; auto-index + file watcher; per-project index in `.opencode/index/` (gitignored); plugin + embedding config live in global opencode config (`~/.opencode/opencode.json`, `~/.config/opencode/codebase-index.json`), not in this repo | Complements `AIHelper.md` ("what is this project and what rules govern it") with "where is this behavior implemented?" lookups (semantic search, definition lookup, call graph); keeps all inference local, consistent with the project's local-model premise; the index is a rebuildable artifact, so nothing index-related needs to be committed. Installed + verified 2026-10-09. |
 | 29 | Kurdish localized as two distinct variants — Central/Sorani `ckb` (Arabic script, `dir: "rtl"`) and Northern/Kurmanji `kmr` (Latin script, LTR) — instead of a single generic `ku`, raising the localization target from 84 to 85 languages | The generic ISO 639-1 code `ku` is ambiguous and cannot be used twice (two `ku.json` files collide; two `ku` `LANGS` entries fail the unique-code parity test). The standard ISO 639-3 codes are consistent with the existing `prs` (Dari) precedent of a 3-letter code for a language without a unique 2-letter one; the RTL variant reuses the validated RTL layout (decision #22). User request (2026-10-12). |
 | 30 | Post-translation roadmap: make the AI the **full controller** of the app — (1a) actor-aware audit trail first, (1b) MCP surface grown to full parity with the app, (2) period locking, (3) AI command center (chat UI, local LLM acting through typed tools, traceable answers, human-approved actions), (4) workflow extensions (recurring transactions, bank CSV import, one-jurisdiction tax, dimensions). Multi-user roles, multi-currency, multi-entity consolidation, and revenue recognition explicitly deferred | User decision (2026-10-16): "the AI should control this application at full." An external (ChatGPT) analysis of the public repo confirmed the gaps (no audit trail, no period locking, flat tax, single-user auth) and recommended local-first AI-native positioning over QuickBooks/Xero feature parity; the roadmap adopts that prioritization reframed around AI control. Audit trail comes first so the expanded AI control is traceable from day one; MCP parity is achievable without new domain logic because every tool wraps an existing service through the single posting path |
+| 31 | Phase 1a implemented (2026-10-22): append-only `AuditLog` (id/timestamp/actor/action/model/record_id — no `details` column in v1); actor contextvar (default `system`) set at the two front doors (`user:<id>` in `get_current_user`, `ai:<MCP_CLIENT_NAME>` in `context.get_session()`); centralized idempotent `Session` hook — `after_flush` buffers `(model, action, record_id)` into `session.info`, `after_commit` writes rows in a follow-up transaction via a fresh session, `after_rollback` clears; negative skip set (`AuditLog` + the four line-item models); write + tests only (no read endpoint, no UI). Deviations from the original brief, forced by the stack: same-transaction re-flush is impossible on SQLAlchemy 2.0.54 (→ follow-up transaction, the brief's own fallback); `flush_context` carries no object lists (→ read the session's `new/dirty/deleted` sets); `get_current_user` made `async` so the actor contextvar reaches the endpoint's commits | Negative skip list = future models are audited by default (fail-safe for "every AI action is traceable"); the follow-up transaction keeps every committed write auditable while respecting SQLAlchemy 2.0's event constraints; front-door wiring keeps all services audit-unaware, preserving the single-posting-path convention; `async` `get_current_user` is required because a sync dependency's contextvar set is lost in its throwaway threadpool context |
 
 ## Environment & Tooling Notes
 
@@ -256,7 +269,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - **pip mirror**: `pypi.org` is unreachable from this machine (timeouts). Install with `-i https://mirrors.aliyun.com/pypi/simple/` (verified working).
 - **LSP**: opencode's pyright LSP needs the venv — configured via `pyrightconfig.json` (`venvPath`/`venv`) and the gitignored local `opencode.jsonc`. If the LSP reports unresolved third-party imports (sqlalchemy, pytest, fastapi...), **restart opencode** so it reloads config; the code is fine if pytest passes.
 - **Run app**: `.venv\Scripts\python.exe main.py` → http://127.0.0.1:8000 (OpenAPI docs at `/docs`). First API use requires `POST /api/auth/setup`.
-- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (208 tests).
+- **Run tests**: `.venv\Scripts\python.exe -m pytest -v` (213 tests).
 - **Run MCP server**: `.venv\Scripts\python.exe mcp_server.py` (stdio) or `MCP_HTTP_TOKEN=... .venv\Scripts\python.exe mcp_server.py --http` (streamable HTTP at `http://127.0.0.1:8765/mcp`); `--print-config <client>` prints ready-to-paste client configs.
 - **Type check**: `.venv\Scripts\python.exe -m pyright app` — keep it at 0 errors.
 - **DB file**: `accounting.db` (+ `-wal`/`-shm` sidecars) at project root, gitignored. Tests use a temp DB via `ACCOUNTING_DB_PATH`.
@@ -265,7 +278,7 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 ## Known Limitations
 
 - No frontend unit tests yet (validated via `node --check` + a TestClient smoke script).
-- No audit logging yet (planned pattern: SQLAlchemy `after_flush` hooks — scheduled as Phase 1a of the Post-Translation Roadmap, with actor identity for human vs AI writes).
+- Audit logging is **implemented** (Phase 1a, 2026-10-22) — see the "Audit trail" domain rule. Remaining gaps: no read endpoint/UI for the trail, and no `details`/per-field before-after diff column (both deferred).
 
 ## AI Instructions
 
@@ -284,14 +297,14 @@ Deliberately out of scope: payroll, QBO sync, Stripe, OCR, nonprofit, multi-comp
 - Working dir: `D:\Projects\Python\GithubResume\Accounting`
 - Parent dir `GithubResume` implies this is a GitHub portfolio project
 - DB file: `accounting.db` at project root (WAL mode)
-- Test suite: 208 tests, all passing (build complete + i18n Phase 0 + README i18n)
+- Test suite: 213 tests, all passing (build complete + i18n Phase 0 + README i18n + Phase 1a audit trail)
 
 ## Metadata
 
-- Last Updated: 2026-10-21
+- Last Updated: 2026-10-22
 - Last Full Scan: 2026-09-22 (full inventory of implemented app/ + tests/ for Phase 0–2 handoff)
-- Last Incremental Update: 2026-10-21 (i18n batch 26: `gn`/`mi`/`ht`/`la` dictionaries + `LANGS` entries; 85/85 app languages done, queue complete; no code change)
-- Files Analyzed: `static/i18n/gn.json`, `static/i18n/mi.json`, `static/i18n/ht.json`, `static/i18n/la.json`, `static/i18n/en.json`, `static/js/i18n.js`, `tests/test_i18n.py`, `AIHelper.md`
-- Git Commit: `01087d2` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
-- Architecture Version: 0.15 (unchanged — the roadmap is a queued plan, no implemented architecture change; RTL layout: `dir` applied on initial load + logical `text-align` in CSS/inline; RTL languages `fa`, `ar`, `prs`, `he`, `ckb`, `ps`, `ur`)
-- AIHelper Version: 37 (i18n batch 25 recorded; no app architecture change)
+- Last Incremental Update: 2026-10-22 (Phase 1a implemented — actor identity + audit trail: `AuditLog` model, `app/services/audit.py` Session hook, actor wiring in `get_current_user` (async) + `context.get_session`, `tests/test_audit.py`; 213 tests green, pyright clean)
+- Files Analyzed: `app/models/audit.py`, `app/services/audit.py`, `tests/test_audit.py`, `app/models/__init__.py`, `app/database.py`, `app/dependencies.py`, `app/mcp/context.py`, `app/services/journal.py`, `app/services/invoices.py`, `app/seed/coa.py`, `AIHelper.md`
+- Git Commit: `353156e` (branch `main`, tracking `origin/main` at `git@github.com:Parsa-Mah/ai-accounting.git`)
+- Architecture Version: 0.16 (Phase 1a audit trail implemented — append-only `audit_log` + centralized Session hook + actor identity at both front doors; RTL layout: `dir` applied on initial load + logical `text-align` in CSS/inline; RTL languages `fa`, `ar`, `prs`, `he`, `ckb`, `ps`, `ur`)
+- AIHelper Version: 39 (Phase 1a implemented; "Audit trail" domain rule + decision #31 added)
