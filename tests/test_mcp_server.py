@@ -53,6 +53,11 @@ WRITE_TOOL_NAMES = {
     "create_bill",
     "pay_bill",
     "create_budget",
+    "create_customer",
+    "create_vendor",
+    "create_item",
+    "update_item",
+    "deactivate_item",
 }
 
 
@@ -269,6 +274,47 @@ async def test_list_reconciliations(mcp_server) -> None:
     assert recon["is_balanced"] is True
     assert recon["difference_cents"] == 0
     assert recon["difference_cents_usd"] == "0.00"
+
+
+@pytest.mark.anyio
+async def test_list_customers(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("list_customers", {})
+    assert result.is_error is False
+    rows = _rows(result)
+    assert [row["name"] for row in rows] == [
+        "Acme Corporation",
+        "Globex Inc",
+        "Initech LLC",
+    ]
+    assert rows[0]["email"] == "billing@acme.example"
+    assert rows[0]["id"] and rows[0]["created_at"]
+
+
+@pytest.mark.anyio
+async def test_list_vendors(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("list_vendors", {})
+    assert result.is_error is False
+    rows = _rows(result)
+    assert [row["name"] for row in rows] == [
+        "City Power & Light",
+        "CloudHost Inc",
+        "OfficeMax Supplies",
+    ]
+
+
+@pytest.mark.anyio
+async def test_list_items(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("list_items", {})
+    assert result.is_error is False
+    rows = _rows(result)
+    assert len(rows) == 5
+    assert all(row["is_active"] is True for row in rows)
+    consulting = next(row for row in rows if row["name"] == "Consulting (day)")
+    assert consulting["unit_price_cents"] == 25000
+    assert consulting["unit_price_cents_usd"] == "250.00"
 
 
 @pytest.mark.anyio
@@ -546,3 +592,101 @@ async def test_create_budget(write_server) -> None:
     rows = report.structured_content["rows"]
     rent_rows = [row for row in rows if row["account_number"] == "5100"]
     assert {row["budget_cents"] for row in rent_rows} == {200000, 300000}
+
+
+@pytest.mark.anyio
+async def test_create_customer_round_trip(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        created = await client.call_tool(
+            "create_customer",
+            {"name": "Northwind Traders", "email": "ap@northwind.example"},
+        )
+        assert created.is_error is False
+        body = created.structured_content
+        assert body["name"] == "Northwind Traders"
+        assert body["email"] == "ap@northwind.example"
+        assert body["phone"] is None
+
+        listed = _rows(await client.call_tool("list_customers", {}))
+    assert any(row["id"] == body["id"] for row in listed)
+
+
+@pytest.mark.anyio
+async def test_create_vendor_round_trip(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        created = await client.call_tool(
+            "create_vendor", {"name": "Stark Industries"}
+        )
+        assert created.is_error is False
+        body = created.structured_content
+        assert body["name"] == "Stark Industries"
+
+        listed = _rows(await client.call_tool("list_vendors", {}))
+    assert any(row["id"] == body["id"] for row in listed)
+
+
+@pytest.mark.anyio
+async def test_create_item_round_trip(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        created = await client.call_tool(
+            "create_item",
+            {
+                "name": "SEO Audit",
+                "description": "One-time SEO audit",
+                "unit_price_cents": 75000,
+            },
+        )
+        assert created.is_error is False
+        body = created.structured_content
+        assert body["unit_price_cents"] == 75000
+        assert body["unit_price_cents_usd"] == "750.00"
+        assert body["is_active"] is True
+
+        listed = _rows(await client.call_tool("list_items", {}))
+    assert any(row["id"] == body["id"] for row in listed)
+
+
+@pytest.mark.anyio
+async def test_update_item_partial_keeps_other_fields(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_items", {}))
+        consulting = next(row for row in listed if row["name"] == "Consulting (day)")
+        result = await client.call_tool(
+            "update_item",
+            {"item_id": consulting["id"], "unit_price_cents": 30000},
+        )
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["unit_price_cents"] == 30000
+    assert body["unit_price_cents_usd"] == "300.00"
+    assert body["name"] == "Consulting (day)"
+    assert body["description"] == "Consulting service, billed per day"
+
+
+@pytest.mark.anyio
+async def test_update_item_missing_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "update_item", {"item_id": 9999, "name": "Ghost"}
+        )
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_deactivate_item_hides_from_default_list(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_items", {}))
+        logo = next(row for row in listed if row["name"] == "Logo Design")
+        result = await client.call_tool("deactivate_item", {"item_id": logo["id"]})
+        assert result.is_error is False
+        assert result.structured_content["is_active"] is False
+
+        default_rows = _rows(await client.call_tool("list_items", {}))
+        all_rows = _rows(
+            await client.call_tool("list_items", {"include_inactive": True})
+        )
+    assert "Logo Design" not in {row["name"] for row in default_rows}
+    assert "Logo Design" in {row["name"] for row in all_rows}

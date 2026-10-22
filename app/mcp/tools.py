@@ -16,14 +16,18 @@ from app.schemas.bill import BillLineCreate, BillRead
 from app.schemas.budget import BudgetCreate
 from app.schemas.estimate import EstimateRead
 from app.schemas.invoice import InvoiceLineCreate, InvoiceRead
+from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
 from app.schemas.journal import JournalLineCreate
+from app.schemas.party import CustomerCreate, CustomerRead, VendorCreate, VendorRead
 from app.services import accounts
 from app.services import budgets as budgets_service
 from app.services import bills as bills_service
 from app.services import estimates as estimates_service
 from app.services import invoices as invoices_service
+from app.services import items as items_service
 from app.services import journal as journal_service
 from app.services import ledger
+from app.services import parties as parties_service
 from app.services import reconciliation as reconciliation_service
 from app.services import reports
 
@@ -273,6 +277,53 @@ def list_reconciliations() -> list[dict[str, Any]]:
     """
     with context.get_session() as db:
         return context.with_usd(reconciliation_service.list_reconciliations(db))
+
+
+@context.safe_tool
+def list_customers() -> list[dict[str, Any]]:
+    """List all customers (accounts receivable parties), by name.
+
+    Returns id, name, email, phone, address. Use to discover customer
+    names before create_invoice, or for 'who are our customers?'.
+    """
+    with context.get_session() as db:
+        return [
+            CustomerRead.model_validate(customer).model_dump(mode="json")
+            for customer in parties_service.list_customers(db)
+        ]
+
+
+@context.safe_tool
+def list_vendors() -> list[dict[str, Any]]:
+    """List all vendors (accounts payable parties), by name.
+
+    Returns id, name, email, phone, address. Use to discover vendor
+    names before create_bill, or for 'who do we buy from?'.
+    """
+    with context.get_session() as db:
+        return [
+            VendorRead.model_validate(vendor).model_dump(mode="json")
+            for vendor in parties_service.list_vendors(db)
+        ]
+
+
+@context.safe_tool
+def list_items(include_inactive: bool = False) -> list[dict[str, Any]]:
+    """List the item catalog: name, description, unit price, active.
+
+    ``include_inactive`` also returns deactivated items. Use to discover
+    catalog items and their prices, or for 'what do we charge for
+    consulting?'.
+    """
+    with context.get_session() as db:
+        return context.with_usd(
+            [
+                ItemRead.model_validate(item).model_dump(mode="json")
+                for item in items_service.list_items(
+                    db, include_inactive=include_inactive
+                )
+            ]
+        )
 
 
 # --- Write tools (registered only when MCP_ALLOW_WRITE=1) --------------
@@ -577,6 +628,110 @@ def create_budget(
         )
 
 
+@context.safe_tool
+def create_customer(
+    name: str,
+    email: str | None = None,
+    phone: str | None = None,
+    address: str | None = None,
+) -> dict[str, Any]:
+    """Create a customer (accounts receivable party).
+
+    Only ``name`` is required. Use before invoicing a new customer, e.g.
+    'add Northwind Traders as a customer'.
+    """
+    with context.get_session() as db:
+        customer = parties_service.create_customer(
+            db, CustomerCreate(name=name, email=email, phone=phone, address=address)
+        )
+        return CustomerRead.model_validate(customer).model_dump(mode="json")
+
+
+@context.safe_tool
+def create_vendor(
+    name: str,
+    email: str | None = None,
+    phone: str | None = None,
+    address: str | None = None,
+) -> dict[str, Any]:
+    """Create a vendor (accounts payable party).
+
+    Only ``name`` is required. Use before recording a bill from a new
+    vendor, e.g. 'add Stark Industries as a vendor'.
+    """
+    with context.get_session() as db:
+        vendor = parties_service.create_vendor(
+            db, VendorCreate(name=name, email=email, phone=phone, address=address)
+        )
+        return VendorRead.model_validate(vendor).model_dump(mode="json")
+
+
+@context.safe_tool
+def create_item(
+    name: str,
+    description: str | None = None,
+    unit_price_cents: int = 0,
+    is_active: bool = True,
+) -> dict[str, Any]:
+    """Create a catalog item with an optional unit price.
+
+    ``unit_price_cents`` is integer cents (25000 = $250.00). Use to build
+    the item catalog, e.g. 'add a Consulting (day) item at $250'.
+    """
+    with context.get_session() as db:
+        item = items_service.create_item(
+            db,
+            ItemCreate(
+                name=name,
+                description=description,
+                unit_price_cents=unit_price_cents,
+                is_active=is_active,
+            ),
+        )
+        return context.with_usd(ItemRead.model_validate(item).model_dump(mode="json"))
+
+
+@context.safe_tool
+def update_item(
+    item_id: int,
+    name: str | None = None,
+    description: str | None = None,
+    unit_price_cents: int | None = None,
+    is_active: bool | None = None,
+) -> dict[str, Any]:
+    """Update a catalog item; only the provided fields change.
+
+    Omitted fields keep their current values. Use to fix a price or
+    rename an item, e.g. 'raise Consulting (day) to $300'.
+    """
+    with context.get_session() as db:
+        data = ItemUpdate(
+            **{
+                key: value
+                for key, value in {
+                    "name": name,
+                    "description": description,
+                    "unit_price_cents": unit_price_cents,
+                    "is_active": is_active,
+                }.items()
+                if value is not None
+            }
+        )
+        item = items_service.update_item(db, item_id, data)
+        return context.with_usd(ItemRead.model_validate(item).model_dump(mode="json"))
+
+
+@context.safe_tool
+def deactivate_item(item_id: int) -> dict[str, Any]:
+    """Deactivate a catalog item so it cannot be used on new documents.
+
+    History is never modified. Use for 'retire the Logo Design item'.
+    """
+    with context.get_session() as db:
+        item = items_service.deactivate_item(db, item_id)
+        return context.with_usd(ItemRead.model_validate(item).model_dump(mode="json"))
+
+
 # --- Resources ---------------------------------------------------------
 
 
@@ -664,6 +819,9 @@ def read_tools() -> list[Callable[..., Any]]:
         list_estimates,
         get_budget_report,
         list_reconciliations,
+        list_customers,
+        list_vendors,
+        list_items,
     ]
 
 
@@ -677,6 +835,11 @@ def write_tools() -> list[Callable[..., Any]]:
         create_bill,
         pay_bill,
         create_budget,
+        create_customer,
+        create_vendor,
+        create_item,
+        update_item,
+        deactivate_item,
     ]
 
 
