@@ -10,7 +10,9 @@ Demo-seed expectations (relative to the current month): 5 invoices
 2x "Monthly rent" entries, 1 balanced Cash reconciliation.
 """
 
+import csv
 import datetime
+import io
 
 import pytest
 
@@ -83,6 +85,12 @@ def _text(result) -> str:
     content = result.content[0]
     assert isinstance(content, TextContent)
     return content.text
+
+
+def _csv_rows(result) -> list[list[str]]:
+    """The parsed CSV rows (header first) of an export_report result."""
+    body = result.structured_content
+    return [row for row in csv.reader(io.StringIO(body["csv"]))]
 
 
 def _current_month() -> str:
@@ -239,6 +247,182 @@ async def test_search_transactions_query_and_account(mcp_server) -> None:
     rows = _rows(by_account)
     assert len(rows) > 0
     assert all(row["account_number"] == "1000" for row in rows)
+
+
+@pytest.mark.anyio
+async def test_export_report_trial_balance(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("export_report", {"report": "trial_balance"})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["title"] == "Trial Balance"
+    assert body["subtitle"] == "All time"
+    assert body["filename"] == "trial-balance.csv"
+    rows = _csv_rows(result)
+    assert rows[0] == ["number", "name", "type", "debit", "credit"]
+    assert rows[-1][2] == "Total"
+    cash = next(row for row in rows[1:-1] if row[0] == "1000")
+    assert cash[1] == "Cash"
+    assert cash[2] == "asset"
+
+
+@pytest.mark.anyio
+async def test_export_report_general_ledger(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "export_report", {"report": "general_ledger", "account": "1000"}
+        )
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["title"] == "General Ledger"
+    assert body["filename"] == "general-ledger-1000.csv"
+    rows = _csv_rows(result)
+    assert rows[0] == [
+        "date",
+        "entry",
+        "description",
+        "line_description",
+        "debit",
+        "credit",
+        "balance",
+        "cleared",
+    ]
+    assert rows[1][2] == "Opening balance"
+    assert rows[-1][2] == "Closing balance"
+    # The capital injection's cash line shows $25,000.00 as formatted dollars.
+    assert any(
+        row[3] == "Cash" and row[4] == "25000.00" for row in rows[1:-1]
+    )
+
+
+@pytest.mark.anyio
+async def test_export_report_general_ledger_missing_account(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("export_report", {"report": "general_ledger"})
+    assert result.is_error is True
+    assert "account" in _text(result)
+
+
+@pytest.mark.anyio
+async def test_export_report_income_statement(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("export_report", {"report": "income_statement"})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["title"] == "Income Statement"
+    assert body["filename"] == "income-statement.csv"
+    rows = _csv_rows(result)
+    assert rows[0] == ["section", "number", "name", "amount"]
+    names = [row[2] for row in rows[1:]]
+    assert "Total revenue" in names
+    assert "Total expenses" in names
+    assert "Net income" in names
+
+
+@pytest.mark.anyio
+async def test_export_report_balance_sheet(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("export_report", {"report": "balance_sheet"})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["title"] == "Balance Sheet"
+    assert body["filename"] == "balance-sheet.csv"
+    rows = _csv_rows(result)
+    assert rows[0] == ["section", "number", "name", "amount"]
+    names = [row[2] for row in rows[1:]]
+    assert "Total assets" in names
+    assert "Total liabilities" in names
+    assert "Total equity" in names
+
+
+@pytest.mark.anyio
+async def test_export_report_journal(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("export_report", {"report": "journal"})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["title"] == "Journal"
+    assert body["filename"] == "journal.csv"
+    rows = _csv_rows(result)
+    assert rows[0] == [
+        "entry",
+        "date",
+        "description",
+        "account_number",
+        "account_name",
+        "debit",
+        "credit",
+    ]
+    descs = [row[2] for row in rows[1:]]
+    assert "Owner capital injection" in descs
+    capital = next(
+        row for row in rows[1:] if row[2] == "Owner capital injection" and row[3] == "1000"
+    )
+    assert capital[5] == "25000.00"
+
+
+@pytest.mark.anyio
+async def test_export_report_invoices(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("export_report", {"report": "invoices"})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["title"] == "Invoices"
+    assert body["filename"] == "invoices.csv"
+    rows = _csv_rows(result)
+    assert rows[0] == [
+        "id",
+        "date",
+        "due_date",
+        "customer",
+        "subtotal",
+        "tax",
+        "total",
+        "paid",
+        "balance",
+        "status",
+    ]
+    data = rows[1:]
+    assert len(data) == 5  # demo seed: 5 invoices (include_voided default True)
+    customers = {row[3] for row in data}
+    assert customers == {"Acme Corporation", "Globex Inc", "Initech LLC"}
+
+
+@pytest.mark.anyio
+async def test_export_report_bills(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("export_report", {"report": "bills"})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["title"] == "Bills"
+    assert body["filename"] == "bills.csv"
+    rows = _csv_rows(result)
+    assert rows[0] == [
+        "id",
+        "date",
+        "due_date",
+        "vendor",
+        "subtotal",
+        "tax",
+        "total",
+        "paid",
+        "balance",
+        "status",
+    ]
+    data = rows[1:]
+    assert len(data) == 4  # demo seed: 4 bills
+    vendors = {row[3] for row in data}
+    assert "CloudHost Inc" in vendors
+
+
+@pytest.mark.anyio
+async def test_export_report_invalid_report(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("export_report", {"report": "payroll"})
+    assert result.is_error is True
+    text = _text(result)
+    assert "Invalid report" in text
+    assert "payroll" in text
 
 
 @pytest.mark.anyio

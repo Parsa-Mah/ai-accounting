@@ -25,6 +25,7 @@ from app.services import accounts
 from app.services import budgets as budgets_service
 from app.services import bills as bills_service
 from app.services import estimates as estimates_service
+from app.services import export as export_service
 from app.services import invoices as invoices_service
 from app.services import items as items_service
 from app.services import journal as journal_service
@@ -135,6 +136,102 @@ def get_account_ledger(
                 include_voided=include_voided,
             )
         )
+
+
+@context.safe_tool
+def export_report(
+    report: str,
+    account: str | None = None,
+    customer: str | None = None,
+    vendor: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    as_of: str | None = None,
+    include_voided: bool = True,
+) -> dict[str, Any]:
+    """Export a report as CSV text: title, subtitle, filename, csv.
+
+    ``report`` is one of 'general_ledger', 'trial_balance',
+    'income_statement', 'balance_sheet', 'journal', 'invoices', 'bills'.
+    Params by report: general_ledger needs ``account`` (number or name);
+    trial_balance and balance_sheet take ``as_of``; income_statement and
+    journal take ``date_from``/``date_to`` (journal also takes ``account``);
+    invoices takes ``customer``, bills takes ``vendor``. Dates are
+    'YYYY-MM-DD'. Money is pre-formatted dollars inside the CSV. Use for
+    'give me the income statement as CSV' or 'export the journal'.
+    """
+    context.check_choice(
+        report,
+        (
+            "general_ledger",
+            "trial_balance",
+            "income_statement",
+            "balance_sheet",
+            "journal",
+            "invoices",
+            "bills",
+        ),
+        "report",
+    )
+    with context.get_session() as db:
+        if report == "general_ledger":
+            if account is None:
+                raise ToolError("The general_ledger export requires 'account'.")
+            title, subtitle, header, rows, filename = export_service.general_ledger_rows(
+                db,
+                context.resolve_account(db, account).id,
+                date_from=context.parse_date(date_from) if date_from is not None else None,
+                date_to=context.parse_date(date_to) if date_to is not None else None,
+                include_voided=include_voided,
+            )
+        elif report == "trial_balance":
+            title, subtitle, header, rows, filename = export_service.trial_balance_rows(
+                db,
+                as_of=context.parse_date(as_of) if as_of is not None else None,
+            )
+        elif report == "income_statement":
+            title, subtitle, header, rows, filename = export_service.income_statement_rows(
+                db,
+                date_from=context.parse_date(date_from) if date_from is not None else None,
+                date_to=context.parse_date(date_to) if date_to is not None else None,
+            )
+        elif report == "balance_sheet":
+            title, subtitle, header, rows, filename = export_service.balance_sheet_rows(
+                db,
+                as_of=context.parse_date(as_of) if as_of is not None else None,
+            )
+        elif report == "journal":
+            title, subtitle, header, rows, filename = export_service.journal_rows(
+                db,
+                date_from=context.parse_date(date_from) if date_from is not None else None,
+                date_to=context.parse_date(date_to) if date_to is not None else None,
+                account_id=(
+                    context.resolve_account(db, account).id if account is not None else None
+                ),
+                include_voided=include_voided,
+            )
+        elif report == "invoices":
+            title, subtitle, header, rows, filename = export_service.invoice_rows(
+                db,
+                customer_id=(
+                    context.resolve_customer(db, customer).id if customer is not None else None
+                ),
+                include_voided=include_voided,
+            )
+        else:  # bills
+            title, subtitle, header, rows, filename = export_service.bill_rows(
+                db,
+                vendor_id=(
+                    context.resolve_vendor(db, vendor).id if vendor is not None else None
+                ),
+                include_voided=include_voided,
+            )
+    return {
+        "title": title,
+        "subtitle": subtitle,
+        "filename": f"{filename}.csv",
+        "csv": export_service.render_csv(header, rows).decode("utf-8"),
+    }
 
 
 @context.safe_tool
@@ -1176,6 +1273,7 @@ def read_tools() -> list[Callable[..., Any]]:
         get_trial_balance,
         get_account_ledger,
         search_transactions,
+        export_report,
         list_journal_entries,
         get_journal_entry,
         list_invoices,
