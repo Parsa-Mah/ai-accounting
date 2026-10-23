@@ -328,6 +328,17 @@ def get_budget_report(start: str, end: str) -> dict[str, Any]:
 
 
 @context.safe_tool
+def list_bank_accounts() -> list[dict[str, Any]]:
+    """Bank accounts (accounts with a bank_kind) with their current net balance.
+
+    Use before create_reconciliation to pick an account, or for 'what bank
+    accounts do we have?'.
+    """
+    with context.get_session() as db:
+        return context.with_usd(reconciliation_service.list_bank_accounts(db))
+
+
+@context.safe_tool
 def list_reconciliations() -> list[dict[str, Any]]:
     """List bank reconciliations, newest first.
 
@@ -521,6 +532,51 @@ def create_journal_entry(
                 ],
             }
         )
+
+
+@context.safe_tool
+def create_reconciliation(
+    account: str,
+    statement_date: str,
+    statement_balance_cents: int,
+    line_ids: list[int],
+    note: str | None = None,
+) -> dict[str, Any]:
+    """Reconcile a bank account: match a statement to its journal lines.
+
+    ``account`` is a number or name and must be a bank account.
+    ``line_ids`` are journal line ids from search_transactions — all on
+    this account, uncleared, and dated on or before ``statement_date``
+    ('YYYY-MM-DD'). Returns the reconciliation with the computed opening
+    balance, cleared total, and difference (zero = balanced). Use for
+    'reconcile the checking account to the September statement'.
+    """
+    if not line_ids:
+        raise context.ToolError("line_ids must contain at least one journal line")
+    line_ids = list(dict.fromkeys(line_ids))
+    with context.get_session() as db:
+        account_obj = context.resolve_account(db, account)
+        recon = reconciliation_service.create_reconciliation(
+            db,
+            account_id=account_obj.id,
+            statement_date=context.parse_date(statement_date),
+            statement_balance_cents=statement_balance_cents,
+            line_ids=line_ids,
+            note=note,
+        )
+        return context.with_usd(recon)
+
+
+@context.safe_tool
+def delete_reconciliation(reconciliation_id: int) -> dict[str, Any]:
+    """Delete a reconciliation and un-clear its journal lines.
+
+    The un-cleared lines can be included in a new reconciliation. Use for
+    'undo the September reconciliation'.
+    """
+    with context.get_session() as db:
+        reconciliation_service.delete_reconciliation(db, reconciliation_id)
+        return {"deleted": True, "reconciliation_id": reconciliation_id}
 
 
 @context.safe_tool
@@ -1065,6 +1121,7 @@ def read_tools() -> list[Callable[..., Any]]:
         list_budgets,
         get_budget,
         get_budget_report,
+        list_bank_accounts,
         list_reconciliations,
         list_customers,
         list_vendors,
@@ -1076,6 +1133,8 @@ def write_tools() -> list[Callable[..., Any]]:
     """Write tools, registered only when MCP_ALLOW_WRITE=1."""
     return [
         create_journal_entry,
+        create_reconciliation,
+        delete_reconciliation,
         create_invoice,
         pay_invoice,
         void_invoice,

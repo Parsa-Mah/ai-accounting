@@ -47,6 +47,8 @@ def write_server(monkeypatch):
 
 WRITE_TOOL_NAMES = {
     "create_journal_entry",
+    "create_reconciliation",
+    "delete_reconciliation",
     "create_invoice",
     "pay_invoice",
     "void_invoice",
@@ -94,6 +96,42 @@ def _current_month_range() -> tuple[str, str]:
     else:
         last = datetime.date(today.year, today.month + 1, 1) - datetime.timedelta(days=1)
     return first.isoformat(), last.isoformat()
+
+
+async def _current_month_cash(client) -> tuple[dict, list[int]]:
+    """The demo's bank account row plus its uncleared current-month line ids.
+
+    The seeded reconciliation only cleared previous-month lines, so every
+    current-month cash line is still uncleared. Using the account's current
+    net balance as the statement balance yields a balanced reconciliation
+    (opening + cleared total equals the full balance).
+    """
+    banks = _rows(await client.call_tool("list_bank_accounts", {}))
+    bank = next(row for row in banks if row["number"] == "1000")
+    start, end = _current_month_range()
+    lines = _rows(
+        await client.call_tool(
+            "search_transactions",
+            {"account": "1000", "date_from": start, "date_to": end},
+        )
+    )
+    assert lines, "demo seed should have current-month cash activity"
+    return bank, [row["line_id"] for row in lines]
+
+
+async def _reconcile_current_month(client, bank: dict, line_ids: list[int]) -> dict:
+    """Create a balanced reconciliation for the current month's cash lines."""
+    result = await client.call_tool(
+        "create_reconciliation",
+        {
+            "account": "1000",
+            "statement_date": _current_month_range()[1],
+            "statement_balance_cents": bank["balance_cents"],
+            "line_ids": line_ids,
+        },
+    )
+    assert result.is_error is False
+    return result.structured_content
 
 
 @pytest.mark.anyio
@@ -390,6 +428,20 @@ async def test_budget_report_current_month(mcp_server) -> None:
     software = by_number["5700"]
     assert software["actual_cents"] == 9900
     assert software["variance_cents"] == 5100
+
+
+@pytest.mark.anyio
+async def test_list_bank_accounts(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("list_bank_accounts", {})
+    rows = _rows(result)
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["number"] == "1000"
+    assert row["name"] == "Cash"
+    assert row["bank_kind"] == "checking"
+    assert row["balance_cents"] > 0
+    assert row["balance_cents_usd"]
 
 
 @pytest.mark.anyio
@@ -1153,6 +1205,142 @@ async def test_delete_budget(write_server) -> None:
 async def test_delete_budget_missing_is_tool_error(write_server) -> None:
     async with Client(write_server, raise_exceptions=True) as client:
         result = await client.call_tool("delete_budget", {"budget_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_create_reconciliation_balanced(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        bank, line_ids = await _current_month_cash(client)
+        body = await _reconcile_current_month(client, bank, line_ids)
+        assert body["account_number"] == "1000"
+        assert body["statement_date"] == _current_month_range()[1]
+        assert body["difference_cents"] == 0
+        assert body["difference_cents_usd"] == "0.00"
+        assert body["is_balanced"] is True
+        assert body["line_count"] == len(line_ids)
+        listed = _rows(await client.call_tool("list_reconciliations", {}))
+        assert len(listed) == 2
+        assert listed[0]["id"] == body["id"]
+
+
+@pytest.mark.anyio
+async def test_create_reconciliation_not_a_bank_account(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        _, line_ids = await _current_month_cash(client)
+        result = await client.call_tool(
+            "create_reconciliation",
+            {
+                "account": "5100",
+                "statement_date": _current_month_range()[1],
+                "statement_balance_cents": 0,
+                "line_ids": line_ids,
+            },
+        )
+    assert result.is_error is True
+    assert "not a bank account" in _text(result)
+
+
+@pytest.mark.anyio
+async def test_create_reconciliation_line_after_statement_date(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        _, line_ids = await _current_month_cash(client)
+        result = await client.call_tool(
+            "create_reconciliation",
+            {
+                "account": "1000",
+                "statement_date": "2020-01-01",
+                "statement_balance_cents": 0,
+                "line_ids": line_ids,
+            },
+        )
+    assert result.is_error is True
+    assert "after the statement date" in _text(result)
+
+
+@pytest.mark.anyio
+async def test_create_reconciliation_already_cleared(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        bank, line_ids = await _current_month_cash(client)
+        first = await _reconcile_current_month(client, bank, line_ids)
+        again = await client.call_tool(
+            "create_reconciliation",
+            {
+                "account": "1000",
+                "statement_date": _current_month_range()[1],
+                "statement_balance_cents": bank["balance_cents"],
+                "line_ids": line_ids,
+            },
+        )
+    assert first["is_balanced"] is True
+    assert again.is_error is True
+    assert "already cleared" in _text(again)
+
+
+@pytest.mark.anyio
+async def test_create_reconciliation_empty_line_ids(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "create_reconciliation",
+            {
+                "account": "1000",
+                "statement_date": _current_month_range()[1],
+                "statement_balance_cents": 0,
+                "line_ids": [],
+            },
+        )
+    assert result.is_error is True
+    assert "at least one" in _text(result)
+
+
+@pytest.mark.anyio
+async def test_create_reconciliation_missing_line(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "create_reconciliation",
+            {
+                "account": "1000",
+                "statement_date": _current_month_range()[1],
+                "statement_balance_cents": 0,
+                "line_ids": [99999],
+            },
+        )
+    assert result.is_error is True
+    text = _text(result)
+    assert "99999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_delete_reconciliation(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        bank, line_ids = await _current_month_cash(client)
+        body = await _reconcile_current_month(client, bank, line_ids)
+        result = await client.call_tool(
+            "delete_reconciliation", {"reconciliation_id": body["id"]}
+        )
+        assert result.is_error is False
+        assert result.structured_content == {
+            "deleted": True,
+            "reconciliation_id": body["id"],
+        }
+        remaining = _rows(await client.call_tool("list_reconciliations", {}))
+        assert len(remaining) == 1
+        assert all(row["id"] != body["id"] for row in remaining)
+        # The lines are un-cleared: the same lines reconcile again.
+        again = await _reconcile_current_month(client, bank, line_ids)
+    assert again["is_balanced"] is True
+
+
+@pytest.mark.anyio
+async def test_delete_reconciliation_missing_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "delete_reconciliation", {"reconciliation_id": 9999}
+        )
     assert result.is_error is True
     text = _text(result)
     assert "9999" in text
