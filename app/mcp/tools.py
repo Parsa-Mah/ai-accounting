@@ -218,7 +218,7 @@ def list_bills(
 
     ``status`` filters by 'open', 'partially_paid', 'paid', or 'void'.
     ``month`` filters by bill date ('YYYY-MM'). Use for questions like
-    'what do we still owe vendors?'.
+    'what do we still owe vendors?'. Call get_bill for line detail.
     """
     with context.get_session() as db:
         bills = bills_service.list_bills(db)
@@ -235,11 +235,23 @@ def list_bills(
 
 
 @context.safe_tool
+def get_bill(bill_id: int) -> dict[str, Any]:
+    """Full detail for one bill: lines with expense accounts, payments, status.
+
+    Use after list_bills to inspect a specific bill, e.g. 'what does the
+    CloudHost bill contain?'.
+    """
+    with context.get_session() as db:
+        bill = bills_service.get_bill(db, bill_id)
+        return context.with_usd(BillRead.model_validate(bill).model_dump(mode="json"))
+
+
+@context.safe_tool
 def list_estimates(status: str | None = None) -> list[dict[str, Any]]:
     """List estimates (quotes), newest first.
 
     ``status`` filters by 'open' or 'converted'. Use for questions like
-    'what quotes are outstanding?'.
+    'what quotes are outstanding?'. Call get_estimate for line detail.
     """
     with context.get_session() as db:
         estimates = estimates_service.list_estimates(db)
@@ -252,6 +264,20 @@ def list_estimates(status: str | None = None) -> list[dict[str, Any]]:
             )
             for estimate in estimates
         ]
+
+
+@context.safe_tool
+def get_estimate(estimate_id: int) -> dict[str, Any]:
+    """Full detail for one estimate (quote): lines, totals, status.
+
+    Use after list_estimates to inspect a specific estimate, e.g. 'what
+    did we quote Globex for?'.
+    """
+    with context.get_session() as db:
+        estimate = estimates_service.get_estimate(db, estimate_id)
+        return context.with_usd(
+            EstimateRead.model_validate(estimate).model_dump(mode="json")
+        )
 
 
 @context.safe_tool
@@ -596,6 +622,64 @@ def pay_bill(
 
 
 @context.safe_tool
+def void_bill(bill_id: int) -> dict[str, Any]:
+    """Void a bill (only while it has no payments).
+
+    Posts a reversing journal entry; the bill is flagged void and its
+    history is never deleted. Returns the updated bill. Use for 'void the
+    OfficeMax bill, it was entered in error'.
+    """
+    with context.get_session() as db:
+        bill = bills_service.void_bill(db, bill_id)
+        return context.with_usd(BillRead.model_validate(bill).model_dump(mode="json"))
+
+
+@context.safe_tool
+def create_estimate(
+    customer: str,
+    date: str,
+    lines: list[dict[str, Any]],
+    tax_rate: float = 0.0,
+) -> dict[str, Any]:
+    """Create an estimate (quote) for a customer. Posts nothing to the ledger.
+
+    ``customer`` is a customer name; ``date`` is 'YYYY-MM-DD'; ``tax_rate``
+    is a percent (e.g. 8.0). Each line is
+    {"description": str, "quantity": int, "unit_price_cents": int}. Use
+    for 'quote Globex for a website redesign at $5,000 plus 10 days of
+    consulting at $250/day'. Turn it into an invoice with convert_estimate.
+    """
+    with context.get_session() as db:
+        customer_obj = context.resolve_customer(db, customer)
+        estimate = estimates_service.create_estimate(
+            db,
+            customer_id=customer_obj.id,
+            date=context.parse_date(date),
+            tax_rate=tax_rate,
+            lines=_invoice_lines(lines),
+        )
+        return context.with_usd(
+            EstimateRead.model_validate(estimate).model_dump(mode="json")
+        )
+
+
+@context.safe_tool
+def convert_estimate(estimate_id: int) -> dict[str, Any]:
+    """Convert an open estimate into an invoice and post it to the ledger.
+
+    The invoice is created with today's date using the estimate's lines
+    and tax rate; the estimate is marked converted (re-converting is
+    refused). Returns the created invoice. Use for 'turn the Globex quote
+    into an invoice'.
+    """
+    with context.get_session() as db:
+        invoice = estimates_service.convert_estimate(db, estimate_id)
+        return context.with_usd(
+            InvoiceRead.model_validate(invoice).model_dump(mode="json")
+        )
+
+
+@context.safe_tool
 def create_budget(
     account: str,
     budget_start: str,
@@ -898,7 +982,9 @@ def read_tools() -> list[Callable[..., Any]]:
         list_invoices,
         get_invoice,
         list_bills,
+        get_bill,
         list_estimates,
+        get_estimate,
         get_budget_report,
         list_reconciliations,
         list_customers,
@@ -916,6 +1002,9 @@ def write_tools() -> list[Callable[..., Any]]:
         void_invoice,
         create_bill,
         pay_bill,
+        void_bill,
+        create_estimate,
+        convert_estimate,
         create_budget,
         create_customer,
         create_vendor,

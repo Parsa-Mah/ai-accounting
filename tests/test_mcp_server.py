@@ -52,6 +52,9 @@ WRITE_TOOL_NAMES = {
     "void_invoice",
     "create_bill",
     "pay_bill",
+    "void_bill",
+    "create_estimate",
+    "convert_estimate",
     "create_budget",
     "create_customer",
     "create_vendor",
@@ -243,6 +246,67 @@ async def test_list_estimates(mcp_server) -> None:
     assert rows[0]["status"] == "open"
     assert rows[0]["customer_name"] == "Globex Inc"
     assert rows[0]["total_cents"] == 750000
+
+
+@pytest.mark.anyio
+async def test_get_bill_detail(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_bills", {"status": "open"}))
+        offimax = next(
+            row for row in listed if row["vendor_name"] == "OfficeMax Supplies"
+        )
+        result = await client.call_tool("get_bill", {"bill_id": offimax["id"]})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["vendor_name"] == "OfficeMax Supplies"
+    assert body["status"] == "open"
+    assert body["total_cents"] == 32500
+    assert body["total_cents_usd"] == "325.00"
+    assert body["paid_cents"] == 0
+    assert len(body["lines"]) == 1
+    assert body["lines"][0]["expense_account_id"]
+    assert body["payments"] == []
+
+
+@pytest.mark.anyio
+async def test_get_bill_missing_is_tool_error(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("get_bill", {"bill_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_get_estimate_detail(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_estimates", {}))
+        result = await client.call_tool(
+            "get_estimate", {"estimate_id": listed[0]["id"]}
+        )
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["customer_name"] == "Globex Inc"
+    assert body["status"] == "open"
+    assert body["subtotal_cents"] == 750000
+    assert body["subtotal_cents_usd"] == "7500.00"
+    assert body["tax_cents"] == 0
+    assert body["total_cents"] == 750000
+    assert [line["description"] for line in body["lines"]] == [
+        "Website Design",
+        "Consulting (day)",
+    ]
+
+
+@pytest.mark.anyio
+async def test_get_estimate_missing_is_tool_error(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("get_estimate", {"estimate_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
 
 
 @pytest.mark.anyio
@@ -815,3 +879,139 @@ async def test_deactivate_used_account_is_tool_error(write_server) -> None:
         result = await client.call_tool("deactivate_account", {"account": "5100"})
     assert result.is_error is True
     assert "journal entries" in _text(result).lower()
+
+
+@pytest.mark.anyio
+async def test_void_bill(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_bills", {"status": "open"}))
+        offimax = next(
+            row for row in listed if row["vendor_name"] == "OfficeMax Supplies"
+        )
+        result = await client.call_tool("void_bill", {"bill_id": offimax["id"]})
+        assert result.is_error is False
+        body = result.structured_content
+        assert body["is_voided"] is True
+        assert body["status"] == "void"
+
+        again = await client.call_tool("void_bill", {"bill_id": offimax["id"]})
+    assert again.is_error is True
+    assert "already voided" in _text(again)
+
+
+@pytest.mark.anyio
+async def test_void_bill_paid_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_bills", {"status": "paid"}))
+        result = await client.call_tool("void_bill", {"bill_id": listed[0]["id"]})
+    assert result.is_error is True
+    assert "payments" in _text(result).lower()
+
+
+@pytest.mark.anyio
+async def test_void_bill_missing_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("void_bill", {"bill_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_create_estimate_round_trip(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        created = await client.call_tool(
+            "create_estimate",
+            {
+                "customer": "Acme Corporation",
+                "date": "2026-09-01",
+                "lines": [
+                    {
+                        "description": "Website Design",
+                        "quantity": 1,
+                        "unit_price_cents": 500000,
+                    },
+                    {
+                        "description": "Consulting (day)",
+                        "quantity": 10,
+                        "unit_price_cents": 25000,
+                    },
+                ],
+                "tax_rate": 8.0,
+            },
+        )
+        assert created.is_error is False
+        body = created.structured_content
+        assert body["customer_name"] == "Acme Corporation"
+        assert body["status"] == "open"
+        assert body["subtotal_cents"] == 750000
+        assert body["tax_cents"] == 60000
+        assert body["total_cents"] == 810000
+        assert body["total_cents_usd"] == "8100.00"
+        assert body["converted_invoice_id"] is None
+
+        listed = _rows(await client.call_tool("list_estimates", {}))
+    assert any(row["id"] == body["id"] for row in listed)
+
+
+@pytest.mark.anyio
+async def test_create_estimate_unknown_customer(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "create_estimate",
+            {
+                "customer": "Ghost Corp",
+                "date": "2026-09-01",
+                "lines": [
+                    {"description": "Consulting", "quantity": 1, "unit_price_cents": 10000}
+                ],
+            },
+        )
+    assert result.is_error is True
+    text = _text(result)
+    assert "Ghost Corp" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_convert_estimate(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_estimates", {}))
+        estimate = next(
+            row for row in listed if row["customer_name"] == "Globex Inc"
+        )
+        result = await client.call_tool(
+            "convert_estimate", {"estimate_id": estimate["id"]}
+        )
+        assert result.is_error is False
+        invoice = result.structured_content
+        assert invoice["customer_name"] == "Globex Inc"
+        assert invoice["status"] == "open"
+        assert invoice["subtotal_cents"] == 750000
+        assert invoice["total_cents"] == 750000
+        assert len(invoice["lines"]) == 2
+
+        est_listed = _rows(await client.call_tool("list_estimates", {}))
+        est_row = next(row for row in est_listed if row["id"] == estimate["id"])
+        assert est_row["status"] == "converted"
+        assert est_row["converted_invoice_id"] == invoice["id"]
+
+        inv_listed = _rows(await client.call_tool("list_invoices", {}))
+        assert any(row["id"] == invoice["id"] for row in inv_listed)
+
+        again = await client.call_tool(
+            "convert_estimate", {"estimate_id": estimate["id"]}
+        )
+    assert again.is_error is True
+    assert "already been converted" in _text(again).lower()
+
+
+@pytest.mark.anyio
+async def test_convert_estimate_missing_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("convert_estimate", {"estimate_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
