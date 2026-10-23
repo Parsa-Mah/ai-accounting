@@ -19,7 +19,7 @@ from app.schemas.budget import BudgetCreate, BudgetRead, BudgetUpdate
 from app.schemas.estimate import EstimateRead
 from app.schemas.invoice import InvoiceLineCreate, InvoiceRead
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
-from app.schemas.journal import JournalLineCreate
+from app.schemas.journal import JournalEntryRead, JournalLineCreate
 from app.schemas.party import CustomerCreate, CustomerRead, VendorCreate, VendorRead
 from app.services import accounts
 from app.services import budgets as budgets_service
@@ -165,6 +165,53 @@ def search_transactions(
             limit=limit,
         )
     return context.with_usd(rows)
+
+
+@context.safe_tool
+def list_journal_entries(
+    date_from: str | None = None,
+    date_to: str | None = None,
+    account: str | None = None,
+    include_voided: bool = True,
+) -> list[dict[str, Any]]:
+    """List journal entries with all their lines, oldest first.
+
+    ``date_from``/``date_to`` are 'YYYY-MM-DD'; ``account`` is a number
+    or name (entries touching it); ``include_voided`` hides voided
+    entries when False. Use for 'show the journal' or 'what touched
+    Cash in March?'. For free-text search use search_transactions.
+    """
+    with context.get_session() as db:
+        account_id = (
+            context.resolve_account(db, account).id if account is not None else None
+        )
+        entries = journal_service.list_journal_entries(
+            db,
+            date_from=context.parse_date(date_from) if date_from is not None else None,
+            date_to=context.parse_date(date_to) if date_to is not None else None,
+            account_id=account_id,
+            include_voided=include_voided,
+        )
+        return context.with_usd(
+            [
+                JournalEntryRead.model_validate(entry).model_dump(mode="json")
+                for entry in entries
+            ]
+        )
+
+
+@context.safe_tool
+def get_journal_entry(entry_id: int) -> dict[str, Any]:
+    """One journal entry with all its lines.
+
+    Use after list_journal_entries or search_transactions to inspect a
+    specific entry: its lines, accounts, and whether it is voided.
+    """
+    with context.get_session() as db:
+        entry = journal_service.get_journal_entry(db, entry_id)
+        return context.with_usd(
+            JournalEntryRead.model_validate(entry).model_dump(mode="json")
+        )
 
 
 @context.safe_tool
@@ -531,6 +578,23 @@ def create_journal_entry(
                     for line in entry.lines
                 ],
             }
+        )
+
+
+@context.safe_tool
+def void_journal_entry(entry_id: int) -> dict[str, Any]:
+    """Void a journal entry by posting a reversing entry dated today.
+
+    The original stays in the ledger flagged void (audit trail); entries
+    with cleared lines cannot be voided until their reconciliation is
+    deleted. Returns the reversal entry — use get_journal_entry to
+    inspect the voided original. For invoices and bills use
+    void_invoice/void_bill instead. Use for 'undo that manual entry'.
+    """
+    with context.get_session() as db:
+        reversal = journal_service.void_journal_entry(db, entry_id)
+        return context.with_usd(
+            JournalEntryRead.model_validate(reversal).model_dump(mode="json")
         )
 
 
@@ -1112,6 +1176,8 @@ def read_tools() -> list[Callable[..., Any]]:
         get_trial_balance,
         get_account_ledger,
         search_transactions,
+        list_journal_entries,
+        get_journal_entry,
         list_invoices,
         get_invoice,
         list_bills,
@@ -1133,6 +1199,7 @@ def write_tools() -> list[Callable[..., Any]]:
     """Write tools, registered only when MCP_ALLOW_WRITE=1."""
     return [
         create_journal_entry,
+        void_journal_entry,
         create_reconciliation,
         delete_reconciliation,
         create_invoice,

@@ -47,6 +47,7 @@ def write_server(monkeypatch):
 
 WRITE_TOOL_NAMES = {
     "create_journal_entry",
+    "void_journal_entry",
     "create_reconciliation",
     "delete_reconciliation",
     "create_invoice",
@@ -132,6 +133,23 @@ async def _reconcile_current_month(client, bank: dict, line_ids: list[int]) -> d
     )
     assert result.is_error is False
     return result.structured_content
+
+
+async def _current_month_rent(client) -> dict:
+    """The demo's current-month 'Monthly rent' entry (uncleared lines).
+
+    The seeded reconciliation only cleared previous-month lines, so this
+    entry's lines are all uncleared and it can be voided.
+    """
+    start, end = _current_month_range()
+    rows = _rows(
+        await client.call_tool(
+            "list_journal_entries", {"date_from": start, "date_to": end}
+        )
+    )
+    rent = next(row for row in rows if row["description"] == "Monthly rent")
+    assert rent["is_voided"] is False
+    return rent
 
 
 @pytest.mark.anyio
@@ -221,6 +239,95 @@ async def test_search_transactions_query_and_account(mcp_server) -> None:
     rows = _rows(by_account)
     assert len(rows) > 0
     assert all(row["account_number"] == "1000" for row in rows)
+
+
+@pytest.mark.anyio
+async def test_list_journal_entries(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("list_journal_entries", {})
+    assert result.is_error is False
+    rows = _rows(result)
+    assert rows
+    for row in rows:
+        assert row["id"] and row["date"] and row["description"]
+        assert row["source_type"]
+        assert isinstance(row["is_voided"], bool)
+        assert row["lines"]
+    capital = next(
+        row for row in rows if row["description"] == "Owner capital injection"
+    )
+    assert capital["source_type"] == "manual"
+    assert capital["is_voided"] is False
+    assert capital["voided_by_id"] is None
+    assert len(capital["lines"]) == 2
+    assert {line["account_number"] for line in capital["lines"]} == {
+        "1000",
+        "3000",
+    }
+    debit_line = next(line for line in capital["lines"] if line["debit"] > 0)
+    assert debit_line["account_number"] == "1000"
+    assert debit_line["debit"] == 2500000
+    assert debit_line["debit_usd"] == "25000.00"
+    # Ordered by (date, id), oldest first.
+    keys = [(row["date"], row["id"]) for row in rows]
+    assert keys == sorted(keys)
+
+
+@pytest.mark.anyio
+async def test_list_journal_entries_filters(mcp_server) -> None:
+    start, end = _current_month_range()
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        by_date = await client.call_tool(
+            "list_journal_entries", {"date_from": start, "date_to": end}
+        )
+        by_account = await client.call_tool(
+            "list_journal_entries",
+            {"date_from": start, "date_to": end, "account": "1000"},
+        )
+    assert by_date.is_error is False
+    rows = _rows(by_date)
+    assert rows
+    assert all(start <= row["date"] <= end for row in rows)
+    assert any(row["description"] == "Monthly rent" for row in rows)
+    assert not any(row["description"] == "Owner capital injection" for row in rows)
+
+    assert by_account.is_error is False
+    rows = _rows(by_account)
+    assert rows
+    # Every returned entry touches Cash (at least one line on 1000).
+    assert all(
+        any(line["account_number"] == "1000" for line in row["lines"]) for row in rows
+    )
+    assert any(row["description"] == "Monthly rent" for row in rows)
+
+
+@pytest.mark.anyio
+async def test_get_journal_entry(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        rows = _rows(await client.call_tool("list_journal_entries", {}))
+        capital = next(
+            row for row in rows if row["description"] == "Owner capital injection"
+        )
+        result = await client.call_tool(
+            "get_journal_entry", {"entry_id": capital["id"]}
+        )
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["id"] == capital["id"]
+    assert body["description"] == "Owner capital injection"
+    assert body["is_voided"] is False
+    assert body["voided_by_id"] is None
+    assert len(body["lines"]) == 2
+
+
+@pytest.mark.anyio
+async def test_get_journal_entry_missing(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("get_journal_entry", {"entry_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
 
 
 @pytest.mark.anyio
@@ -1345,3 +1452,95 @@ async def test_delete_reconciliation_missing_is_tool_error(write_server) -> None
     text = _text(result)
     assert "9999" in text
     assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_void_journal_entry(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        rent = await _current_month_rent(client)
+        result = await client.call_tool(
+            "void_journal_entry", {"entry_id": rent["id"]}
+        )
+        assert result.is_error is False
+        reversal = result.structured_content
+        # The tool returns the reversal entry, not the voided original.
+        assert reversal["source_type"] == "void"
+        assert reversal["source_id"] == rent["id"]
+        assert reversal["description"] == "VOID: Monthly rent"
+        assert reversal["date"] == datetime.date.today().isoformat()
+        assert reversal["is_voided"] is False
+        original = (
+            await client.call_tool("get_journal_entry", {"entry_id": rent["id"]})
+        ).structured_content
+        assert original["is_voided"] is True
+        assert original["voided_by_id"] == reversal["id"]
+        # The reversal mirrors the original with debits and credits swapped.
+        for rev_line, orig_line in zip(reversal["lines"], original["lines"]):
+            assert rev_line["debit"] == orig_line["credit"]
+            assert rev_line["credit"] == orig_line["debit"]
+
+
+@pytest.mark.anyio
+async def test_void_journal_entry_already_voided(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        rent = await _current_month_rent(client)
+        first = await client.call_tool(
+            "void_journal_entry", {"entry_id": rent["id"]}
+        )
+        assert first.is_error is False
+        again = await client.call_tool(
+            "void_journal_entry", {"entry_id": rent["id"]}
+        )
+    assert again.is_error is True
+    assert "already voided" in _text(again)
+
+
+@pytest.mark.anyio
+async def test_void_journal_entry_cleared_lines(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        rows = _rows(await client.call_tool("list_journal_entries", {}))
+        capital = next(
+            row for row in rows if row["description"] == "Owner capital injection"
+        )
+        result = await client.call_tool(
+            "void_journal_entry", {"entry_id": capital["id"]}
+        )
+    # Its cash line was cleared by the seeded reconciliation.
+    assert result.is_error is True
+    assert "cleared lines" in _text(result)
+
+
+@pytest.mark.anyio
+async def test_void_journal_entry_missing(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("void_journal_entry", {"entry_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_list_journal_entries_include_voided(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        rent = await _current_month_rent(client)
+        reversal = (
+            await client.call_tool("void_journal_entry", {"entry_id": rent["id"]})
+        ).structured_content
+        hidden = _rows(
+            await client.call_tool(
+                "list_journal_entries", {"include_voided": False}
+            )
+        )
+        shown = _rows(await client.call_tool("list_journal_entries", {}))
+    hidden_ids = {row["id"] for row in hidden}
+    assert rent["id"] not in hidden_ids
+    assert reversal["id"] in hidden_ids  # the reversal itself is not voided
+    shown_ids = {row["id"] for row in shown}
+    assert rent["id"] in shown_ids
+    assert reversal["id"] in shown_ids
+    # include_voided=False hides exactly the voided entries (the demo
+    # seed also voids one invoice's entry).
+    voided_ids = {row["id"] for row in shown if row["is_voided"]}
+    assert shown_ids - hidden_ids == voided_ids
+    assert rent["id"] in voided_ids
