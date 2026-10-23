@@ -56,6 +56,8 @@ WRITE_TOOL_NAMES = {
     "create_estimate",
     "convert_estimate",
     "create_budget",
+    "update_budget",
+    "delete_budget",
     "create_customer",
     "create_vendor",
     "create_item",
@@ -303,6 +305,66 @@ async def test_get_estimate_detail(mcp_server) -> None:
 async def test_get_estimate_missing_is_tool_error(mcp_server) -> None:
     async with Client(mcp_server, raise_exceptions=True) as client:
         result = await client.call_tool("get_estimate", {"estimate_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_list_budgets(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("list_budgets", {})
+    rows = _rows(result)
+    assert len(rows) == 4
+    assert [row["account_number"] for row in rows] == ["5500", "5700", "5100", "5100"]
+    assert all(row["note"] for row in rows)
+
+
+@pytest.mark.anyio
+async def test_list_budgets_account_filter(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        by_number = _rows(await client.call_tool("list_budgets", {"account": "5100"}))
+        by_name = _rows(
+            await client.call_tool("list_budgets", {"account": "Rent Expense"})
+        )
+    assert len(by_number) == 2
+    assert all(row["account_number"] == "5100" for row in by_number)
+    assert all(row["note"] == "Monthly rent" for row in by_number)
+    assert {row["id"] for row in by_number} == {row["id"] for row in by_name}
+
+
+@pytest.mark.anyio
+async def test_list_budgets_unknown_account(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("list_budgets", {"account": "9999"})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_get_budget_detail(mcp_server) -> None:
+    start, end = _current_month_range()
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_budgets", {"account": "5500"}))
+        result = await client.call_tool("get_budget", {"budget_id": listed[0]["id"]})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["account_number"] == "5500"
+    assert body["account_name"] == "Marketing Expense"
+    assert body["budget_cents"] == 50000
+    assert body["budget_cents_usd"] == "500.00"
+    assert body["note"] == "Advertising and events"
+    assert body["budget_start"] == start
+    assert body["budget_end"] == end
+
+
+@pytest.mark.anyio
+async def test_get_budget_missing_is_tool_error(mcp_server) -> None:
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        result = await client.call_tool("get_budget", {"budget_id": 9999})
     assert result.is_error is True
     text = _text(result)
     assert "9999" in text
@@ -1011,6 +1073,86 @@ async def test_convert_estimate(write_server) -> None:
 async def test_convert_estimate_missing_is_tool_error(write_server) -> None:
     async with Client(write_server, raise_exceptions=True) as client:
         result = await client.call_tool("convert_estimate", {"estimate_id": 9999})
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_update_budget(write_server) -> None:
+    start, end = _current_month_range()
+    async with Client(write_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_budgets", {"account": "5500"}))
+        result = await client.call_tool(
+            "update_budget",
+            {
+                "budget_id": listed[0]["id"],
+                "amount_cents": 75000,
+                "note": "Raised for Q4 campaign",
+            },
+        )
+        assert result.is_error is False
+        body = result.structured_content
+        assert body["budget_cents"] == 75000
+        assert body["budget_cents_usd"] == "750.00"
+        assert body["note"] == "Raised for Q4 campaign"
+        assert body["account_number"] == "5500"
+        assert body["budget_start"] == start
+        assert body["budget_end"] == end
+
+
+@pytest.mark.anyio
+async def test_update_budget_start_after_end(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_budgets", {"account": "5500"}))
+        budget = listed[0]
+        bad_start = (
+            datetime.date.fromisoformat(budget["budget_end"])
+            + datetime.timedelta(days=1)
+        ).isoformat()
+        result = await client.call_tool(
+            "update_budget",
+            {"budget_id": budget["id"], "budget_start": bad_start},
+        )
+    assert result.is_error is True
+    assert "on or before" in _text(result)
+
+
+@pytest.mark.anyio
+async def test_update_budget_missing_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool(
+            "update_budget", {"budget_id": 9999, "note": "nope"}
+        )
+    assert result.is_error is True
+    text = _text(result)
+    assert "9999" in text
+    assert "not found" in text.lower()
+
+
+@pytest.mark.anyio
+async def test_delete_budget(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        listed = _rows(await client.call_tool("list_budgets", {"account": "5500"}))
+        budget_id = listed[0]["id"]
+        result = await client.call_tool("delete_budget", {"budget_id": budget_id})
+        assert result.is_error is False
+        assert result.structured_content == {"deleted": True, "budget_id": budget_id}
+
+        remaining = _rows(await client.call_tool("list_budgets", {}))
+        assert len(remaining) == 3
+        assert all(row["id"] != budget_id for row in remaining)
+
+        again = await client.call_tool("delete_budget", {"budget_id": budget_id})
+    assert again.is_error is True
+    assert "not found" in _text(again).lower()
+
+
+@pytest.mark.anyio
+async def test_delete_budget_missing_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("delete_budget", {"budget_id": 9999})
     assert result.is_error is True
     text = _text(result)
     assert "9999" in text

@@ -15,7 +15,7 @@ from app.mcp import context
 from app.models.account import AccountType
 from app.schemas.account import AccountCreate, AccountRead, AccountUpdate
 from app.schemas.bill import BillLineCreate, BillRead
-from app.schemas.budget import BudgetCreate
+from app.schemas.budget import BudgetCreate, BudgetRead, BudgetUpdate
 from app.schemas.estimate import EstimateRead
 from app.schemas.invoice import InvoiceLineCreate, InvoiceRead
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
@@ -278,6 +278,37 @@ def get_estimate(estimate_id: int) -> dict[str, Any]:
         return context.with_usd(
             EstimateRead.model_validate(estimate).model_dump(mode="json")
         )
+
+
+@context.safe_tool
+def list_budgets(account: str | None = None) -> list[dict[str, Any]]:
+    """List budgets (planned amounts per account), newest first.
+
+    ``account`` optionally filters by account number or name. Use for
+    questions like 'what budgets do we have this month?'. Call get_budget
+    for detail.
+    """
+    with context.get_session() as db:
+        account_id = None
+        if account is not None:
+            account_id = context.resolve_account(db, account).id
+        budgets = budgets_service.list_budgets(db, account_id=account_id)
+        return [
+            context.with_usd(BudgetRead.model_validate(budget).model_dump(mode="json"))
+            for budget in budgets
+        ]
+
+
+@context.safe_tool
+def get_budget(budget_id: int) -> dict[str, Any]:
+    """Full detail for one budget: account, date range, planned amount, note.
+
+    Use after list_budgets to inspect a specific budget, e.g. 'what did
+    we budget for rent?'.
+    """
+    with context.get_session() as db:
+        budget = budgets_service.get_budget(db, budget_id)
+        return context.with_usd(BudgetRead.model_validate(budget).model_dump(mode="json"))
 
 
 @context.safe_tool
@@ -716,6 +747,52 @@ def create_budget(
 
 
 @context.safe_tool
+def update_budget(
+    budget_id: int,
+    budget_start: str | None = None,
+    budget_end: str | None = None,
+    amount_cents: int | None = None,
+    note: str | None = None,
+) -> dict[str, Any]:
+    """Update a budget; only the provided fields change.
+
+    Dates are 'YYYY-MM-DD'; budget_start must stay on or before
+    budget_end. Omitted fields keep their current values. Use for 'raise
+    the rent budget to $2,500'.
+    """
+    start = context.parse_date(budget_start) if budget_start is not None else None
+    end = context.parse_date(budget_end) if budget_end is not None else None
+    with context.get_session() as db:
+        data = BudgetUpdate(
+            **{
+                key: value
+                for key, value in {
+                    "budget_start": start,
+                    "budget_end": end,
+                    "budget_cents": amount_cents,
+                    "note": note,
+                }.items()
+                if value is not None
+            }
+        )
+        budget = budgets_service.update_budget(db, budget_id, data)
+        return context.with_usd(BudgetRead.model_validate(budget).model_dump(mode="json"))
+
+
+@context.safe_tool
+def delete_budget(budget_id: int) -> dict[str, Any]:
+    """Delete a budget.
+
+    Budgets are planning data only — they post nothing to the ledger, so
+    deleting one affects nothing else. Use for 'delete the old rent
+    budget'.
+    """
+    with context.get_session() as db:
+        budgets_service.delete_budget(db, budget_id)
+        return {"deleted": True, "budget_id": budget_id}
+
+
+@context.safe_tool
 def create_customer(
     name: str,
     email: str | None = None,
@@ -985,6 +1062,8 @@ def read_tools() -> list[Callable[..., Any]]:
         get_bill,
         list_estimates,
         get_estimate,
+        list_budgets,
+        get_budget,
         get_budget_report,
         list_reconciliations,
         list_customers,
@@ -1006,6 +1085,8 @@ def write_tools() -> list[Callable[..., Any]]:
         create_estimate,
         convert_estimate,
         create_budget,
+        update_budget,
+        delete_budget,
         create_customer,
         create_vendor,
         create_item,
