@@ -47,6 +47,17 @@ def write_server(monkeypatch):
     return build_server()
 
 
+@pytest.fixture
+def empty_write_server(monkeypatch):
+    """Fresh, UNSEEDED database with write tools enabled (COA only, via
+    build_server's init_db). Used to exercise the seed_demo_data tool's
+    real-seed path."""
+    monkeypatch.setenv("MCP_ALLOW_WRITE", "1")
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+    return build_server()
+
+
 WRITE_TOOL_NAMES = {
     "create_journal_entry",
     "void_journal_entry",
@@ -71,6 +82,7 @@ WRITE_TOOL_NAMES = {
     "create_account",
     "update_account",
     "deactivate_account",
+    "seed_demo_data",
 }
 
 
@@ -1728,3 +1740,39 @@ async def test_list_journal_entries_include_voided(write_server) -> None:
     voided_ids = {row["id"] for row in shown if row["is_voided"]}
     assert shown_ids - hidden_ids == voided_ids
     assert rent["id"] in voided_ids
+
+
+@pytest.mark.anyio
+async def test_seed_demo_data(empty_write_server) -> None:
+    async with Client(empty_write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("seed_demo_data", {})
+        assert result.is_error is False
+        body = result.structured_content
+        assert body["seeded"] is True
+        assert body["login"] == {"username": "demo", "password": "demo123"}
+        customers = _rows(await client.call_tool("list_customers", {}))
+    assert len(customers) == 3  # the demo business really landed
+
+
+@pytest.mark.anyio
+async def test_seed_demo_data_already_present(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("seed_demo_data", {})
+    assert result.is_error is False
+    body = result.structured_content
+    assert body["seeded"] is False
+    assert "already present" in body["message"]
+    assert "login" not in body
+
+
+@pytest.mark.anyio
+async def test_seed_demo_data_idempotent(empty_write_server) -> None:
+    async with Client(empty_write_server, raise_exceptions=True) as client:
+        first = await client.call_tool("seed_demo_data", {})
+        assert first.is_error is False
+        assert first.structured_content["seeded"] is True
+        again = await client.call_tool("seed_demo_data", {})
+        assert again.is_error is False
+        assert again.structured_content["seeded"] is False
+        customers = _rows(await client.call_tool("list_customers", {}))
+    assert len(customers) == 3  # the second call created nothing new

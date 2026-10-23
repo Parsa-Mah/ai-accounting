@@ -5,14 +5,18 @@ when to use it, and an example question. Money results carry both integer
 cents and formatted USD strings (see ``context.with_usd``).
 """
 
+import contextlib
+import io
 from collections.abc import Callable
 from typing import Any
 
 from mcp.server.mcpserver.exceptions import ToolError
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.mcp import context
 from app.models.account import AccountType
+from app.models.party import Customer
 from app.schemas.account import AccountCreate, AccountRead, AccountUpdate
 from app.schemas.bill import BillLineCreate, BillRead
 from app.schemas.budget import BudgetCreate, BudgetRead, BudgetUpdate
@@ -21,6 +25,7 @@ from app.schemas.invoice import InvoiceLineCreate, InvoiceRead
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
 from app.schemas.journal import JournalEntryRead, JournalLineCreate
 from app.schemas.party import CustomerCreate, CustomerRead, VendorCreate, VendorRead
+from app.seed import demo
 from app.services import accounts
 from app.services import budgets as budgets_service
 from app.services import bills as bills_service
@@ -1192,6 +1197,36 @@ def deactivate_account(account: str) -> dict[str, Any]:
         return AccountRead.model_validate(updated).model_dump(mode="json")
 
 
+@context.safe_tool
+def seed_demo_data() -> dict[str, Any]:
+    """Seed the demo business: parties, items, documents, budgets, entries, reconciliation.
+
+    Idempotent: if the demo data is already present, nothing is created and
+    ``seeded`` is False. Creates a demo login (demo / demo123) only if no
+    user exists yet. Use to start from a realistic sample business, e.g.
+    'set up some sample data I can explore'.
+    """
+    with context.get_session() as db:
+        already = (
+            db.scalar(select(Customer).where(Customer.name == demo.MARKER_CUSTOMER))
+            is not None
+        )
+        # The service prints a summary; capture it so it cannot corrupt the
+        # stdio transport (the default MCP channel). We return our own dict.
+        with contextlib.redirect_stdout(io.StringIO()):
+            demo.seed_demo_data()
+    if already:
+        return {
+            "seeded": False,
+            "message": "Demo data already present — nothing to seed.",
+        }
+    return {
+        "seeded": True,
+        "message": "Demo data seeded successfully.",
+        "login": {"username": demo.DEMO_USERNAME, "password": demo.DEMO_PASSWORD},
+    }
+
+
 # --- Resources ---------------------------------------------------------
 
 
@@ -1319,6 +1354,7 @@ def write_tools() -> list[Callable[..., Any]]:
         create_account,
         update_account,
         deactivate_account,
+        seed_demo_data,
     ]
 
 
