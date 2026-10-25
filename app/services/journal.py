@@ -14,6 +14,7 @@ from app.models.journal import JournalEntry, JournalLine
 from app.schemas.journal import JournalLineCreate
 from app.services.accounts import get_account
 from app.services.errors import ConflictError, NotFoundError, ValidationError
+from app.services.periods import assert_period_open
 
 
 def create_journal_entry(
@@ -25,6 +26,7 @@ def create_journal_entry(
     source_type: str = "manual",
     source_id: int | None = None,
 ) -> JournalEntry:
+    assert_period_open(db, date)
     total_debit = 0
     total_credit = 0
     for line in lines:
@@ -93,6 +95,10 @@ def list_journal_entries(
 
 def void_journal_entry(db: Session, entry_id: int) -> JournalEntry:
     entry = get_journal_entry(db, entry_id)
+    # Voiding rewrites a record dated in the original entry's month, so a
+    # locked original month blocks the void even though the reversal entry
+    # itself is dated today (which the posting guard checks separately).
+    assert_period_open(db, entry.date)
     if entry.is_voided:
         raise ConflictError("journal entry is already voided")
     if any(line.cleared for line in entry.lines):

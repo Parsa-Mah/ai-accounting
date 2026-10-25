@@ -18,6 +18,7 @@ from app.models.journal import JournalEntry, JournalLine
 from app.models.reconciliation import Reconciliation
 from app.services.accounts import get_account
 from app.services.errors import ConflictError, NotFoundError, ValidationError
+from app.services.periods import assert_period_open
 
 
 def list_bank_accounts(db: Session) -> list[dict]:
@@ -64,6 +65,10 @@ def create_reconciliation(
         if entry is None:
             raise NotFoundError(f"journal entry {line.entry_id} not found")
         entries[line.entry_id] = entry
+    # Clearing mutates journal lines dated in their entry's month, so a
+    # locked month blocks the reconciliation (fix it by unlocking first).
+    for entry in entries.values():
+        assert_period_open(db, entry.date)
     for line in lines:
         if entries[line.entry_id].date > statement_date:
             raise ValidationError(
@@ -118,6 +123,10 @@ def delete_reconciliation(db: Session, reconciliation_id: int) -> None:
     recon = db.get(Reconciliation, reconciliation_id)
     if recon is None:
         raise NotFoundError(f"reconciliation {reconciliation_id} not found")
+    # Un-clearing mutates journal lines dated in their entry's month, so a
+    # locked month blocks the deletion (delete before locking, or reopen).
+    for line in recon.lines:
+        assert_period_open(db, line.entry.date)
     for line in recon.lines:
         line.cleared = False
         line.reconciliation_id = None
