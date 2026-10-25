@@ -40,6 +40,7 @@ def create_app() -> FastAPI:
         journal,
         ledger,
         parties,
+        periods,
         reconciliation,
         reports,
     )
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(invoices.router)
     app.include_router(bills.router)
     app.include_router(budgets.router)
+    app.include_router(periods.router)
     app.include_router(reconciliation.router)
     app.include_router(estimates.router)
     app.include_router(export.router)

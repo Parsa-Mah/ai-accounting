@@ -8,8 +8,10 @@ the guards are exercised through the existing endpoints (the real paths).
 import datetime
 
 import pytest
+from sqlalchemy import select
 
 from app.database import SessionLocal
+from app.models.audit import AuditLog
 from app.services import periods as periods_service
 from app.services.errors import ConflictError, NotFoundError
 
@@ -39,6 +41,18 @@ def _last_month() -> tuple[int, int]:
 def _last_month_date() -> datetime.date:
     """A date inside last month (its last day)."""
     return datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+
+
+def _audit_rows(**filters):
+    """Audit rows matching the given column values, oldest first."""
+    db = SessionLocal()
+    try:
+        stmt = select(AuditLog)
+        for column, value in filters.items():
+            stmt = stmt.where(getattr(AuditLog, column) == value)
+        return list(db.execute(stmt.order_by(AuditLog.id)).scalars())
+    finally:
+        db.close()
 
 
 def _account_ids(client) -> dict[str, int]:
@@ -234,3 +248,69 @@ def test_delete_reconciliation_in_locked_month_rejected(client) -> None:
 
     response = client.delete(f"/api/reconciliation/{recon_id}")
     assert response.status_code == 409
+
+
+def test_lock_endpoint_creates_and_is_idempotent(client) -> None:
+    response = client.post("/api/periods/2030/2/lock")
+    assert response.status_code == 201
+    body = response.json()
+    assert (body["year"], body["month"]) == (2030, 2)
+    assert body["is_locked"] is True
+    assert body["locked_at"] is not None
+    period_id = body["id"]
+
+    response = client.post("/api/periods/2030/2/lock")
+    assert response.status_code == 201
+    assert response.json()["id"] == period_id
+
+
+def test_unlock_endpoint(client) -> None:
+    client.post("/api/periods/2030/3/lock")
+
+    response = client.post("/api/periods/2030/3/unlock")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["is_locked"] is False
+    assert body["locked_at"] is None
+
+    # The row is kept after unlock; unlocking again is a 409.
+    response = client.post("/api/periods/2030/3/unlock")
+    assert response.status_code == 409
+
+
+def test_unlock_unknown_period_404(client) -> None:
+    response = client.post("/api/periods/2031/7/unlock")
+    assert response.status_code == 404
+
+
+def test_invalid_month_422(client) -> None:
+    assert client.post("/api/periods/2030/0/lock").status_code == 422
+    assert client.post("/api/periods/2030/13/lock").status_code == 422
+    assert client.post("/api/periods/2030/13/unlock").status_code == 422
+
+
+def test_list_periods_endpoint(client) -> None:
+    client.post("/api/periods/2030/5/lock")
+    client.post("/api/periods/2029/11/lock")
+
+    response = client.get("/api/periods")
+    assert response.status_code == 200
+    assert [(p["year"], p["month"]) for p in response.json()] == [
+        (2029, 11),
+        (2030, 5),
+    ]
+
+
+def test_periods_require_auth(app_client) -> None:
+    assert app_client.get("/api/periods").status_code == 401
+    assert app_client.post("/api/periods/2030/1/lock").status_code == 401
+    assert app_client.post("/api/periods/2030/1/unlock").status_code == 401
+
+
+def test_lock_unlock_audited_as_user(client) -> None:
+    """Lock (create) and unlock (update) land in the audit trail as the user."""
+    client.post("/api/periods/2030/4/lock")
+    client.post("/api/periods/2030/4/unlock")
+
+    rows = _audit_rows(model="Period", actor="user:1")
+    assert [row.action for row in rows] == ["create", "update"]
