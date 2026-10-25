@@ -63,6 +63,8 @@ WRITE_TOOL_NAMES = {
     "void_journal_entry",
     "create_reconciliation",
     "delete_reconciliation",
+    "lock_period",
+    "unlock_period",
     "create_invoice",
     "pay_invoice",
     "void_invoice",
@@ -1528,6 +1530,78 @@ async def test_create_reconciliation_balanced(write_server) -> None:
         listed = _rows(await client.call_tool("list_reconciliations", {}))
         assert len(listed) == 2
         assert listed[0]["id"] == body["id"]
+
+
+@pytest.mark.anyio
+async def test_list_periods_empty(mcp_server) -> None:
+    """No periods exist until a month is locked."""
+    async with Client(mcp_server, raise_exceptions=True) as client:
+        rows = _rows(await client.call_tool("list_periods", {}))
+    assert rows == []
+
+
+@pytest.mark.anyio
+async def test_lock_period_and_list(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("lock_period", {"month": "2030-02"})
+        assert result.is_error is False
+        body = result.structured_content
+        assert (body["year"], body["month"]) == (2030, 2)
+        assert body["is_locked"] is True
+        assert body["locked_at"] is not None
+
+        # Idempotent re-lock returns the same period.
+        again = await client.call_tool("lock_period", {"month": "2030-02"})
+        assert again.structured_content["id"] == body["id"]
+
+        rows = _rows(await client.call_tool("list_periods", {}))
+    assert [(row["year"], row["month"]) for row in rows] == [(2030, 2)]
+
+
+@pytest.mark.anyio
+async def test_unlock_period_semantics(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        unknown = await client.call_tool("unlock_period", {"month": "2031-01"})
+        assert unknown.is_error is True
+        assert "not found" in _text(unknown).lower()
+
+        await client.call_tool("lock_period", {"month": "2030-03"})
+        unlocked = await client.call_tool("unlock_period", {"month": "2030-03"})
+        assert unlocked.is_error is False
+        assert unlocked.structured_content["is_locked"] is False
+        assert unlocked.structured_content["locked_at"] is None
+
+        again = await client.call_tool("unlock_period", {"month": "2030-03"})
+    assert again.is_error is True
+    assert "not locked" in _text(again)
+
+
+@pytest.mark.anyio
+async def test_lock_invalid_month_is_tool_error(write_server) -> None:
+    async with Client(write_server, raise_exceptions=True) as client:
+        result = await client.call_tool("lock_period", {"month": "2026-13"})
+    assert result.is_error is True
+    assert "Invalid month" in _text(result)
+
+
+@pytest.mark.anyio
+async def test_locked_month_blocks_journal_entry(write_server) -> None:
+    """The MCP write path honors the period guard (a tool error, not a crash)."""
+    async with Client(write_server, raise_exceptions=True) as client:
+        await client.call_tool("lock_period", {"month": _current_month()})
+        result = await client.call_tool(
+            "create_journal_entry",
+            {
+                "date": datetime.date.today().isoformat(),
+                "description": "Blocked by lock",
+                "lines": [
+                    {"account": "5100", "debit_cents": 10000, "credit_cents": 0},
+                    {"account": "1000", "debit_cents": 0, "credit_cents": 10000},
+                ],
+            },
+        )
+    assert result.is_error is True
+    assert "locked" in _text(result)
 
 
 @pytest.mark.anyio

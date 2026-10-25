@@ -25,6 +25,7 @@ from app.schemas.invoice import InvoiceLineCreate, InvoiceRead
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
 from app.schemas.journal import JournalEntryRead, JournalLineCreate
 from app.schemas.party import CustomerCreate, CustomerRead, VendorCreate, VendorRead
+from app.schemas.period import PeriodRead
 from app.seed import demo
 from app.services import accounts
 from app.services import budgets as budgets_service
@@ -36,6 +37,7 @@ from app.services import items as items_service
 from app.services import journal as journal_service
 from app.services import ledger
 from app.services import parties as parties_service
+from app.services import periods as periods_service
 from app.services import reconciliation as reconciliation_service
 from app.services import reports
 
@@ -500,6 +502,21 @@ def list_reconciliations() -> list[dict[str, Any]]:
 
 
 @context.safe_tool
+def list_periods() -> list[dict[str, Any]]:
+    """List calendar-month periods (locked and unlocked), oldest first.
+
+    Each row carries ``is_locked``: entries, voids, and reconciliations
+    dated in a locked month are rejected until it is unlocked. Check this
+    before posting to a past month. Use for 'which months are locked?'.
+    """
+    with context.get_session() as db:
+        return [
+            PeriodRead.model_validate(period).model_dump(mode="json")
+            for period in periods_service.list_periods(db)
+        ]
+
+
+@context.safe_tool
 def list_customers() -> list[dict[str, Any]]:
     """List all customers (accounts receivable parties), by name.
 
@@ -743,6 +760,35 @@ def delete_reconciliation(reconciliation_id: int) -> dict[str, Any]:
     with context.get_session() as db:
         reconciliation_service.delete_reconciliation(db, reconciliation_id)
         return {"deleted": True, "reconciliation_id": reconciliation_id}
+
+
+@context.safe_tool
+def lock_period(month: str) -> dict[str, Any]:
+    """Lock a calendar month: no new journal entries, voids, or
+    reconciliations dated in that month will be accepted until unlocked.
+
+    ``month`` is 'YYYY-MM' (e.g. '2026-09'). Locking is idempotent —
+    re-locking an already-locked month succeeds. Lock a month after its
+    books are reviewed and reconciled. Use for 'lock September'.
+    """
+    first, _ = context.parse_month(month)
+    with context.get_session() as db:
+        period = periods_service.lock_period(db, year=first.year, month=first.month)
+        return PeriodRead.model_validate(period).model_dump(mode="json")
+
+
+@context.safe_tool
+def unlock_period(month: str) -> dict[str, Any]:
+    """Unlock a previously locked calendar month (the controlled reopen).
+
+    ``month`` is 'YYYY-MM' (e.g. '2026-09'). Fails if the month was never
+    locked. Use to correct a locked month, e.g. 'unlock September so I
+    can fix that entry'.
+    """
+    first, _ = context.parse_month(month)
+    with context.get_session() as db:
+        period = periods_service.unlock_period(db, year=first.year, month=first.month)
+        return PeriodRead.model_validate(period).model_dump(mode="json")
 
 
 @context.safe_tool
@@ -1322,6 +1368,7 @@ def read_tools() -> list[Callable[..., Any]]:
         get_budget_report,
         list_bank_accounts,
         list_reconciliations,
+        list_periods,
         list_customers,
         list_vendors,
         list_items,
@@ -1335,6 +1382,8 @@ def write_tools() -> list[Callable[..., Any]]:
         void_journal_entry,
         create_reconciliation,
         delete_reconciliation,
+        lock_period,
+        unlock_period,
         create_invoice,
         pay_invoice,
         void_invoice,
