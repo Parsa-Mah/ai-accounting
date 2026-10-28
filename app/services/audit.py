@@ -26,9 +26,10 @@ Rollbacks clear the buffer, so nothing is audited unless it committed.
 """
 
 import contextvars
+import datetime
 import os
 
-from sqlalchemy import event
+from sqlalchemy import event, select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.unitofwork import UOWTransaction
 
@@ -44,6 +45,7 @@ __all__ = [
     "set_actor_override",
     "reset_actor_override",
     "actor_override",
+    "list_audit_log",
     "install_hooks",
 ]
 
@@ -111,6 +113,42 @@ def reset_actor_override(token: contextvars.Token[str | None]) -> None:
 def actor_override() -> str | None:
     """The actor override for the current context, if one is set."""
     return _actor_override.get()
+
+
+def list_audit_log(
+    db: Session,
+    *,
+    actor: str | None = None,
+    model: str | None = None,
+    action: str | None = None,
+    date_from: datetime.date | None = None,
+    date_to: datetime.date | None = None,
+    limit: int = 200,
+) -> list[AuditLog]:
+    """List audit rows, newest first, with optional exact-match filters.
+
+    ``date_from``/``date_to`` are inclusive calendar days on the write
+    timestamp. The trail is append-only, so ``id`` order is the true
+    insertion order (timestamps can tie within a commit).
+    """
+    stmt = select(AuditLog)
+    if actor is not None:
+        stmt = stmt.where(AuditLog.actor == actor)
+    if model is not None:
+        stmt = stmt.where(AuditLog.model == model)
+    if action is not None:
+        stmt = stmt.where(AuditLog.action == action)
+    if date_from is not None:
+        stmt = stmt.where(
+            AuditLog.timestamp
+            >= datetime.datetime.combine(date_from, datetime.time.min)
+        )
+    if date_to is not None:
+        stmt = stmt.where(
+            AuditLog.timestamp
+            <= datetime.datetime.combine(date_to, datetime.time.max)
+        )
+    return list(db.scalars(stmt.order_by(AuditLog.id.desc()).limit(limit)))
 
 
 def _buffer_changes(session: Session, flush_context: UOWTransaction) -> None:

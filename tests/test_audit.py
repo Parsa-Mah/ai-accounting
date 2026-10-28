@@ -205,3 +205,69 @@ def test_seed_audited_as_system(app_client) -> None:
     """The COA seed (26 accounts) is audited as the system actor."""
     rows = _audit_rows(model="Account", actor="system", action="create")
     assert len(rows) == 26
+
+
+def test_audit_list_requires_auth(app_client) -> None:
+    assert app_client.get("/api/audit").status_code == 401
+
+
+def test_audit_list_newest_first(client) -> None:
+    """Rows come back newest-first (id desc) with the full field set."""
+    response = client.get("/api/audit")
+    assert response.status_code == 200
+    rows = response.json()
+    assert rows, "the COA seed must have produced audit rows"
+    ids = [row["id"] for row in rows]
+    assert ids == sorted(ids, reverse=True)
+    assert set(rows[0]) == {
+        "id",
+        "timestamp",
+        "actor",
+        "action",
+        "model",
+        "record_id",
+    }
+
+
+def test_audit_list_filters(client) -> None:
+    """Exact-match actor/model/action filters + inclusive day range + limit."""
+    accounts = _account_ids(client)
+    response = client.post(
+        "/api/journal",
+        json={
+            "date": "2026-10-01",
+            "description": "Audit list entry",
+            "lines": [
+                {"account_id": accounts["5100"], "debit": 10000, "credit": 0},
+                {"account_id": accounts["1000"], "debit": 0, "credit": 10000},
+            ],
+        },
+    )
+    assert response.status_code == 201
+    entry_id = response.json()["id"]
+
+    rows = client.get(
+        "/api/audit",
+        params={"actor": "user:1", "model": "JournalEntry", "action": "create"},
+    ).json()
+    assert [row["record_id"] for row in rows] == [entry_id]
+
+    # An unknown actor matches nothing.
+    assert client.get("/api/audit", params={"actor": "user:999"}).json() == []
+
+    # The write committed "now" (UTC timestamp), so a range on the newest
+    # row's own date contains it and a past range does not. (Local "today"
+    # can differ from the UTC date near midnight.)
+    newest_day = client.get("/api/audit").json()[0]["timestamp"][:10]
+    assert client.get(
+        "/api/audit", params={"date_from": newest_day, "date_to": newest_day}
+    ).json()
+    assert (
+        client.get(
+            "/api/audit", params={"date_from": "2020-01-01", "date_to": "2020-01-31"}
+        ).json()
+        == []
+    )
+
+    assert len(client.get("/api/audit", params={"limit": 1}).json()) == 1
+    assert client.get("/api/audit", params={"limit": 0}).status_code == 422

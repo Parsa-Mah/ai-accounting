@@ -40,6 +40,7 @@ def create_app() -> FastAPI:
     from app.routers import (
         accounts,
         ai,
+        audit,
         auth,
         bills,
         budgets,
@@ -66,6 +67,7 @@ def create_app() -> FastAPI:
     app.include_router(bills.router)
     app.include_router(budgets.router)
     app.include_router(periods.router)
+    app.include_router(audit.router)
     app.include_router(reconciliation.router)
     app.include_router(estimates.router)
     app.include_router(export.router)
