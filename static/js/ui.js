@@ -33,6 +33,15 @@ export function fmtDate(d) {
   return String(d).slice(0, 10);
 }
 
+// Render a timestamp (ISO "YYYY-MM-DDTHH:MM:SS…") as "YYYY-MM-DD HH:MM".
+// The value is displayed as-is: the app stores UTC wall-clock values in
+// SQLite and does no timezone conversion (same convention as fmtDate).
+export function fmtDateTime(iso) {
+  if (!iso) return "";
+  const s = String(iso);
+  return s.length >= 16 ? s.slice(0, 16).replace("T", " ") : s.slice(0, 10);
+}
+
 // Today's date as an ISO string (local time).
 export function todayISO() {
   const d = new Date();

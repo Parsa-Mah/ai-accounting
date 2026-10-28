@@ -138,6 +138,9 @@ export const API = {
   deleteReconciliation: (id) =>
     request("DELETE", `/api/reconciliation/${id}`),
 
+  // --- audit ---
+  listAudit: (params) => request("GET", withQuery("/api/audit", params)),
+
   // --- export ---
   // Returns a download URL (not a fetch); the caller sets window.location.href
   // to it. The server responds with Content-Disposition: attachment, so the

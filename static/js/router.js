@@ -18,6 +18,7 @@ const NAV = [
   "budgets",
   "reconciliation",
   "export",
+  "audit",
   "ai",
 ];
 
@@ -34,6 +35,7 @@ const LOADERS = {
   budgets: () => import("./pages/budgets.js"),
   reconciliation: () => import("./pages/reconciliation.js"),
   export: () => import("./pages/export.js"),
+  audit: () => import("./pages/audit.js"),
   ai: () => import("./pages/ai.js"),
 };
 
