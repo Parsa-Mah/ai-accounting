@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Adicione pelo menos uma linha.",
     "doclines.err_invalid_price": "Uma linha tem um preço unitário inválido.",
     "doclines.err_no_item_or_desc": "Cada linha precisa de um item ou de uma descrição.",
-    "doclines.totals": "Subtotal <b>{subtotal}</b> · Imposto <b>{tax}</b> · Total <b>{total}</b>"
+    "doclines.totals": "Subtotal <b>{subtotal}</b> · Imposto <b>{tax}</b> · Total <b>{total}</b>",
+    "nav.ai": "Assistente",
+    "ai.title": "Centro de comando de IA",
+    "ai.subtitle": "Faça perguntas sobre seus livros contábeis. O assistente responde com base nos seus dados e propõe alterações para sua aprovação.",
+    "ai.placeholder": "Faça uma pergunta sobre seus livros…",
+    "ai.send": "Enviar",
+    "ai.thinking": "Pensando…",
+    "ai.empty": "Faça uma pergunta para começar. Tente: «Qual é o meu saldo em caixa?»",
+    "ai.trail": "Ferramentas usadas",
+    "ai.proposal_title": "Alteração proposta",
+    "ai.approve": "Aprovar",
+    "ai.reject": "Rejeitar",
+    "ai.approved": "Aprovado",
+    "ai.rejected": "Rejeitado",
+    "ai.status_ok": "Conectado a {model}",
+    "ai.status_down": "Modelo de IA inacessível — inicie o LM Studio ou defina LLM_API_BASE",
+    "ai.error": "Algo deu errado: {detail}"
   }
 }

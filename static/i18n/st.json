@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Eketsa bonyane mola o le mong.",
     "doclines.err_invalid_price": "Mola o na le theko e sa ameheng ea ntho e le 'ngoe.",
     "doclines.err_no_item_or_desc": "Mola o mong le o mong o hloka thepa kapa tlhaloso.",
-    "doclines.totals": "Kakaretso e nyane <b>{subtotal}</b> · Peiso <b>{tax}</b> · Kakaretso <b>{total}</b>"
+    "doclines.totals": "Kakaretso e nyane <b>{subtotal}</b> · Peiso <b>{tax}</b> · Kakaretso <b>{total}</b>",
+    "nav.ai": "Mothusi",
+    "ai.title": "Sefaha sa AI",
+    "ai.subtitle": "Botsa ka libuka tsa hao. Mothusi o araba ho tsoa ho data ea hao 'me o u fa liphetoho tseo u lokelang ho li amohela.",
+    "ai.placeholder": "Botsa ka libuka tsa hao…",
+    "ai.send": "Romela",
+    "ai.thinking": "O nahana…",
+    "ai.empty": "Botsa potso ho qala. Leka: “Chelete ea ka e setseng ke kae?”",
+    "ai.trail": "Lisebelisoa tse sebelisitsoeng",
+    "ai.proposal_title": "Liphetoho tse fanoeng",
+    "ai.approve": "Amohela",
+    "ai.reject": "Hana",
+    "ai.approved": "E amoehile",
+    "ai.rejected": "E hanoa",
+    "ai.status_ok": "E hokahantsoe le {model}",
+    "ai.status_down": "AI model ha e fihlellohe — qala LM Studio kapa beha LLM_API_BASE",
+    "ai.error": "Ho etsahetse phoso: {detail}"
   }
 }

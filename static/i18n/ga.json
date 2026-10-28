@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Cuir ar a laghad líne amháin leis.",
     "doclines.err_invalid_price": "Tá príomh aonaid neamhbhailí ag líne.",
     "doclines.err_no_item_or_desc": "Teastaíonn eilimint nó cur síos ó gach líne.",
-    "doclines.totals": "Fo-iomlán <b>{subtotal}</b> · Cáin <b>{tax}</b> · Iomlán <b>{total}</b>"
+    "doclines.totals": "Fo-iomlán <b>{subtotal}</b> · Cáin <b>{tax}</b> · Iomlán <b>{total}</b>",
+    "nav.ai": "Cúntóir",
+    "ai.title": "Lárionad Seachadta AI",
+    "ai.subtitle": "Ceist faoi do leabhar contae. Freagraíonn an cúntóir as do chuid sonraí agus molann athruithe le haghaidh ceadú.",
+    "ai.placeholder": "Ceist faoi do leabhar contae…",
+    "ai.send": "Seol",
+    "ai.thinking": "Ag smaoineamh…",
+    "ai.empty": "Cuir ceist chun tosú a chur. Bain triail as: “Cad is ea mo chothromas caise?”",
+    "ai.trail": "Uirlisí a úsáideadh",
+    "ai.proposal_title": "Athrú moltach",
+    "ai.approve": "Ceadaigh",
+    "ai.reject": "Diúltigh",
+    "ai.approved": "Ceadaithe",
+    "ai.rejected": "Diúltaithe",
+    "ai.status_ok": "Ceangailte le {model}",
+    "ai.status_down": "Níl an sampla AI inrochtaineach — tosú LM Studio nó socraigh LLM_API_BASE",
+    "ai.error": "Tharla drochscéal: {detail}"
   }
 }

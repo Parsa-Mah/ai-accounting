@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Isa muraira mumwe chete.",
     "doclines.err_invalid_price": "Muraira une mutengo wechigadzirwa usina kururama.",
     "doclines.err_no_item_or_desc": "Muraira uri nechigadzirwa kana tsanangudzo.",
-    "doclines.totals": "Zvese zvishoma <b>{subtotal}</b> · Mutero <b>{tax}</b> · Zvese <b>{total}</b>"
+    "doclines.totals": "Zvese zvishoma <b>{subtotal}</b> · Mutero <b>{tax}</b> · Zvese <b>{total}</b>",
+    "nav.ai": "Chiridzwa",
+    "ai.title": "Chikamu cheAI",
+    "ai.subtitle": "Tsvaga nezve mabhuku ako. Chiridzwa chinopindura kubva kumagwaro ako uye chinopawira zvibodzwa kuti uzvibvumire.",
+    "ai.placeholder": "Tsvaga nezve mabhuku ako…",
+    "ai.send": "Tumira",
+    "ai.thinking": "Inofunga…",
+    "ai.empty": "Tsvaga mubvunzo kuti utange. Edza: “Mari yangu yakashara ndiyo ipi?”",
+    "ai.trail": "Zvigadzirwa zvakashandiswa",
+    "ai.proposal_title": "Zvibodzwa zvakapawirwa",
+    "ai.approve": "Bvumira",
+    "ai.reject": "Kundikana",
+    "ai.approved": "Zvakabvumirwa",
+    "ai.rejected": "Zvakakundikanywa",
+    "ai.status_ok": "Yakabatana na {model}",
+    "ai.status_down": "AI model haigone kufanirwa — tanga LM Studio kana kuisa LLM_API_BASE",
+    "ai.error": "Zvakaitika zvisina kufanirwa: {detail}"
   }
 }

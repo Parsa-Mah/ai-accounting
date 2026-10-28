@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Fügen Sie mindestens eine Zeile hinzu.",
     "doclines.err_invalid_price": "Eine Zeile hat einen ungültigen Einzelpreis.",
     "doclines.err_no_item_or_desc": "Jede Zeile benötigt eine Position oder eine Beschreibung.",
-    "doclines.totals": "Zwischensumme <b>{subtotal}</b> · Steuern <b>{tax}</b> · Gesamt <b>{total}</b>"
+    "doclines.totals": "Zwischensumme <b>{subtotal}</b> · Steuern <b>{tax}</b> · Gesamt <b>{total}</b>",
+    "nav.ai": "Assistent",
+    "ai.title": "KI-Kommandozentrale",
+    "ai.subtitle": "Stellen Sie Fragen zu Ihren Büchern. Der Assistent antwortet auf Basis Ihrer Daten und schlägt Änderungen vor, die Sie freigeben.",
+    "ai.placeholder": "Stellen Sie eine Frage zu Ihren Büchern…",
+    "ai.send": "Senden",
+    "ai.thinking": "Denke nach…",
+    "ai.empty": "Stellen Sie eine Frage, um loszulegen. Z. B.: „Wie hoch ist mein Kassenbestand?“",
+    "ai.trail": "Verwendete Werkzeuge",
+    "ai.proposal_title": "Vorgeschlagene Änderung",
+    "ai.approve": "Genehmigen",
+    "ai.reject": "Ablehnen",
+    "ai.approved": "Genehmigt",
+    "ai.rejected": "Abgelehnt",
+    "ai.status_ok": "Verbunden mit {model}",
+    "ai.status_down": "KI-Modell nicht erreichbar — starten Sie LM Studio oder setzen Sie LLM_API_BASE",
+    "ai.error": "Etwas ist schiefgelaufen: {detail}"
   }
 }

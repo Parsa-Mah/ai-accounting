@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Ongera umurongo umwe.",
     "doclines.err_invalid_price": "Umurongo ufite igiciro cy'ikintu kitayemewe.",
     "doclines.err_no_item_or_desc": "Buri murongo ushaka ikintu cyangwa ibisobanuro.",
-    "doclines.totals": "Igiteranyo gito <b>{subtotal}</b> · Icyuzye <b>{tax}</b> · Igiteranyo <b>{total}</b>"
+    "doclines.totals": "Igiteranyo gito <b>{subtotal}</b> · Icyuzye <b>{tax}</b> · Igiteranyo <b>{total}</b>",
+    "nav.ai": "Ufasha",
+    "ai.title": "Ishyirahamwe ry'AI",
+    "ai.subtitle": "Baza ku bitabo byawe. Ufasha arasubiza biturutse ku makuru yawe kandi aguteza imbere impinduka uzabyemera.",
+    "ai.placeholder": "Baza ku bitabo byawe…",
+    "ai.send": "Ohereza",
+    "ai.thinking": "Aratuye…",
+    "ai.empty": "Baza ikibazo kugira utangire. Gerageza: “Amadeni yanjye asigaye ni angahe?”",
+    "ai.trail": "Ibikoresho byakoreshejwe",
+    "ai.proposal_title": "Impinduka yateweho",
+    "ai.approve": "Emera",
+    "ai.reject": "Hagarika",
+    "ai.approved": "Yemewe",
+    "ai.rejected": "Yahagaritswe",
+    "ai.status_ok": "Yahuje na {model}",
+    "ai.status_down": "AI model itaboneka — tangira LM Studio cyangwa uhindure LLM_API_BASE",
+    "ai.error": "Habaye ikibazo: {detail}"
   }
 }

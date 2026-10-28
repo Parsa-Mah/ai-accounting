@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "ከአንድ በላይ መስመር ያክሉ።",
     "doclines.err_invalid_price": "መስመር አልታክከለኛ የአንዱ ዋጋ አለው።",
     "doclines.err_no_item_or_desc": "እያንዳንዱ መስመር እቃ ወይም መግለጫ ያስፈልገዋል።",
-    "doclines.totals": "ከፊል ጠቅላላ <b>{subtotal}</b> · ግብር <b>{tax}</b> · ጠቅላላ <b>{total}</b>"
+    "doclines.totals": "ከፊል ጠቅላላ <b>{subtotal}</b> · ግብር <b>{tax}</b> · ጠቅላላ <b>{total}</b>",
+    "nav.ai": "ረዳት",
+    "ai.title": "AI ትዕዛዝ ማእከል",
+    "ai.subtitle": "ስለ መጽሐፎችዎ ጥያቄ ይጠይቁ። ረዳቱ ከመረጃዎችዎ ተነስቶ መልስ ይሰጣል እና ለማጽደቅ ለውጦችን ያቅርባል።",
+    "ai.placeholder": "ስለ መጽሐፎችዎ ጥያቄ ይጠይቁ…",
+    "ai.send": "ላክ",
+    "ai.thinking": "በመፍተን ላይ…",
+    "ai.empty": "ለመጀመር ጥያቄ ይጠይቁ። ሙከራ ያድርጉ፦ “የእኔ የገንዘብ መቀሪያ ስንት ነው?”",
+    "ai.trail": "የተጠቀሙት መሣሪያዎች",
+    "ai.proposal_title": "የቀረበ ለውጥ",
+    "ai.approve": "አጽድቅ",
+    "ai.reject": "ውድቅ",
+    "ai.approved": "አጸድቋል",
+    "ai.rejected": "ውድቅ ተደርጓል",
+    "ai.status_ok": "ከ {model} ጋር ተገናኝቷል",
+    "ai.status_down": "AI ሞዴል አይገኝም — LM Studio ይጀምሩ ወይም LLM_API_BASE ይጥቀሙ",
+    "ai.error": "ሁኔታ አልተሳካም፦ {detail}"
   }
 }

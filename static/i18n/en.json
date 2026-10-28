@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Add at least one line.",
     "doclines.err_invalid_price": "A line has an invalid unit price.",
     "doclines.err_no_item_or_desc": "Each line needs an item or a description.",
-    "doclines.totals": "Subtotal <b>{subtotal}</b> · Tax <b>{tax}</b> · Total <b>{total}</b>"
+    "doclines.totals": "Subtotal <b>{subtotal}</b> · Tax <b>{tax}</b> · Total <b>{total}</b>",
+    "nav.ai": "Assistant",
+    "ai.title": "AI Command Center",
+    "ai.subtitle": "Ask about your books. The assistant answers from your data and proposes changes for your approval.",
+    "ai.placeholder": "Ask about your books…",
+    "ai.send": "Send",
+    "ai.thinking": "Thinking…",
+    "ai.empty": "Ask a question to get started. Try “What’s my cash balance?”",
+    "ai.trail": "Tools used",
+    "ai.proposal_title": "Proposed change",
+    "ai.approve": "Approve",
+    "ai.reject": "Reject",
+    "ai.approved": "Approved",
+    "ai.rejected": "Rejected",
+    "ai.status_ok": "Connected to {model}",
+    "ai.status_down": "AI model not reachable — start LM Studio or set LLM_API_BASE",
+    "ai.error": "Something went wrong: {detail}"
   }
 }

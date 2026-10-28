@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "少なくとも1行追加してください。",
     "doclines.err_invalid_price": "無効な単価の行があります。",
     "doclines.err_no_item_or_desc": "各行に品目または説明が必要です。",
-    "doclines.totals": "小計 <b>{subtotal}</b> · 税 <b>{tax}</b> · 合計 <b>{total}</b>"
+    "doclines.totals": "小計 <b>{subtotal}</b> · 税 <b>{tax}</b> · 合計 <b>{total}</b>",
+    "nav.ai": "アシスタント",
+    "ai.title": "AI コマンドセンター",
+    "ai.subtitle": "帳簿について質問してください。アシスタントはあなたのデータに基づいて回答し、承認を待つ変更を提案します。",
+    "ai.placeholder": "帳簿について質問…",
+    "ai.send": "送信",
+    "ai.thinking": "考え中…",
+    "ai.empty": "質問して始めてください。例：「現金残高はいくらですか？」",
+    "ai.trail": "使用したツール",
+    "ai.proposal_title": "提案された変更",
+    "ai.approve": "承認",
+    "ai.reject": "却下",
+    "ai.approved": "承認済み",
+    "ai.rejected": "却下済み",
+    "ai.status_ok": "{model} に接続中",
+    "ai.status_down": "AI モデルに接続できません — LM Studio を起動するか LLM_API_BASE を設定してください",
+    "ai.error": "問題が発生しました: {detail}"
   }
 }

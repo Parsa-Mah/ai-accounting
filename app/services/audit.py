@@ -13,6 +13,10 @@ Actor identity is a contextvar set at the two front doors:
 - everything else (COA seed, ``--seed`` demo data, first-run setup):
   the ``system`` default
 
+A per-context override (``set_actor_override``) can replace the front-door
+actor; the command center uses it to audit its tool executions as
+``ai:command-center``.
+
 SQLAlchemy 2.0 blocks re-entrant flushes/commits inside its events
 ("Session is already flushing" / "committed" state), so the hook buffers
 the changed records on ``after_flush`` (where the session's pending sets
@@ -32,15 +36,32 @@ from app.database import SessionLocal
 from app.models.audit import AuditLog
 
 __all__ = [
+    "AI_COMMAND_CENTER_ACTOR",
     "set_actor",
     "reset_actor",
     "current_actor",
     "ai_actor",
+    "set_actor_override",
+    "reset_actor_override",
+    "actor_override",
     "install_hooks",
 ]
 
 _current_actor: contextvars.ContextVar[str] = contextvars.ContextVar(
     "accounting_actor", default="system"
+)
+
+# Actor for the AI command center (web chat acting through the tools):
+# distinguishes AI-composed actions from ``user:<id>`` (manual UI) and
+# ``ai:<client>`` (external MCP clients).
+AI_COMMAND_CENTER_ACTOR = "ai:command-center"
+
+# Optional per-context override of the front-door actor. Set by the
+# command center around tool executions so they audit as
+# ``ai:command-center`` even though ``get_session()`` would otherwise
+# use the MCP client actor. Default None = no override.
+_actor_override: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "accounting_actor_override", default=None
 )
 
 # Negative skip list: everything is audited except these. AuditLog itself
@@ -71,6 +92,25 @@ def current_actor() -> str:
 def ai_actor() -> str:
     """MCP actor id: ``ai:<MCP_CLIENT_NAME>`` (env read at call time)."""
     return f"ai:{os.environ.get('MCP_CLIENT_NAME', 'mcp')}"
+
+
+def set_actor_override(actor: str) -> contextvars.Token[str | None]:
+    """Override the front-door actor for the current context.
+
+    Used by the command center so its tool executions audit as
+    ``ai:command-center``. Pair with :func:`reset_actor_override`.
+    """
+    return _actor_override.set(actor)
+
+
+def reset_actor_override(token: contextvars.Token[str | None]) -> None:
+    """Restore the override to its value before the matching set."""
+    _actor_override.reset(token)
+
+
+def actor_override() -> str | None:
+    """The actor override for the current context, if one is set."""
+    return _actor_override.get()
 
 
 def _buffer_changes(session: Session, flush_context: UOWTransaction) -> None:

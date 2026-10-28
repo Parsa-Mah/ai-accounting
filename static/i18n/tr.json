@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "En az bir satır ekleyin.",
     "doclines.err_invalid_price": "Bir satırda geçersiz bir birim fiyat var.",
     "doclines.err_no_item_or_desc": "Her satır için bir ürün veya açıklama gerekli.",
-    "doclines.totals": "Ara toplam <b>{subtotal}</b> · Vergi <b>{tax}</b> · Toplam <b>{total}</b>"
+    "doclines.totals": "Ara toplam <b>{subtotal}</b> · Vergi <b>{tax}</b> · Toplam <b>{total}</b>",
+    "nav.ai": "Yardımcı",
+    "ai.title": "AI Komuta Merkezi",
+    "ai.subtitle": "Muhasebe kayıtlarınız hakkında sorun. Yardımcı, verilerinizden yanıt verir ve onayınız için değişiklikler önerir.",
+    "ai.placeholder": "Kayıtlarınız hakkında sorun…",
+    "ai.send": "Gönder",
+    "ai.thinking": "Düşünüyor…",
+    "ai.empty": "Başlamak için bir soru sorun. Deneyin: “Nakit bakiyem ne kadar?”",
+    "ai.trail": "Kullanılan araçlar",
+    "ai.proposal_title": "Önerilen değişiklik",
+    "ai.approve": "Onayla",
+    "ai.reject": "Reddet",
+    "ai.approved": "Onaylandı",
+    "ai.rejected": "Reddedildi",
+    "ai.status_ok": "{model} bağlantılı",
+    "ai.status_down": "AI modeline ulaşılamıyor — LM Studio'yu başlatın veya LLM_API_BASE'ı ayarlayın",
+    "ai.error": "Bir şeyler ters gitti: {detail}"
   }
 }

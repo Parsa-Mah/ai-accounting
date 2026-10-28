@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Додајте бар један ред.",
     "doclines.err_invalid_price": "Један ред има неисправну цену по јединици.",
     "doclines.err_no_item_or_desc": "Сваки ред треба да има артикл или опис.",
-    "doclines.totals": "Основница <b>{subtotal}</b> · Порез <b>{tax}</b> · Укупно <b>{total}</b>"
+    "doclines.totals": "Основница <b>{subtotal}</b> · Порез <b>{tax}</b> · Укупно <b>{total}</b>",
+    "nav.ai": "Pomoćnik",
+    "ai.title": "AI centar komande",
+    "ai.subtitle": "Postavljajte pitanja o svojim knjigama. Pomoćnik odgovara na osnovu vaših podataka i predlaže izmene za odobrenje.",
+    "ai.placeholder": "Pitajte o svojim knjigama…",
+    "ai.send": "Pošalji",
+    "ai.thinking": "Razmišljam…",
+    "ai.empty": "Postavite pitanje da biste počeli. Probajte: „Koliko imam gotovine?”",
+    "ai.trail": "Korišćeni alati",
+    "ai.proposal_title": "Predložena izmena",
+    "ai.approve": "Odobri",
+    "ai.reject": "Odbij",
+    "ai.approved": "Odobreno",
+    "ai.rejected": "Odbijeno",
+    "ai.status_ok": "Povezano sa {model}",
+    "ai.status_down": "AI model nije dostupan — pokrenite LM Studio ili podesite LLM_API_BASE",
+    "ai.error": "Nešto nije u redu: {detail}"
   }
 }

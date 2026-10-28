@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Dodajte barem jednu stavku.",
     "doclines.err_invalid_price": "Stavka ima neispravnu jediničnu cijenu.",
     "doclines.err_no_item_or_desc": "Svaka stavka zahtijeva artikal ili opis.",
-    "doclines.totals": "Međuzbroj <b>{subtotal}</b> · Porez <b>{tax}</b> · Ukupno <b>{total}</b>"
+    "doclines.totals": "Međuzbroj <b>{subtotal}</b> · Porez <b>{tax}</b> · Ukupno <b>{total}</b>",
+    "nav.ai": "Pomoćnik",
+    "ai.title": "AI upravljačko središte",
+    "ai.subtitle": "Postavljajte pitanja o svojim knjigama. Pomoćnik odgovara na temelju vaših podataka i predlaže promjene za odobrenje.",
+    "ai.placeholder": "Pitajte o svojim knjigama…",
+    "ai.send": "Pošalji",
+    "ai.thinking": "Razmišljam…",
+    "ai.empty": "Postavite pitanje za početak. Pokušajte: „Kakvo je moje gotovinsko stanje?“",
+    "ai.trail": "Korišteni alati",
+    "ai.proposal_title": "Predložena promjena",
+    "ai.approve": "Odobri",
+    "ai.reject": "Odbij",
+    "ai.approved": "Odobreno",
+    "ai.rejected": "Odbijeno",
+    "ai.status_ok": "Povezano s {model}",
+    "ai.status_down": "AI model nije dostupan — pokrenite LM Studio ili postavite LLM_API_BASE",
+    "ai.error": "Nešto je pošlo po zlu: {detail}"
   }
 }

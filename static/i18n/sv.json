@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Lägg till minst en rad.",
     "doclines.err_invalid_price": "En rad har ett ogiltigt enhetspris.",
     "doclines.err_no_item_or_desc": "Varje rad behöver en artikel eller en beskrivning.",
-    "doclines.totals": "Delsumma <b>{subtotal}</b> · Moms <b>{tax}</b> · Totalt <b>{total}</b>"
+    "doclines.totals": "Delsumma <b>{subtotal}</b> · Moms <b>{tax}</b> · Totalt <b>{total}</b>",
+    "nav.ai": "Assistent",
+    "ai.title": "AI-kommandocenter",
+    "ai.subtitle": "Fråga om dina bokföringar. Assistenten svarar utifrån dina data och föreslår ändringar för godkännande.",
+    "ai.placeholder": "Fråga om dina bokföringar…",
+    "ai.send": "Skicka",
+    "ai.thinking": "Tänker…",
+    "ai.empty": "Ställ en fråga för att komma igång. Prova: ”Vad är mitt kassabalans?”",
+    "ai.trail": "Använda verktyg",
+    "ai.proposal_title": "Föreslagen ändring",
+    "ai.approve": "Godkänn",
+    "ai.reject": "Avvisa",
+    "ai.approved": "Godkänd",
+    "ai.rejected": "Avvisad",
+    "ai.status_ok": "Ansluten till {model}",
+    "ai.status_down": "AI-modellen är inte tillgänglig — starta LM Studio eller sätt LLM_API_BASE",
+    "ai.error": "Något gick fel: {detail}"
   }
 }

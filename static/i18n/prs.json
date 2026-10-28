@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "حداقل یک ردیف اضافه کنید.",
     "doclines.err_invalid_price": "یکی از ردیف‌ها قیمت واحد نامعتبر دارد.",
     "doclines.err_no_item_or_desc": "هر ردیف به یک قلم یا توضیحات نیاز دارد.",
-    "doclines.totals": "جمع جزء <b>{subtotal}</b> · مالیات <b>{tax}</b> · جمع <b>{total}</b>"
+    "doclines.totals": "جمع جزء <b>{subtotal}</b> · مالیات <b>{tax}</b> · جمع <b>{total}</b>",
+    "nav.ai": "دستیار",
+    "ai.title": "مرکز فرماندهی هوش مصنوعی",
+    "ai.subtitle": "درباره دفاتر خود بپرسید. دستیار بر اساس داده‌های شما پاسخ می‌دهد و تغییراتی برای تأیید شما پیشنهاد می‌کند.",
+    "ai.placeholder": "درباره دفاتر خود بپرسید…",
+    "ai.send": "ارسال",
+    "ai.thinking": "در حال فکر کردن…",
+    "ai.empty": "برای شروع سؤالی بپرسید. امتحان کنید: “موجودی نقد من چقدر است؟”",
+    "ai.trail": "ابزارهای به‌کاررفته",
+    "ai.proposal_title": "تغییر پیشنهادی",
+    "ai.approve": "تأیید",
+    "ai.reject": "رد",
+    "ai.approved": "تأیید شد",
+    "ai.rejected": "رد شد",
+    "ai.status_ok": "متصل به {model}",
+    "ai.status_down": "به مدل هوش مصنوعی دسترسی نیست — LM Studio را راه‌اندازی کنید یا LLM_API_BASE را تنظیم کنید",
+    "ai.error": "مشکلی پیش آمد: {detail}"
   }
 }

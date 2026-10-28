@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "کم از کم ایک قطار شامل کریں۔",
     "doclines.err_invalid_price": "ایک قطار میں غلط فی یونٹ قیمت ہے۔",
     "doclines.err_no_item_or_desc": "ہر قطار کو ایک آئٹم یا تفصیل درکار ہے۔",
-    "doclines.totals": "ذیلی کل <b>{subtotal}</b> · ٹیکس <b>{tax}</b> · کل <b>{total}</b>"
+    "doclines.totals": "ذیلی کل <b>{subtotal}</b> · ٹیکس <b>{tax}</b> · کل <b>{total}</b>",
+    "nav.ai": "مددگار",
+    "ai.title": "AI کمانڈ سینٹر",
+    "ai.subtitle": "اپنے دفاتر کے بارے میں پوچھیں۔ مددگار آپ کے ڈیٹا سے جواب دیتا ہے اور آپ کی منظوری کے لیے تبدیلیاں تجویز کرتا ہے۔",
+    "ai.placeholder": "اپنے دفاتر کے بارے میں پوچھیں…",
+    "ai.send": "بھیجیں",
+    "ai.thinking": "سوچ رہا ہے…",
+    "ai.empty": "شروع کرنے کے لیے ایک سوال پوچھیں۔ آزمائیں: “میرا نقد بیلنس کتنا ہے؟”",
+    "ai.trail": "استعمال شدہ ٹولز",
+    "ai.proposal_title": "تجویز کردہ تبدیلی",
+    "ai.approve": "منظور کریں",
+    "ai.reject": "مسترد کریں",
+    "ai.approved": "منظور",
+    "ai.rejected": "مسترد",
+    "ai.status_ok": "{model} سے جڑا ہوا",
+    "ai.status_down": "AI ماڈل تک رسائی ممکن نہیں — LM Studio شروع کریں یا LLM_API_BASE مقرر کریں",
+    "ai.error": "کچھ غلط ہو گیا: {detail}"
   }
 }

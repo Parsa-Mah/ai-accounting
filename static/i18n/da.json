@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Tilføj mindst én række.",
     "doclines.err_invalid_price": "En række har en ugyldig enhedspris.",
     "doclines.err_no_item_or_desc": "Hver række kræver en vare eller en beskrivelse.",
-    "doclines.totals": "Delsum <b>{subtotal}</b> · Moms <b>{tax}</b> · I alt <b>{total}</b>"
+    "doclines.totals": "Delsum <b>{subtotal}</b> · Moms <b>{tax}</b> · I alt <b>{total}</b>",
+    "nav.ai": "Assistent",
+    "ai.title": "AI-kommandocenter",
+    "ai.subtitle": "Spørg om dine regnskaber. Assistenten svarer ud fra dine data og foreslår ændringer til godkendelse.",
+    "ai.placeholder": "Spørg om dine regnskaber…",
+    "ai.send": "Send",
+    "ai.thinking": "Tænker…",
+    "ai.empty": "Stil et spørgsmål for at komme i gang. Prøv: »Hvad er min kontantbalance?«",
+    "ai.trail": "Brugte værktøjer",
+    "ai.proposal_title": "Foreslået ændring",
+    "ai.approve": "Godkend",
+    "ai.reject": "Afvis",
+    "ai.approved": "Godkendt",
+    "ai.rejected": "Afvist",
+    "ai.status_ok": "Forbundet med {model}",
+    "ai.status_down": "AI-modellen kan ikke nås — start LM Studio eller sæt LLM_API_BASE",
+    "ai.error": "Noget gik galt: {detail}"
   }
 }

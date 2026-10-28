@@ -110,6 +110,27 @@ The resulting roadmap is recorded in `AIHelper.md` (decision #30) and starts aft
 
 Multi-user roles, multi-currency, multi-entity consolidation, and revenue recognition are explicitly deferred: they are orthogonal to "one company's books, fully controlled by a local AI."
 
+## Post-build: the AI-full-control phases (1a → 3)
+
+The roadmap above was executed in the same rhythm — small batches, tests + pyright green after each, `AIHelper.md` as the queue and the record (decision log #30–#41).
+
+**Phase 1a — audit trail (2026-10-22).** Every write is now recorded in an `AuditLog` with an actor identity — `user:<id>` for the web UI, `ai:<client>` for MCP clients, `system` for seeding — captured via SQLAlchemy `after_flush` hooks, so the AI's expanding control is traceable from day one.
+
+**Phase 1b — MCP parity (2026-10-24, 8 batches).** The MCP surface grew from 19 tools to 50 (24 read + 26 write): parties, items, accounts, estimates, bills, budgets, reconciliation, journal, export, and a demo-seed tool — every tool wrapping an existing service through the single posting path, with no new domain logic.
+
+**Phase 2 — period locking (2026-10-26, 3 batches).** Calendar-month periods with a single `assert_period_open` guard (HTTP 409) in the posting, void, and reconciliation paths; locking is idempotent, unlocking is a controlled reopen; exposed over REST and MCP.
+
+**Phase 3 — the AI command center (2026-10-28, 6 batches).** The chat page the roadmap promised: a local LLM (LM Studio, OpenAI-compatible) answers questions about the books by acting through the 50 typed MCP tools. The build, batch by batch:
+
+1. **LLM client** — `app/services/llm.py`: an OpenAI-compatible streaming client (SSE stream parser, model auto-detection, configured by `LLM_API_BASE` / `LLM_MODEL` / `LLM_API_KEY` / `LLM_EXTRA`), with a clean error type mapped to HTTP 503.
+2. **Tool bridge** — the 50 MCP tools exposed to the model as OpenAI function schemas (built once from the same `build_server()` the MCP server uses), executed under a dedicated audit actor, `ai:command-center`, so AI-composed actions are distinguishable in the trail from both human and MCP-client actions.
+3. **Agent loop + SSE REST** — a bounded loop (max 8 rounds) that streams the model's tokens and tool calls to the browser as server-sent events. Read tools run in-turn; **write tools are never executed by the loop** — they come back as proposals. `POST /api/ai/approve` executes an approved write through the same posting path (a locked month 409s, exactly like the web UI), and `GET /api/ai/status` reports model reachability.
+4. **SPA chat page** — `#/ai`: streamed answers, a chip for every tool call (with a link to the page that shows the underlying data), approve/reject cards for proposals, and a connection status dot.
+5. **i18n** — the 16 new UI strings added to all 85 dictionaries, parity-tested.
+6. **Docs** — this entry, the README section, and the `AIHelper.md` domain rule.
+
+The durable design decisions (recorded as decision #41): the assistant's own audit actor; SSE streaming from the start; traceability at page level (no transaction deep links, which the hash router cannot express); reject is a frontend-only note; conversations are in-memory per chat; and the human stays in the loop — nothing writes to the books without an explicit Approve. The suite stands at 349 tests, all green, pyright clean.
+
 ## How the AI kept quality high without a human reviewer in the loop
 
 - **The domain checks itself.** Double-entry bookkeeping has built-in invariants: every entry must balance, the trial balance must tie, and the balance sheet must satisfy A = L + E. Tests assert these invariants on real data, so an arithmetic or posting mistake cannot pass silently.

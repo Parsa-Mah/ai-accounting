@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "请添加至少一行。",
     "doclines.err_invalid_price": "某行的单价无效。",
     "doclines.err_no_item_or_desc": "每行都需要一个项目或描述。",
-    "doclines.totals": "小计 <b>{subtotal}</b> · 税 <b>{tax}</b> · 总计 <b>{total}</b>"
+    "doclines.totals": "小计 <b>{subtotal}</b> · 税 <b>{tax}</b> · 总计 <b>{total}</b>",
+    "nav.ai": "助手",
+    "ai.title": "AI 指挥中心",
+    "ai.subtitle": "询问您的账目。助手会根据您的数据作答，并提议需您批准的更改。",
+    "ai.placeholder": "询问您的账目…",
+    "ai.send": "发送",
+    "ai.thinking": "思考中…",
+    "ai.empty": "提出一个问题开始吧。试试：“我的现金余额是多少？”",
+    "ai.trail": "使用的工具",
+    "ai.proposal_title": "提议的更改",
+    "ai.approve": "批准",
+    "ai.reject": "拒绝",
+    "ai.approved": "已批准",
+    "ai.rejected": "已拒绝",
+    "ai.status_ok": "已连接到 {model}",
+    "ai.status_down": "无法连接 AI 模型 — 请启动 LM Studio 或设置 LLM_API_BASE",
+    "ai.error": "出了点问题: {detail}"
   }
 }

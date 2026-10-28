@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Żid mill-inqas linja waħda.",
     "doclines.err_invalid_price": "Linja għandha prezz unitarju invalidu.",
     "doclines.err_no_item_or_desc": "Kull linja teħtieġ oġġett jew deskrizzjoni.",
-    "doclines.totals": "Sottotal <b>{subtotal}</b> · Taxxa <b>{tax}</b> · Total <b>{total}</b>"
+    "doclines.totals": "Sottotal <b>{subtotal}</b> · Taxxa <b>{tax}</b> · Total <b>{total}</b>",
+    "nav.ai": "Assistent",
+    "ai.title": "Ċentru tal-Kmand AI",
+    "ai.subtitle": "Iwħel mistoqsijiet dwar il-ktieb tiegħek. L-assistent iwieġeb mill-data tiegħek u jippropożja bidliet għall-approvazzjoni tiegħek.",
+    "ai.placeholder": "Iwħel mistoqsija dwar il-ktieb tiegħek…",
+    "ai.send": "Ibgħat",
+    "ai.thinking": "Qed nifhem…",
+    "ai.empty": "Iwħel mistoqsija biex tibda. Erġa' pprova: “X'inhu l-bilanc tal-flus kontanti tiegħi?”",
+    "ai.trail": "Għodod użati",
+    "ai.proposal_title": "Bidla proposta",
+    "ai.approve": "Approva",
+    "ai.reject": "Irrikkjuta",
+    "ai.approved": "Approvat",
+    "ai.rejected": "Mirrakkjutat",
+    "ai.status_ok": "Konnettut ma' {model}",
+    "ai.status_down": "Il-mudell AI mhux accessibbli — ibda LM Studio jew issetta LLM_API_BASE",
+    "ai.error": "Xejn ma mexxa tajjeb: {detail}"
   }
 }

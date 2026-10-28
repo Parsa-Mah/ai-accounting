@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Tambah sekurang-kurangnya satu baris.",
     "doclines.err_invalid_price": "Satu baris mempunyai harga satuan yang tidak sah.",
     "doclines.err_no_item_or_desc": "Setiap baris memerlukan item atau penerangan.",
-    "doclines.totals": "Jumlah kecil <b>{subtotal}</b> · Cukai <b>{tax}</b> · Jumlah <b>{total}</b>"
+    "doclines.totals": "Jumlah kecil <b>{subtotal}</b> · Cukai <b>{tax}</b> · Jumlah <b>{total}</b>",
+    "nav.ai": "Pembantu",
+    "ai.title": "Pusat Perintah AI",
+    "ai.subtitle": "Tanya tentang buku besar anda. Pembantu menjawab daripada data anda dan mencadangkan perubahan untuk kelulusan anda.",
+    "ai.placeholder": "Tanya tentang buku besar anda…",
+    "ai.send": "Hantar",
+    "ai.thinking": "Berpikir…",
+    "ai.empty": "Taja soalan untuk bermula. Cuba: “Berapakah baki wang tunai saya?”",
+    "ai.trail": "Alat yang digunakan",
+    "ai.proposal_title": "Perubahan yang dicadangkan",
+    "ai.approve": "Luluskan",
+    "ai.reject": "Tolak",
+    "ai.approved": "Diluluskan",
+    "ai.rejected": "Ditolak",
+    "ai.status_ok": "Disambungkan ke {model}",
+    "ai.status_down": "Model AI tidak boleh dicapai — mulakan LM Studio atau tetapkan LLM_API_BASE",
+    "ai.error": "Sesuatu tidak kena: {detail}"
   }
 }

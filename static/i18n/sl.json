@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Dodajte vsaj eno vrstico.",
     "doclines.err_invalid_price": "Vrstica ima neveljavno ceno na enoto.",
     "doclines.err_no_item_or_desc": "Vsaka vrstica potrebuje artikel ali opis.",
-    "doclines.totals": "Podskupaj <b>{subtotal}</b> · Davek <b>{tax}</b> · Skupaj <b>{total}</b>"
+    "doclines.totals": "Podskupaj <b>{subtotal}</b> · Davek <b>{tax}</b> · Skupaj <b>{total}</b>",
+    "nav.ai": "Pomočnik",
+    "ai.title": "AI ukazovalnica",
+    "ai.subtitle": "Postavite vprašanja o svojih knjigah. Pomočnik odgovarja na podlagi vaših podatkov in predlaga spremembe za odobritev.",
+    "ai.placeholder": "Vprašajte o svojih knjigah…",
+    "ai.send": "Pošlji",
+    "ai.thinking": "Razmišljam…",
+    "ai.empty": "Postavite vprašanje, da začnete. Poskusite: »Kakšen je moj gotovinski saldo?«",
+    "ai.trail": "Uporabljena orodja",
+    "ai.proposal_title": "Predlagana sprememba",
+    "ai.approve": "Odobri",
+    "ai.reject": "Zavrni",
+    "ai.approved": "Odobreno",
+    "ai.rejected": "Zavrnjeno",
+    "ai.status_ok": "Povezano z {model}",
+    "ai.status_down": "AI model ni dosegljiv — zaženite LM Studio ali nastavite LLM_API_BASE",
+    "ai.error": "Kajš ni šlo prav: {detail}"
   }
 }

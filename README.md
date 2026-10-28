@@ -33,6 +33,7 @@ To demonstrate that a **local, open-weight AI model running on a single consumer
 - [Overview](#overview)
 - [Features](#features)
 - [Using with an AI (MCP)](#using-with-an-ai-mcp)
+- [AI command center (chat)](#ai-command-center-chat)
 - [Running the app](#running-the-app)
 - [Running the tests](#running-the-tests)
 - [Tech stack](#tech-stack)
@@ -175,6 +176,30 @@ HTTP mode binds `127.0.0.1:8765` (`--host` / `--port` to change) and refuses to 
 - **Debugging**: the standard debugging client is [MCP Inspector](https://github.com/modelcontextprotocol/inspector) (`npx @modelcontextprotocol/inspector`), or `mcp dev mcp_server.py` with the SDK's CLI extra.
 
 The design rationale — curated tools vs. API passthrough, write gating, token auth, the tool catalog — is documented in [AIHelper.md](AIHelper.md) (section "MCP server").
+
+## AI command center (chat)
+
+The web app includes an **AI command center** — a chat page where a local LLM answers questions about the books by acting through the app's typed MCP tools. Ask in plain English — *"What's my cash balance?"*, *"How much did we spend on utilities in March?"* — and the assistant runs the relevant tools, then answers with the real numbers. Every tool call it makes is shown as a chip with a link to the page that shows the underlying data, so every answer is traceable.
+
+The assistant **never changes anything without your approval**. Read-only tools run immediately, but any write — posting a journal entry, creating an invoice, paying a bill — comes back as a **proposal** with the exact action and arguments. You approve it (it then posts through the same single posting path as the web UI, and is recorded in the audit trail as `ai:command-center`) or reject it.
+
+### Setup
+
+The command center talks to any **OpenAI-compatible** chat API, and is configured for [LM Studio](https://lmstudio.ai) by default:
+
+1. Load a model in LM Studio and enable its local server (the OpenAI-compatible endpoint at `http://127.0.0.1:1234/v1`).
+2. Start the app and open the **Assistant** page. A status dot shows green with the model name when the app can reach the model, red with a hint when it can't.
+
+| Variable | Meaning |
+| --- | --- |
+| `LLM_API_BASE` | OpenAI-compatible base URL (default: `http://127.0.0.1:1234/v1`) |
+| `LLM_MODEL` | Model name to use. Optional — when unset, the app auto-detects the model the server has loaded |
+| `LLM_API_KEY` | Optional API key (LM Studio does not require one) |
+| `LLM_EXTRA` | Optional JSON object merged into every chat request — a model-specific escape hatch, e.g. `{"enable_thinking": false}` to turn off a model's thinking mode |
+
+*Usecase:* ask "post a $200 payment on invoice #12" — the assistant looks the invoice up, proposes the payment entry, and only posts it after you click Approve.
+
+**Local-first caveat:** by default the model runs on your own machine and no book data leaves it. If you point `LLM_API_BASE` at a remote LLM service, your questions and the books data they touch are sent to that server.
 
 ## Running the app
 

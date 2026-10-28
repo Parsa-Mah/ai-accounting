@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Saltem unam lineam adde.",
     "doclines.err_invalid_price": "Linea pretium singulare invalidum habet.",
     "doclines.err_no_item_or_desc": "Quaeque linea rem vel descriptionem opus habet.",
-    "doclines.totals": "Subsumma <b>{subtotal}</b> · Tributum <b>{tax}</b> · Summa <b>{total}</b>"
+    "doclines.totals": "Subsumma <b>{subtotal}</b> · Tributum <b>{tax}</b> · Summa <b>{total}</b>",
+    "nav.ai": "Auxiliarius",
+    "ai.title": "Centrum Imperii AI",
+    "ai.subtitle": "De libris tuis quaere. Auxiliarius ex datis tuis respondet et mutationes ad approbationem tuam proponit.",
+    "ai.placeholder": "De libris tuis quaere…",
+    "ai.send": "Mittere",
+    "ai.thinking": "Cogito…",
+    "ai.empty": "Utram quaestionem ut incipias. Exempla: “Quod est numerus meae pecuniae?”",
+    "ai.trail": "Instrumenta usitata",
+    "ai.proposal_title": "Mutatio proposita",
+    "ai.approve": "Approba",
+    "ai.reject": "Reice",
+    "ai.approved": "Approbatum",
+    "ai.rejected": "Reiectum",
+    "ai.status_ok": "Connectum ad {model}",
+    "ai.status_down": "Modellus AI non attingitur — LM Studio incipe vel LLM_API_BASE constitue",
+    "ai.error": "Aliquid praeterierat: {detail}"
   }
 }

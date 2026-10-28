@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Magdagdag ng hindi bababa sa isang linya.",
     "doclines.err_invalid_price": "May linya na may hindi wastong yunit na presyo.",
     "doclines.err_no_item_or_desc": "Kailangan ng item o deskripsyon ang bawat linya.",
-    "doclines.totals": "Subtotal <b>{subtotal}</b> · Buwis <b>{tax}</b> · Kabuuan <b>{total}</b>"
+    "doclines.totals": "Subtotal <b>{subtotal}</b> · Buwis <b>{tax}</b> · Kabuuan <b>{total}</b>",
+    "nav.ai": "Asistente",
+    "ai.title": "Sentro ng Utos ng AI",
+    "ai.subtitle": "Magtanong tungkol sa iyong mga libro. Sagot ng asistente mula sa iyong data at magmumungkahi ng mga pagbabago para sa iyong pagsang-ayon.",
+    "ai.placeholder": "Magtanong tungkol sa iyong mga libro…",
+    "ai.send": "Ipadala",
+    "ai.thinking": "Nag-iisip…",
+    "ai.empty": "Magtanong upang magsimula. Subukan: “Gaano karami ang cash balance ko?”",
+    "ai.trail": "Ginamit na mga tool",
+    "ai.proposal_title": "Inirekomendang pagbabago",
+    "ai.approve": "Pumayag",
+    "ai.reject": "Tanggihan",
+    "ai.approved": "Pinayagan",
+    "ai.rejected": "Tinanggihan",
+    "ai.status_ok": "Kumakonekta sa {model}",
+    "ai.status_down": "Hindi maabot ang AI model — i-launch ang LM Studio o i-set ang LLM_API_BASE",
+    "ai.error": "May naging mali: {detail}"
   }
 }

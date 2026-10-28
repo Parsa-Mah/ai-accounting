@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Shtoni të paktën një rresht.",
     "doclines.err_invalid_price": "Një rresht ka një çmim njësie të pavlefshëm.",
     "doclines.err_no_item_or_desc": "Çdo rresht kërkon një artikull ose një përshkrim.",
-    "doclines.totals": "Nëntotali <b>{subtotal}</b> · Tatimi <b>{tax}</b> · Totali <b>{total}</b>"
+    "doclines.totals": "Nëntotali <b>{subtotal}</b> · Tatimi <b>{tax}</b> · Totali <b>{total}</b>",
+    "nav.ai": "Asistent",
+    "ai.title": "Qendra e komandës AI",
+    "ai.subtitle": "Pyet për librat tuaj. Asistenti përgjigjet nga të dhënat tuaja dhe propozon ndryshime për miratimin tuaj.",
+    "ai.placeholder": "Pyet për librat tuaj…",
+    "ai.send": "Dërgo",
+    "ai.thinking": "Duke menduar…",
+    "ai.empty": "Bëni një pyetje për të filluar. Provoni: “Sa është bilanci im i parave?”",
+    "ai.trail": "Mjete të përdorura",
+    "ai.proposal_title": "Ndryshimi i propozuar",
+    "ai.approve": "Mirato",
+    "ai.reject": "Refuzo",
+    "ai.approved": "U miratua",
+    "ai.rejected": "U refuzua",
+    "ai.status_ok": "I lidhur me {model}",
+    "ai.status_down": "Modeli AI nuk arritet — nisni LM Studio ose vendosni LLM_API_BASE",
+    "ai.error": "Diçka shkoi keq: {detail}"
   }
 }

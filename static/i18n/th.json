@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "เพิ่มอย่างน้อย 1 รายการ",
     "doclines.err_invalid_price": "รายการมีราคาต่อหน่วยไม่ถูกต้อง",
     "doclines.err_no_item_or_desc": "แต่ละรายการต้องมีสินค้าหรือรายละเอียด",
-    "doclines.totals": "รวมย่อย <b>{subtotal}</b> · ภาษี <b>{tax}</b> · รวม <b>{total}</b>"
+    "doclines.totals": "รวมย่อย <b>{subtotal}</b> · ภาษี <b>{tax}</b> · รวม <b>{total}</b>",
+    "nav.ai": "ผู้ช่วย",
+    "ai.title": "ศูนย์บัญชาการ AI",
+    "ai.subtitle": "สอบถามเกี่ยวกับบัญชีของคุณ ผู้ช่วยจะตอบจากข้อมูลของคุณและเสนอการเปลี่ยนแปลงเพื่อขอการอนุมัติ",
+    "ai.placeholder": "สอบถามเกี่ยวกับบัญชีของคุณ…",
+    "ai.send": "ส่ง",
+    "ai.thinking": "กำลังคิด…",
+    "ai.empty": "ถามคำถามเพื่อเริ่มต้น ลองถามว่า: “ยอดเงินสดของฉันเหลือเท่าไหร่?”",
+    "ai.trail": "เครื่องมือที่ใช้",
+    "ai.proposal_title": "การเปลี่ยนแปลงที่เสนอ",
+    "ai.approve": "อนุมัติ",
+    "ai.reject": "ปฏิเสธ",
+    "ai.approved": "อนุมัติแล้ว",
+    "ai.rejected": "ปฏิเสธแล้ว",
+    "ai.status_ok": "เชื่อมต่อ {model}",
+    "ai.status_down": "ไม่สามารถเข้าถึงโมเดล AI ได้ — เริ่ม LM Studio หรือตั้งค่า LLM_API_BASE",
+    "ai.error": "เกิดปัญหาบางอย่าง: {detail}"
   }
 }

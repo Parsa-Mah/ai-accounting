@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Ampio farafahakeliny trano iray.",
     "doclines.err_invalid_price": "Misy trano manana vidin'ny iray tsy mety.",
     "doclines.err_no_item_or_desc": "Mila varotra na fanazavana ny trano tsirairay.",
-    "doclines.totals": "Fifampitoviana kely <b>{subtotal}</b> · Taxe <b>{tax}</b> · Fifampitoviana <b>{total}</b>"
+    "doclines.totals": "Fifampitoviana kely <b>{subtotal}</b> · Taxe <b>{tax}</b> · Fifampitoviana <b>{total}</b>",
+    "nav.ai": "Mpiara-miasa",
+    "ai.title": "Tetezanteneny AI",
+    "ai.subtitle": "Mianatra momba ny boky anao. Ny mpiara-miasa dia mitantana avy amin'ny angona anao ary manolotra fiovana vitan'ny fahazoan-dalana.",
+    "ai.placeholder": "Mianatra momba ny boky anao…",
+    "ai.send": "Alefa",
+    "ai.thinking": "Mihintsy…",
+    "ai.empty": "Mianatra fanontaniana vitan'ny fanombohana. Epoko: “Fetra fananana vola anao no inona?”",
+    "ai.trail": "Fitaovana nampiasaina",
+    "ai.proposal_title": "Fiovana noforonina",
+    "ai.approve": "Manofo",
+    "ai.reject": "Matahotra",
+    "ai.approved": "Nanofona",
+    "ai.rejected": "Natahotra",
+    "ai.status_ok": "Mampitambatra amin'ny {model}",
+    "ai.status_down": "Tsy azo atao ny fahatretana amin'ny AI model — manomboka LM Studio na mamoaka LLM_API_BASE",
+    "ai.error": "Nisy fahadisoana: {detail}"
   }
 }

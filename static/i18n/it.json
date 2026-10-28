@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Aggiungi almeno una riga.",
     "doclines.err_invalid_price": "Una riga ha un prezzo unitario non valido.",
     "doclines.err_no_item_or_desc": "Ogni riga richiede una voce o una descrizione.",
-    "doclines.totals": "Subtotale <b>{subtotal}</b> · Imposta <b>{tax}</b> · Totale <b>{total}</b>"
+    "doclines.totals": "Subtotale <b>{subtotal}</b> · Imposta <b>{tax}</b> · Totale <b>{total}</b>",
+    "nav.ai": "Assistente",
+    "ai.title": "Centro di comando IA",
+    "ai.subtitle": "Fai domande sui tuoi libri contabili. L'assistente risponde dai tuoi dati e propone modifiche da approvare.",
+    "ai.placeholder": "Fai una domanda sui tuoi libri…",
+    "ai.send": "Invia",
+    "ai.thinking": "Sto pensando…",
+    "ai.empty": "Fai una domanda per iniziare. Prova: «Qual è il mio saldo di cassa?»",
+    "ai.trail": "Strumenti utilizzati",
+    "ai.proposal_title": "Modifica proposta",
+    "ai.approve": "Approva",
+    "ai.reject": "Rifiuta",
+    "ai.approved": "Approvato",
+    "ai.rejected": "Rifiutato",
+    "ai.status_ok": "Connesso a {model}",
+    "ai.status_down": "Modello IA non raggiungibile: avvia LM Studio o imposta LLM_API_BASE",
+    "ai.error": "Qualcosa è andato storto: {detail}"
   }
 }

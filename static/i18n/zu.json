@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Engeza ubuncinane umgca omnye.",
     "doclines.err_invalid_price": "Umgca unentengo engenambileyo.",
     "doclines.err_no_item_or_desc": "Umgca ngamnye ufuna impahla okanye incazelo.",
-    "doclines.totals": "Isamba esincinci <b>{subtotal}</b> · Irhafu <b>{tax}</b> · Isamba <b>{total}</b>"
+    "doclines.totals": "Isamba esincinci <b>{subtotal}</b> · Irhafu <b>{tax}</b> · Isamba <b>{total}</b>",
+    "nav.ai": "Umseki",
+    "ai.title": "Iqonga leAI",
+    "ai.subtitle": "Buza ngeencwadi zakho. Umseki uya kuphendula ngokwemfundo yakho kwaye wacela utshintsho olufuneka lubavulwe.",
+    "ai.placeholder": "Buza ngeencwadi zakho…",
+    "ai.send": "Thumela",
+    "ai.thinking": "Ecinga…",
+    "ai.empty": "Buza umbuzo ukuze uqale. Zama: “Lingakanani imali yam eqeshileyo?”",
+    "ai.trail": "Izixhobo ezisetyenzisiweyo",
+    "ai.proposal_title": "Utshintsho olucelwe",
+    "ai.approve": "Vumela",
+    "ai.reject": "Yenja",
+    "ai.approved": "Kuvunyiwe",
+    "ai.rejected": "Kunyengwe",
+    "ai.status_ok": "Iqhagamshelwe ku {model}",
+    "ai.status_down": "I-modeli yeAI ayifikelelekanga — qalisa i-LM Studio okanye usete i-LLM_API_BASE",
+    "ai.error": "Kwenzeke into engalunganga: {detail}"
   }
 }

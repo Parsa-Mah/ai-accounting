@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "ເພີ່ມຢ່າງໜ້ອຍ 1 ເຄື່ອນ.",
     "doclines.err_invalid_price": "ເຄື່ອນໜຶ່ງມີລາຄາຕໍ່ຫົວໜ່ວຍບໍ່ຖືກຕ້ອງ.",
     "doclines.err_no_item_or_desc": "ແຕ່ລະເຄື່ອນຕ້ອງມີສິນຄ້າ ຫຼື ລາຍລະອຽດ.",
-    "doclines.totals": "ຍອດຍ່ອຍ <b>{subtotal}</b> · ອາກອນ <b>{tax}</b> · ລວມ <b>{total}</b>"
+    "doclines.totals": "ຍອດຍ່ອຍ <b>{subtotal}</b> · ອາກອນ <b>{tax}</b> · ລວມ <b>{total}</b>",
+    "nav.ai": "ຜູ້ຊ່ວຍ",
+    "ai.title": "ກາງຄຳສັ່ງ AI",
+    "ai.subtitle": "ຖາມກ່ຽວກັບປຶ້ມໂທນຂອງທ່ານ. ຜູ້ຊ່ວຍຕອບຈາກຂໍ້ມູນຂອງທ່ານ ແລະ ນຳສະເໜີການປ່ຽນແປງເພື່ອການອະນຸມັດຂອງທ່ານ.",
+    "ai.placeholder": "ຖາມກ່ຽວກັບປຶ້ມໂທນຂອງທ່ານ…",
+    "ai.send": "ສົ່ງ",
+    "ai.thinking": "ກຳລັງຄິດ…",
+    "ai.empty": "ຖາມຄຳຖາມໜຶ່ງເພື່ອເລີ່ມຕົ້ນ. ລອງ: “ສະເປຣມືເງິນສົດຂອງຂ້ອຍມີເທົ່າໃດ?”",
+    "ai.trail": "ເຄື່ອງມືທີ່ໃຊ້",
+    "ai.proposal_title": "ການປ່ຽນແປງທີ່ນຳສະເໜີ",
+    "ai.approve": "ອະນຸມັດ",
+    "ai.reject": "ປະຕິເສດ",
+    "ai.approved": "ອະນຸມັດແລ້ວ",
+    "ai.rejected": "ປະຕິເສດແລ້ວ",
+    "ai.status_ok": "ຕໍ່ເຊື່ອມກັບ {model}",
+    "ai.status_down": "ບໍ່ສາມາດຕໍ່ເຊື່ອມໂມເດວ AI — ເລີ່ມ LM Studio ຫຼື ຕັ້ງ LLM_API_BASE",
+    "ai.error": "ມີບັນຫາ: {detail}"
   }
 }

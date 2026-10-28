@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Afegeix almenys una línia.",
     "doclines.err_invalid_price": "Una línia té un preu unitari no vàlid.",
     "doclines.err_no_item_or_desc": "Cada línia necessita un article o una descripció.",
-    "doclines.totals": "Subtotal <b>{subtotal}</b> · Impost <b>{tax}</b> · Total <b>{total}</b>"
+    "doclines.totals": "Subtotal <b>{subtotal}</b> · Impost <b>{tax}</b> · Total <b>{total}</b>",
+    "nav.ai": "Assistent",
+    "ai.title": "Centre de comandament d'IA",
+    "ai.subtitle": "Fes preguntes sobre els teus llibres comptables. L'assistent respon amb les teves dades i proposa canvis per a la teva aprovació.",
+    "ai.placeholder": "Fes una pregunta sobre els teus llibres…",
+    "ai.send": "Envia",
+    "ai.thinking": "Pensant…",
+    "ai.empty": "Fes una pregunta per començar. Prova: «Quin és el meu saldo en caixa?»",
+    "ai.trail": "Eines utilitzades",
+    "ai.proposal_title": "Canvi proposat",
+    "ai.approve": "Aprovar",
+    "ai.reject": "Rebutjar",
+    "ai.approved": "Aprovat",
+    "ai.rejected": "Rebutjat",
+    "ai.status_ok": "Connectat a {model}",
+    "ai.status_down": "El model d'IA no és accessible: inicia el LM Studio o defineix LLM_API_BASE",
+    "ai.error": "Alguna cosa ha anat malament: {detail}"
   }
 }

@@ -47,10 +47,14 @@ def get_session() -> Iterator[Session]:
     Services commit internally on success; the outer commit is a no-op
     safety net, and the rollback undoes partial work on failure. The MCP
     actor (``ai:<MCP_CLIENT_NAME>``) is set for the call, so every write
-    is audited as the AI client rather than ``system``.
+    is audited as the AI client rather than ``system`` — unless an actor
+    override is set (the command center uses this to audit its tool
+    executions as ``ai:command-center``).
     """
     db = SessionLocal()
-    token = audit_service.set_actor(audit_service.ai_actor())
+    override = audit_service.actor_override()
+    actor = override if override is not None else audit_service.ai_actor()
+    token = audit_service.set_actor(actor)
     try:
         yield db
         db.commit()

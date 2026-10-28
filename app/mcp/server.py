@@ -1,8 +1,9 @@
 """MCP server assembly (Python SDK v2).
 
 ``build_server()`` wires the domain services into an MCPServer: read
-tools are always registered; write tools only when ``MCP_ALLOW_WRITE=1``
-(read at call time, not import time, so tests can toggle it). When
+tools are always registered; write tools only when allowed — the
+``allow_write`` parameter when given, else ``MCP_ALLOW_WRITE=1`` (read
+at call time, not import time, so tests can toggle it). When
 ``http_token`` is given, a static bearer-token verifier is wired in for
 the streamable-HTTP transport (the token itself comes from the
 ``MCP_HTTP_TOKEN`` environment variable in the entry point).
@@ -45,9 +46,11 @@ def build_server(
     http_token: str | None = None,
     host: str = "127.0.0.1",
     port: int = 8765,
+    allow_write: bool | None = None,
 ) -> MCPServer:
     init_db()
-    allow_write = os.environ.get("MCP_ALLOW_WRITE") == "1"
+    if allow_write is None:
+        allow_write = os.environ.get("MCP_ALLOW_WRITE") == "1"
     auth_kwargs: dict[str, Any] = {}
     if http_token is not None:
         base_url = f"http://{host}:{port}/mcp"

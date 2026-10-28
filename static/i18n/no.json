@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Legg til minst én linje.",
     "doclines.err_invalid_price": "En linje har en ugyldig enhetspris.",
     "doclines.err_no_item_or_desc": "Hver linje må ha en vare eller en beskrivelse.",
-    "doclines.totals": "Subtotal <b>{subtotal}</b> · Avgift <b>{tax}</b> · Totalt <b>{total}</b>"
+    "doclines.totals": "Subtotal <b>{subtotal}</b> · Avgift <b>{tax}</b> · Totalt <b>{total}</b>",
+    "nav.ai": "Assistent",
+    "ai.title": "AI-kommandosenter",
+    "ai.subtitle": "Spør om dine regnskaper. Assistenten svarer ut fra dine data og foreslår endringer for godkjenning.",
+    "ai.placeholder": "Spør om dine regnskaper…",
+    "ai.send": "Send",
+    "ai.thinking": "Tenker…",
+    "ai.empty": "Still et spørsmål for å komme i gang. Prøv: «Hva er kontantbalansen min?»",
+    "ai.trail": "Verktøy brukt",
+    "ai.proposal_title": "Foreslått endring",
+    "ai.approve": "Godkjenn",
+    "ai.reject": "Avvis",
+    "ai.approved": "Godkjent",
+    "ai.rejected": "Avvist",
+    "ai.status_ok": "Tilkoblet {model}",
+    "ai.status_down": "AI-modellen er utilgjengelig — start LM Studio eller sett LLM_API_BASE",
+    "ai.error": "Noe gikk galt: {detail}"
   }
 }

@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "행을 하나 이상 추가하세요.",
     "doclines.err_invalid_price": "유효하지 않은 단가의 행이 있습니다.",
     "doclines.err_no_item_or_desc": "각 행에 품목 또는 설명이 필요합니다.",
-    "doclines.totals": "소계 <b>{subtotal}</b> · 세금 <b>{tax}</b> · 합계 <b>{total}</b>"
+    "doclines.totals": "소계 <b>{subtotal}</b> · 세금 <b>{tax}</b> · 합계 <b>{total}</b>",
+    "nav.ai": "어시스턴트",
+    "ai.title": "AI 지시 센터",
+    "ai.subtitle": "장부에 대해 질문하세요. 어시스턴트는 당신의 데이터에 기반해 답변하고, 승인할 변경 사항을 제안합니다.",
+    "ai.placeholder": "장부에 대해 질문…",
+    "ai.send": "보내기",
+    "ai.thinking": "생각 중…",
+    "ai.empty": "질문해서 시작하세요. 예: “내 현금 잔고는 얼마인가요?”",
+    "ai.trail": "사용한 도구",
+    "ai.proposal_title": "제안된 변경",
+    "ai.approve": "승인",
+    "ai.reject": "거절",
+    "ai.approved": "승인됨",
+    "ai.rejected": "거절됨",
+    "ai.status_ok": "{model}에 연결됨",
+    "ai.status_down": "AI 모델에 연결할 수 없습니다 — LM Studio를 시작하거나 LLM_API_BASE를 설정하세요",
+    "ai.error": "문제가 발생했습니다: {detail}"
   }
 }

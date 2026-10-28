@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "අවමයෙන් පේළියක් එකතු කරන්න.",
     "doclines.err_invalid_price": "පේළියකට වලංගු නොවන ඒකක මිලක් ඇත.",
     "doclines.err_no_item_or_desc": "සෑම පේළියකටම අයිතමයක් හෝ විස්තරයක් අවශ්‍යයි.",
-    "doclines.totals": "උප මුළු <b>{subtotal}</b> · කරය <b>{tax}</b> · මුළු <b>{total}</b>"
+    "doclines.totals": "උප මුළු <b>{subtotal}</b> · කරය <b>{tax}</b> · මුළු <b>{total}</b>",
+    "nav.ai": "සහායක",
+    "ai.title": "AI අණ කේන්ද්‍රය",
+    "ai.subtitle": "ඔබේ ගිණුම් ගැන අසන්න. සහායක ඔබේ දත්ත මත පදනම්ව පිළිතුරු දෙන අතර ඔබේ අනුමැතිය සඳහා වෙනස්කම් යෝජනා කරයි.",
+    "ai.placeholder": "ඔබේ ගිණුම් ගැන අසන්න…",
+    "ai.send": "යවන්න",
+    "ai.thinking": "සිතමින්…",
+    "ai.empty": "ආරම්භ කිරීමට ප්‍රශ්නයක් අසන්න. උත්සාහ කරන්න: “මගේ මුදල් ශේෂය කොපමණද?”",
+    "ai.trail": "පාවිච්ඡිත මෙවලම්",
+    "ai.proposal_title": "යෝජිත වෙනස්කම",
+    "ai.approve": "අනුමත කරන්න",
+    "ai.reject": "අවලංගු කරන්න",
+    "ai.approved": "අනුමතයි",
+    "ai.rejected": "අවලංගුයි",
+    "ai.status_ok": "{model} සමඟ සම්බන්ධයි",
+    "ai.status_down": "AI මාදිලියට ළඟා විය නොහැක — LM Studio ආරම්භ කරන්න හෝ LLM_API_BASE සකසන්න",
+    "ai.error": "මשהු වැරදුණා: {detail}"
   }
 }

@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Ongeza angalau mstari mmoja.",
     "doclines.err_invalid_price": "Mstari una bei isiyokubalika ya kila kipengele.",
     "doclines.err_no_item_or_desc": "Kila mstari unahitaji bidhaa au maelezo.",
-    "doclines.totals": "Jumla ndogo <b>{subtotal}</b> · Kodi <b>{tax}</b> · Jumla <b>{total}</b>"
+    "doclines.totals": "Jumla ndogo <b>{subtotal}</b> · Kodi <b>{tax}</b> · Jumla <b>{total}</b>",
+    "nav.ai": "Msaidizi",
+    "ai.title": "Kituo cha Amri cha AI",
+    "ai.subtitle": "Uliza kuhusu vitabu vyako. Msaidizi anajibu kutoka kwenye data yako na anapendekeza mabadiliko kwa idhini yako.",
+    "ai.placeholder": "Uliza kuhusu vitabu vyako…",
+    "ai.send": "Tuma",
+    "ai.thinking": "Anafikiri…",
+    "ai.empty": "Uliza swali ili uanze. Jaribu: “Salio langu la pesa ni ngapi?”",
+    "ai.trail": "Zana zilizotumika",
+    "ai.proposal_title": "Mabadiliko yaliyopendekezwa",
+    "ai.approve": "Idhinisha",
+    "ai.reject": "Kataa",
+    "ai.approved": "Imeidhinishwa",
+    "ai.rejected": "Imekataliwa",
+    "ai.status_ok": "Imeunganishwa na {model}",
+    "ai.status_down": "Modeli ya AI haipatikani — anzisha LM Studio au weka LLM_API_BASE",
+    "ai.error": "Kilichokosea: {detail}"
   }
 }

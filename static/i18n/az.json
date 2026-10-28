@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Ən azı bir sətir əlavə edin.",
     "doclines.err_invalid_price": "Sətirdə keçərlə olmayan vahid qiymət var.",
     "doclines.err_no_item_or_desc": "Hər sətir üçün məhsul və ya izahat tələb olunur.",
-    "doclines.totals": "Ara cəm <b>{subtotal}</b> · Vergi <b>{tax}</b> · Ümumi <b>{total}</b>"
+    "doclines.totals": "Ara cəm <b>{subtotal}</b> · Vergi <b>{tax}</b> · Ümumi <b>{total}</b>",
+    "nav.ai": "Köməkçi",
+    "ai.title": "AI komanda mərkəzi",
+    "ai.subtitle": "Kitablarınız haqqında soruşun. Köməkçi məlumatlarınıza əsasən cavab verir və təsdiqləmə üçün dəyişikliklər təklif edir.",
+    "ai.placeholder": "Kitablarınız haqqında soruşun…",
+    "ai.send": "Göndər",
+    "ai.thinking": "Düşünür…",
+    "ai.empty": "Başlamaq üçün sual verin. Sınaq edin: “Nəğd balansım nə qədərdir?”",
+    "ai.trail": "İstifadə edilən alətlər",
+    "ai.proposal_title": "Təklif olunan dəyişiklik",
+    "ai.approve": "Təsdiqlə",
+    "ai.reject": "Reddet",
+    "ai.approved": "Təsdiqləndi",
+    "ai.rejected": "Redd edildi",
+    "ai.status_ok": "{model} ilə bağlı",
+    "ai.status_down": "AI modelinə çatmaq mümkün deyil — LM Studio-nu işə salın və ya LLM_API_BASE-i təyin edin",
+    "ai.error": "Bir şey səhv getdi: {detail}"
   }
 }

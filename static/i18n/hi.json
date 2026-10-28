@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "कम से कम एक पंक्ति जोड़ें।",
     "doclines.err_invalid_price": "एक पंक्ति में अमान्य इकाई मूल्य है।",
     "doclines.err_no_item_or_desc": "प्रत्येक पंक्ति को आइटम या विवरण चाहिए।",
-    "doclines.totals": "उप-योग <b>{subtotal}</b> · कर <b>{tax}</b> · कुल <b>{total}</b>"
+    "doclines.totals": "उप-योग <b>{subtotal}</b> · कर <b>{tax}</b> · कुल <b>{total}</b>",
+    "nav.ai": "सहायक",
+    "ai.title": "AI कमांड सेंटर",
+    "ai.subtitle": "अपनी बही-खात के बारे में पूछें। सहायक आपके डेटा से जवाब देता है और आपकी मंजूरी के लिए बदलाव प्रस्तावित करता है।",
+    "ai.placeholder": "अपनी बही-खात के बारे में पूछें…",
+    "ai.send": "भेजें",
+    "ai.thinking": "सोच रहा है…",
+    "ai.empty": "शुरू करने के लिए एक प्रश्न पूछें। आज़माएं: “मेरा नकद बैलेंस कितना है?”",
+    "ai.trail": "उपयोग किए गए टूल्स",
+    "ai.proposal_title": "प्रस्तावित बदलाव",
+    "ai.approve": "मंज़ूर करें",
+    "ai.reject": "अस्वीकार करें",
+    "ai.approved": "मंज़ूर",
+    "ai.rejected": "अस्वीकृत",
+    "ai.status_ok": "{model} से जुड़ा",
+    "ai.status_down": "AI मॉडल उपलब्ध नहीं है — LM Studio शुरू करें या LLM_API_BASE सेट करें",
+    "ai.error": "कुछ गड़बड़ हो गई: {detail}"
   }
 }

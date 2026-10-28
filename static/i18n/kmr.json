@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Herî kêm rêziyekê zêde bike.",
     "doclines.err_invalid_price": "Rêziyekê nerxa yekîneyê ne-rast heye.",
     "doclines.err_no_item_or_desc": "Her rêzekê pêdivî bi berhem an ravekirinê heye.",
-    "doclines.totals": "Koma navîn <b>{subtotal}</b> · Salix <b>{tax}</b> · Kom <b>{total}</b>"
+    "doclines.totals": "Koma navîn <b>{subtotal}</b> · Salix <b>{tax}</b> · Kom <b>{total}</b>",
+    "nav.ai": "Alîkar",
+    "ai.title": "Navenda Fermanê AI",
+    "ai.subtitle": "Derbarê pirtûkan de pirsa ke. Alîkar li ser bingehê daneyên te bersiv dide û guhertinan ji bo razîbûna te pêşniyar dike.",
+    "ai.placeholder": "Derbarê pirtûkan de pirsa ke…",
+    "ai.send": "Bişîne",
+    "ai.thinking": "Bêr dike…",
+    "ai.empty": "Ji bo destpêkirinê pirsê ke. Biceribîne: “Bala meya naxê çend e?”",
+    "ai.trail": "Amûrên bikarhatî",
+    "ai.proposal_title": "Guhertina pêşniyarkirî",
+    "ai.approve": "Razî bibe",
+    "ai.reject": "Raxe",
+    "ai.approved": "Razî bû",
+    "ai.rejected": "Raxist",
+    "ai.status_ok": "Bi {model} ve girêdayî",
+    "ai.status_down": "Nabe ku bigihîje modela AI — LM Studio dest pê bike an LLM_API_BASE rast bike",
+    "ai.error": "Tiştek xira bû: {detail}"
   }
 }

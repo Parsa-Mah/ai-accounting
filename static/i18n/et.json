@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Lisa vähemalt üks rida.",
     "doclines.err_invalid_price": "Ühel real on kehtetu ühikuhind.",
     "doclines.err_no_item_or_desc": "Igal real peab olema toode või kirjeldus.",
-    "doclines.totals": "Alamsumma <b>{subtotal}</b> · Käibemaks <b>{tax}</b> · Kokku <b>{total}</b>"
+    "doclines.totals": "Alamsumma <b>{subtotal}</b> · Käibemaks <b>{tax}</b> · Kokku <b>{total}</b>",
+    "nav.ai": "Assistent",
+    "ai.title": "AI juhiskeskus",
+    "ai.subtitle": "Küsi oma raamatupidamisest. Assistent vastab sinu andmete põhjal ja pakub heakskiidu saamiseks muudatusi.",
+    "ai.placeholder": "Küsi oma raamatupidamisest…",
+    "ai.send": "Saada",
+    "ai.thinking": "Mõeln…",
+    "ai.empty": "Alusta küsimusega. Proovi: „Mis on minu sularaha saldo?“",
+    "ai.trail": "Kasutatud tööriistad",
+    "ai.proposal_title": "Muudatuse ettepanek",
+    "ai.approve": "Kinnita",
+    "ai.reject": "Hüjuta",
+    "ai.approved": "Kinnitatud",
+    "ai.rejected": "Hüjutatud",
+    "ai.status_ok": "Ühendatud {model}ga",
+    "ai.status_down": "AI mudelit ei leita — käivita LM Studio või määra LLM_API_BASE",
+    "ai.error": "Midagi läks valesti: {detail}"
   }
 }

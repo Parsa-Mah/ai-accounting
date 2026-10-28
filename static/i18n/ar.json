@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "أضف سطرًا واحدًا على الأقل.",
     "doclines.err_invalid_price": "يوجد سطر بسعر وحدة غير صالح.",
     "doclines.err_no_item_or_desc": "كل سطر يحتاج إلى بند أو وصف.",
-    "doclines.totals": "المجموع الفرعي <b>{subtotal}</b> · الضريبة <b>{tax}</b> · الإجمالي <b>{total}</b>"
+    "doclines.totals": "المجموع الفرعي <b>{subtotal}</b> · الضريبة <b>{tax}</b> · الإجمالي <b>{total}</b>",
+    "nav.ai": "المساعد",
+    "ai.title": "مركز قيادة الذكاء الاصطناعي",
+    "ai.subtitle": "اسأل عن دفاترك. يجيب المساعد بناءً على بياناتك ويقترح تغييرات لموافقتك.",
+    "ai.placeholder": "اسأل عن دفاترك…",
+    "ai.send": "إرسال",
+    "ai.thinking": "يفكّر…",
+    "ai.empty": "اطرح سؤالًا للبدء. جرّب: “ما هو رصيد نقديتي؟”",
+    "ai.trail": "الأدوات المستخدمة",
+    "ai.proposal_title": "التغيير المقترح",
+    "ai.approve": "موافقة",
+    "ai.reject": "رفض",
+    "ai.approved": "تمت الموافقة",
+    "ai.rejected": "تم الرفض",
+    "ai.status_ok": "متصل بـ {model}",
+    "ai.status_down": "لا يمكن الوصول إلى نموذج الذكاء الاصطناعي — شغّل LM Studio أو اضبط LLM_API_BASE",
+    "ai.error": "حدث خطأ ما: {detail}"
   }
 }

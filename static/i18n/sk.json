@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Pridajte aspoň jeden riadok.",
     "doclines.err_invalid_price": "Riadok má neplatnú cenu za jednotku.",
     "doclines.err_no_item_or_desc": "Každý riadok potrebuje položku alebo popis.",
-    "doclines.totals": "Medzisúčet <b>{subtotal}</b> · Daň <b>{tax}</b> · Spolu <b>{total}</b>"
+    "doclines.totals": "Medzisúčet <b>{subtotal}</b> · Daň <b>{tax}</b> · Spolu <b>{total}</b>",
+    "nav.ai": "Asistent",
+    "ai.title": "AI riadiace centrum",
+    "ai.subtitle": "Kladte otázky k svojim knihám. Asistent odpovedá na základe vašich dát a navrhuje zmeny na schválenie.",
+    "ai.placeholder": "Spýtajte sa na svoje knihy…",
+    "ai.send": "Odoslať",
+    "ai.thinking": "Premýšľam…",
+    "ai.empty": "Spýtajte sa a začnite. Skúste: „Aká je moja hotovosť?“",
+    "ai.trail": "Použité nástroje",
+    "ai.proposal_title": "Navrhnutá zmena",
+    "ai.approve": "Schváliť",
+    "ai.reject": "Zamietnuť",
+    "ai.approved": "Schválené",
+    "ai.rejected": "Zamietnuté",
+    "ai.status_ok": "Pripojené k {model}",
+    "ai.status_down": "AI model nie je dosahuateľný — spustite LM Studio alebo nastavte LLM_API_BASE",
+    "ai.error": "Niečo sa pokazilo: {detail}"
   }
 }

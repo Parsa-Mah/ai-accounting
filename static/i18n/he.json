@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "הוסף לפחות שורה אחת.",
     "doclines.err_invalid_price": "לשורה יש מחיר יחידה לא תקין.",
     "doclines.err_no_item_or_desc": "לכל שורה נדרש פריט או תיאור.",
-    "doclines.totals": "סכום ביניים <b>{subtotal}</b> · מס <b>{tax}</b> · סה\"כ <b>{total}</b>"
+    "doclines.totals": "סכום ביניים <b>{subtotal}</b> · מס <b>{tax}</b> · סה\"כ <b>{total}</b>",
+    "nav.ai": "עוזר",
+    "ai.title": "מרכז פקודה AI",
+    "ai.subtitle": "שאלו על החשבונות שלכם. העוזר עונה מתוך הנתונים שלכם ומציע שינויים לאישורכם.",
+    "ai.placeholder": "שאלו על החשבונות שלכם…",
+    "ai.send": "שליחה",
+    "ai.thinking": "חושב…",
+    "ai.empty": "שאלו שאלה כדי להתחיל. נסו: “מה יתרת המזומנים שלי?”",
+    "ai.trail": "כלים ששימשו",
+    "ai.proposal_title": "שינוי מוצע",
+    "ai.approve": "אישור",
+    "ai.reject": "דחייה",
+    "ai.approved": "אושר",
+    "ai.rejected": "נדחה",
+    "ai.status_ok": "מחובר ל־{model}",
+    "ai.status_down": "אין גישה למודל AI — הפעילו את LM Studio או הגדירו LLM_API_BASE",
+    "ai.error": "משהו השתבש: {detail}"
   }
 }

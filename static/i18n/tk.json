@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Iň azyndan bir setir goşuň.",
     "doclines.err_invalid_price": "Bir setirde nädogry birlik bahasy bar.",
     "doclines.err_no_item_or_desc": "Her setir üçin haryt ýa-da düşündiriş gerek.",
-    "doclines.totals": "Orta jemi <b>{subtotal}</b> · Salgyt <b>{tax}</b> · Jemi <b>{total}</b>"
+    "doclines.totals": "Orta jemi <b>{subtotal}</b> · Salgyt <b>{tax}</b> · Jemi <b>{total}</b>",
+    "nav.ai": "Kömekçi",
+    "ai.title": "AI dolandyryş merkezi",
+    "ai.subtitle": "Hasablaryňyz barada soraň. Kömekçi maglumatlaryňyza esaslanyp jogap berýär we tassyklamak üçin üýtgeşmeleri teklip edýär.",
+    "ai.placeholder": "Hasablaryňyz barada soraň…",
+    "ai.send": "Izarlamak",
+    "ai.thinking": "Oýlanýar…",
+    "ai.empty": "Başlamak üçin sorag beriň. Synap görüň: “Naýda galanym näçe?”",
+    "ai.trail": "Ulanylan guralar",
+    "ai.proposal_title": "Teklip edilen üýtgeşme",
+    "ai.approve": "Tassyklamak",
+    "ai.reject": "Ret etmek",
+    "ai.approved": "Tassyklandy",
+    "ai.rejected": "Ret edildi",
+    "ai.status_ok": "{model} e birleşdirildi",
+    "ai.status_down": "AI modeline ýetip bolmady — LM Studio-ny işe düşüriň ýa-da LLM_API_BASE-i sazlaň",
+    "ai.error": "Bir zat ýalňyşlyk boldy: {detail}"
   }
 }

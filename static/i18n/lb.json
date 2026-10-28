@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Setzt mindestens eng Zeel dobäi.",
     "doclines.err_invalid_price": "Eng Zeel huet e ongültege Stéckpräis.",
     "doclines.err_no_item_or_desc": "All Zeel brauch en Artikel oder eng Beschreiwung.",
-    "doclines.totals": "Subtotal <b>{subtotal}</b> · Steier <b>{tax}</b> · Total <b>{total}</b>"
+    "doclines.totals": "Subtotal <b>{subtotal}</b> · Steier <b>{tax}</b> · Total <b>{total}</b>",
+    "nav.ai": "Helfer",
+    "ai.title": "AI Kommandozenter",
+    "ai.subtitle": "Froet noch iwwer Äer Bicher. Den Helper äntwert op Basis vun Äre Donnéeën a schléit Ännerunge vir, déi Dir uerkännt.",
+    "ai.placeholder": "Froet noch iwwer Äer Bicher…",
+    "ai.send": "Schécken",
+    "ai.thinking": "Denkt no…",
+    "ai.empty": "Stellt eng Fro fir unzewisen. Probéiert: “Wéi héich ass meng Kassenstand?”",
+    "ai.trail": "Benotz Wierkzeuge",
+    "ai.proposal_title": "Viraagschlag Ännerung",
+    "ai.approve": "Uerkennen",
+    "ai.reject": "Ofléinen",
+    "ai.approved": "Uerkannt",
+    "ai.rejected": "Ofgeleet",
+    "ai.status_ok": "Verbonnen mat {model}",
+    "ai.status_down": "Den AI-Modell ass net erreechbar — start LM Studio oder sett LLM_API_BASE",
+    "ai.error": "Eppes ass schiefgaang: {detail}"
   }
 }

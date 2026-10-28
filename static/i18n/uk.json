@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Додайте хоча б один рядок.",
     "doclines.err_invalid_price": "У рядка некоректна ціна за одиницю.",
     "doclines.err_no_item_or_desc": "Кожен рядок потребує позиції або опису.",
-    "doclines.totals": "Підсумок <b>{subtotal}</b> · Податок <b>{tax}</b> · Разом <b>{total}</b>"
+    "doclines.totals": "Підсумок <b>{subtotal}</b> · Податок <b>{tax}</b> · Разом <b>{total}</b>",
+    "nav.ai": "Асистент",
+    "ai.title": "AI центр керування",
+    "ai.subtitle": "Задавайте запитання щодо ваших книг. Асистент відповідає на основі ваших даних і пропонує зміни для затвердження.",
+    "ai.placeholder": "Спитайте про ваші книги…",
+    "ai.send": "Надіслати",
+    "ai.thinking": "Думаю…",
+    "ai.empty": "Задайте запитання, щоб почати. Спробуйте: «Який мій залишок готівки?»",
+    "ai.trail": "Використані інструменти",
+    "ai.proposal_title": "Пропонована зміна",
+    "ai.approve": "Затвердити",
+    "ai.reject": "Відхилити",
+    "ai.approved": "Затверджено",
+    "ai.rejected": "Відхилено",
+    "ai.status_ok": "Підключено до {model}",
+    "ai.status_down": "AI-модель недоступна — запустіть LM Studio або встановіть LLM_API_BASE",
+    "ai.error": "Щось пішло не так: {detail}"
   }
 }

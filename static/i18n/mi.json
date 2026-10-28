@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Tāpiri kia kotahi rārangi rānei.",
     "doclines.err_invalid_price": "He rārangi he utu takitahi hē.",
     "doclines.err_no_item_or_desc": "Me whai taonga, whakaahuatanga rānei ia rārangi.",
-    "doclines.totals": "Tapeke iti <b>{subtotal}</b> · Taake <b>{tax}</b> · Tapeke <b>{total}</b>"
+    "doclines.totals": "Tapeke iti <b>{subtotal}</b> · Taake <b>{tax}</b> · Tapeke <b>{total}</b>",
+    "nav.ai": "Tautoko",
+    "ai.title": "Pūtahi Whakahau AI",
+    "ai.subtitle": "Patai mō ō pukapuka. Ka whakautu te tautoko i runga i ō raraunga, ā, ka tuku whakapae huringa mō tō whakaaetanga.",
+    "ai.placeholder": "Patai mō ō pukapuka…",
+    "ai.send": "Tukuna",
+    "ai.thinking": "E whakaaro ana…",
+    "ai.empty": "Patai i tētahi pātai hei tīmata. Whakamātauria: “E hia te toenga moni oku?”",
+    "ai.trail": "Ngā taputapu kua whakamahia",
+    "ai.proposal_title": "Te huringa i whakapae",
+    "ai.approve": "Whakaaetia",
+    "ai.reject": "Whakakorea",
+    "ai.approved": "Kua whakaaetia",
+    "ai.rejected": "Kua whakakorengia",
+    "ai.status_ok": "Kua honoa ki {model}",
+    "ai.status_down": "Kāore e taea te tae i te tauira AI — whakahaerehia te LM Studio, whakarite rānei i te LLM_API_BASE",
+    "ai.error": "Kua hē tētahi mea: {detail}"
   }
 }

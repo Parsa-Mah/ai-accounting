@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Добавете поне един ред.",
     "doclines.err_invalid_price": "Редът има невалидна цена на единица.",
     "doclines.err_no_item_or_desc": "Всеки ред изисква артикул или описание.",
-    "doclines.totals": "Междинна сума <b>{subtotal}</b> · Данък <b>{tax}</b> · Общо <b>{total}</b>"
+    "doclines.totals": "Междинна сума <b>{subtotal}</b> · Данък <b>{tax}</b> · Общо <b>{total}</b>",
+    "nav.ai": "Асистент",
+    "ai.title": "AI команден център",
+    "ai.subtitle": "Задавайте въпроси за вашите книги. Асистентът отговаря въз основа на вашите данни и предлага промени за одобрение.",
+    "ai.placeholder": "Задайте въпрос за вашите книги…",
+    "ai.send": "Изпрати",
+    "ai.thinking": "Мисля…",
+    "ai.empty": "Задайте въпрос, за да започнете. Опитайте: „Какъв е моят паричен остатък?“",
+    "ai.trail": "Използвани инструменти",
+    "ai.proposal_title": "Предложена промяна",
+    "ai.approve": "Одобри",
+    "ai.reject": "Отхвърли",
+    "ai.approved": "Одобрено",
+    "ai.rejected": "Отхвърлено",
+    "ai.status_ok": "Свързан с {model}",
+    "ai.status_down": "AI моделът е недостъпен — стартирайте LM Studio или задайте LLM_API_BASE",
+    "ai.error": "Нещо не е наред: {detail}"
   }
 }

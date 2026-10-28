@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Adăugați cel puțin un rând.",
     "doclines.err_invalid_price": "Un rând are un preț unitar invalid.",
     "doclines.err_no_item_or_desc": "Fiecare rând are nevoie de un articol sau o descriere.",
-    "doclines.totals": "Subtotal <b>{subtotal}</b> · Taxă <b>{tax}</b> · Total <b>{total}</b>"
+    "doclines.totals": "Subtotal <b>{subtotal}</b> · Taxă <b>{tax}</b> · Total <b>{total}</b>",
+    "nav.ai": "Asistent",
+    "ai.title": "Centru de comandă AI",
+    "ai.subtitle": "Întreabă despre cărțile tale contabile. Asistentul răspunde pe baza datelor tale și propune modificări pentru aprobarea ta.",
+    "ai.placeholder": "Întreabă despre cărțile tale…",
+    "ai.send": "Trimite",
+    "ai.thinking": "Gândesc…",
+    "ai.empty": "Pune o întrebare pentru a începe. Încearcă: „Care este soldul meu în numerar?”",
+    "ai.trail": "Unele utilizate",
+    "ai.proposal_title": "Modificare propusă",
+    "ai.approve": "Aprobă",
+    "ai.reject": "Respinge",
+    "ai.approved": "Aprobat",
+    "ai.rejected": "Respins",
+    "ai.status_ok": "Conectat la {model}",
+    "ai.status_down": "Modelul AI nu poate fi atins — pornește LM Studio sau setează LLM_API_BASE",
+    "ai.error": "Ceva nu a mers bine: {detail}"
   }
 }

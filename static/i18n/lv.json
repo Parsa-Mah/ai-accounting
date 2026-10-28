@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Pievienojiet vismaz vienu rindu.",
     "doclines.err_invalid_price": "Rindai ir nederīga vienības cena.",
     "doclines.err_no_item_or_desc": "Katrai rindai ir jābūt pozīcijai vai aprakstam.",
-    "doclines.totals": "Apakšsumma <b>{subtotal}</b> · Nodoklis <b>{tax}</b> · Kopā <b>{total}</b>"
+    "doclines.totals": "Apakšsumma <b>{subtotal}</b> · Nodoklis <b>{tax}</b> · Kopā <b>{total}</b>",
+    "nav.ai": "Asistents",
+    "ai.title": "AI vadības centrs",
+    "ai.subtitle": "Uzzini par saviem grāmatvedības datiem. Asistents atbild, balstoties tavos datos, un piedāvā izmaiņas apstiprināšanai.",
+    "ai.placeholder": "Uzzini par saviem grāmatvedības datiem…",
+    "ai.send": "Sūtīt",
+    "ai.thinking": "Domāju…",
+    "ai.empty": "Sāc ar jautājumu. Izmēģini: „Kāds ir mans skaidrā naudas atlikums?“",
+    "ai.trail": "Izmantotie rīki",
+    "ai.proposal_title": "Ierosinātā izmaiņa",
+    "ai.approve": "Apstiprināt",
+    "ai.reject": "Noraidīt",
+    "ai.approved": "Apstiprināts",
+    "ai.rejected": "Noraidīts",
+    "ai.status_ok": "Pieslēgts pie {model}",
+    "ai.status_down": "AI modelis nav pieejams — palaidiet LM Studio vai iestatiet LLM_API_BASE",
+    "ai.error": "Kaut kas nogāja greizi: {detail}"
   }
 }

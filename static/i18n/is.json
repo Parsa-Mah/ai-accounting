@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Bættu við að minnsta kosti einni línu.",
     "doclines.err_invalid_price": "Lína hefur ógildisbært einingarverð.",
     "doclines.err_no_item_or_desc": "Hver lína þarf lið eða lýsingu.",
-    "doclines.totals": "Undirheild <b>{subtotal}</b> · Skattur <b>{tax}</b> · Samtals <b>{total}</b>"
+    "doclines.totals": "Undirheild <b>{subtotal}</b> · Skattur <b>{tax}</b> · Samtals <b>{total}</b>",
+    "nav.ai": "Hjálpari",
+    "ai.title": "AI stjórnmiðstöð",
+    "ai.subtitle": "Spurtu um bækur þínar. Hjálparinn svarar út frá gögnunum þínum og tilræðir breytingar til samþykkis.",
+    "ai.placeholder": "Spurtu um bækur þínar…",
+    "ai.send": "Senda",
+    "ai.thinking": "Hugsar…",
+    "ai.empty": "Spurtu spurning til að byrja. Prófaðu: „Hver er handfjararsjóður minn?“",
+    "ai.trail": "Notuð tól",
+    "ai.proposal_title": "Forslög um breytingu",
+    "ai.approve": "Samþykkja",
+    "ai.reject": "Hafna",
+    "ai.approved": "Samþykkt",
+    "ai.rejected": "Hafnað",
+    "ai.status_ok": "Tengd við {model}",
+    "ai.status_down": "AI líkan er ekki aðgengilegt — ræstu LM Studio eða stilltu LLM_API_BASE",
+    "ai.error": "Eitthvað fór úrskeiðs: {detail}"
   }
 }

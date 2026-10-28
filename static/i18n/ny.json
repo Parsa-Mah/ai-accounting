@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Onjezerani mzere wina ndi wina.",
     "doclines.err_invalid_price": "Mzere ukudza mtengo wa chinthu wosavomerezeka.",
     "doclines.err_no_item_or_desc": "Mzere uli ndi chinthu kapena kufotokozera.",
-    "doclines.totals": "Kuchuluka kang'ono <b>{subtotal}</b> · Misika <b>{tax}</b> · Zonse <b>{total}</b>"
+    "doclines.totals": "Kuchuluka kang'ono <b>{subtotal}</b> · Misika <b>{tax}</b> · Zonse <b>{total}</b>",
+    "nav.ai": "Wothandiza",
+    "ai.title": "Malo a Ulusi wa AI",
+    "ai.subtitle": "Funsani za mabuku anu. Wothandiza amayankha kuchokera pa deta yanu ndipo amapereka zosintha kuti muiwile.",
+    "ai.placeholder": "Funsani za mabuku anu…",
+    "ai.send": "Tumizani",
+    "ai.thinking": "Akaganizira…",
+    "ai.empty": "Funsani funso kuti muyambe. Yesani: “Ndalama zanga zakuthupi ndi zingati?”",
+    "ai.trail": "Zida zomwe zagwiritsidwa ntchito",
+    "ai.proposal_title": "Zosintha zomwe zidaperekedwa",
+    "ai.approve": "Vomereza",
+    "ai.reject": "Kaniza",
+    "ai.approved": "Zidavomerezedwa",
+    "ai.rejected": "Zidakaniidwa",
+    "ai.status_ok": "Yagwiritsidwa ndi {model}",
+    "ai.status_down": "Model ya AI siyikufika — yambani LM Studio kapena ikani LLM_API_BASE",
+    "ai.error": "Zinthu zidakhala zolakwika: {detail}"
   }
 }

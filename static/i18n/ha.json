@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Ƙara layi ɗaya a ƙalla.",
     "doclines.err_invalid_price": "Layi yana da farashin abu da ba ya dacewa.",
     "doclines.err_no_item_or_desc": "Layi ɗaya ɗaya yana buƙatar abu ko bayani.",
-    "doclines.totals": "Jimlar kashi <b>{subtotal}</b> · Harama <b>{tax}</b> · Jimla <b>{total}</b>"
+    "doclines.totals": "Jimlar kashi <b>{subtotal}</b> · Harama <b>{tax}</b> · Jimla <b>{total}</b>",
+    "nav.ai": "Taimakau",
+    "ai.title": "Cibiyatar Umarnin AI",
+    "ai.subtitle": "Tambaya game da littattafayka. Taimakau zai amsa daga bayananka kuma ya ba da shawara canje-canje don yardarka.",
+    "ai.placeholder": "Tambaya game da littattafayka…",
+    "ai.send": "Aika",
+    "ai.thinking": "Yana tunani…",
+    "ai.empty": "Tambaya tambaya don farawa. Gwada: “Yawan kudinen da na da shi nawa ne?”",
+    "ai.trail": "Kayan da aka yi amfani da su",
+    "ai.proposal_title": "Canjin da aka ba da shawara",
+    "ai.approve": "Kyauta",
+    "ai.reject": "Kake",
+    "ai.approved": "An kyautansa",
+    "ai.rejected": "An kake",
+    "ai.status_ok": "An haɗa da {model}",
+    "ai.status_down": "Ba a iya kaiwa ga AI model ba — fara LM Studio ko saita LLM_API_BASE",
+    "ai.error": "Abubuwa sun fadi: {detail}"
   }
 }

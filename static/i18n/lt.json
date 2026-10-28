@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Pridėkite bent vieną eilutę.",
     "doclines.err_invalid_price": "Eilutėje nurodyta netinkama vieneto kaina.",
     "doclines.err_no_item_or_desc": "Kiekviena eilutė turi turėti prekę arba aprašymą.",
-    "doclines.totals": "Tarpinė suma <b>{subtotal}</b> · Mokestis <b>{tax}</b> · Iš viso <b>{total}</b>"
+    "doclines.totals": "Tarpinė suma <b>{subtotal}</b> · Mokestis <b>{tax}</b> · Iš viso <b>{total}</b>",
+    "nav.ai": "Asistentas",
+    "ai.title": "AI valdymo centras",
+    "ai.subtitle": "Klauskite apie savo knygas. Asistentas atsako remdamasis jūsų duomenimis ir siūlo pakeitimų patvirtinimui.",
+    "ai.placeholder": "Klauskite apie savo knygas…",
+    "ai.send": "Siųsti",
+    "ai.thinking": "Mąstau…",
+    "ai.empty": "Užduokite klausimą, kad pradėtumėte. Pabandykite: „Koks yra mano grynųjų pinigų likutis?“",
+    "ai.trail": "Naudoti įrankiai",
+    "ai.proposal_title": "Pasiūlytas pakeitimas",
+    "ai.approve": "Patvirtinti",
+    "ai.reject": "Atmesti",
+    "ai.approved": "Patvirtinta",
+    "ai.rejected": "Atmesta",
+    "ai.status_ok": "Prisijungta prie {model}",
+    "ai.status_down": "AI modelis nepasiekiamas — paleiskite LM Studio arba nustatykite LLM_API_BASE",
+    "ai.error": "Kai kas nutiko ne taip: {detail}"
   }
 }

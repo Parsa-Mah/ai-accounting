@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Adjon hozzá legalább egy sort.",
     "doclines.err_invalid_price": "Egy sor érvénytelen egységárral rendelkezik.",
     "doclines.err_no_item_or_desc": "Minden sornak cikkre vagy leírásra van szüksége.",
-    "doclines.totals": "Közbenső összeg <b>{subtotal}</b> · Adó <b>{tax}</b> · Összesen <b>{total}</b>"
+    "doclines.totals": "Közbenső összeg <b>{subtotal}</b> · Adó <b>{tax}</b> · Összesen <b>{total}</b>",
+    "nav.ai": "Asszisztens",
+    "ai.title": "AI parancsközpont",
+    "ai.subtitle": "Kérdezzen a könyveiről. Az asszisztens az adatai alapján válaszol, és jóváhagyásra javasol változtatásokat.",
+    "ai.placeholder": "Kérdezzen a könyveiről…",
+    "ai.send": "Küldés",
+    "ai.thinking": "Gondolkodom…",
+    "ai.empty": "Tegyön fel egy kérdést a kezdéshez. Próbálja: „Mennyi a készpénz-állományom?”",
+    "ai.trail": "Használt eszközök",
+    "ai.proposal_title": "Javasolt módosítás",
+    "ai.approve": "Jóváhagyás",
+    "ai.reject": "Elutasítás",
+    "ai.approved": "Jóváhagyva",
+    "ai.rejected": "Elutasítva",
+    "ai.status_ok": "Csatlakozva ehhez: {model}",
+    "ai.status_down": "Az AI modell nem érhető el – indítsa el az LM Studio-t, vagy állítsa be az LLM_API_BASE-t",
+    "ai.error": "Valami nem sikerült: {detail}"
   }
 }

@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Přidejte alespoň jeden řádek.",
     "doclines.err_invalid_price": "Řádek má neplatnou jednotkovou cenu.",
     "doclines.err_no_item_or_desc": "Každý řádek potřebuje položku nebo popis.",
-    "doclines.totals": "Mezisoučet <b>{subtotal}</b> · Daň <b>{tax}</b> · Celkem <b>{total}</b>"
+    "doclines.totals": "Mezisoučet <b>{subtotal}</b> · Daň <b>{tax}</b> · Celkem <b>{total}</b>",
+    "nav.ai": "Asistent",
+    "ai.title": "AI řídicí centrum",
+    "ai.subtitle": "Kládejte dotazy ke svým knihám. Asistent odpovídá na základě vašich dat a navrhuje změny k schválení.",
+    "ai.placeholder": "Zeptejte se na své knihy…",
+    "ai.send": "Odeslat",
+    "ai.thinking": "Přemýšlím…",
+    "ai.empty": "Zeptejte se a začněte. Zkuste: „Jaká je moje hotovost?“",
+    "ai.trail": "Použité nástroje",
+    "ai.proposal_title": "Navržená změna",
+    "ai.approve": "Schválit",
+    "ai.reject": "Zamítnout",
+    "ai.approved": "Schváleno",
+    "ai.rejected": "Zamítnuto",
+    "ai.status_ok": "Připojeno k {model}",
+    "ai.status_down": "AI model není dosažitelný — spusťte LM Studio nebo nastavte LLM_API_BASE",
+    "ai.error": "Něco se pokazilo: {detail}"
   }
 }

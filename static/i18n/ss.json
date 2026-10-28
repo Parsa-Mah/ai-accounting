@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Kungeta ngamunye wemigqa.",
     "doclines.err_invalid_price": "umugqa unensani lenkhimbinkati leasekusemthethweni.",
     "doclines.err_no_item_or_desc": "Umugqa ngamunye ufuna imfucako noma inkambiso.",
-    "doclines.totals": "Isamba Lesincane <b>{subtotal}</b> · iTilikhithi <b>{tax}</b> · Isamba <b>{total}</b>"
+    "doclines.totals": "Isamba Lesincane <b>{subtotal}</b> · iTilikhithi <b>{tax}</b> · Isamba <b>{total}</b>",
+    "nav.ai": "Muntfumelisi",
+    "ai.title": "Sifundvo seAI",
+    "ai.subtitle": "Buza ngetingodvo takho. Muntfumelisi uya kuphendvula ngetingxenye takho kanye a kucela switfhalo leswi nga teka ku swi yimbelela.",
+    "ai.placeholder": "Buza ngetingodvo takho…",
+    "ai.send": "Tumela",
+    "ai.thinking": "U nga…",
+    "ai.empty": "Buza xivono lexi teka ku sungula. Lika: “Timala tako leti sihlweleni ti kanguna?”",
+    "ai.trail": "Switirhisiwa leswi tiriswile",
+    "ai.proposal_title": "Switfhalo leswi avelweke",
+    "ai.approve": "Yimbelela",
+    "ai.reject": "Tlakusa",
+    "ai.approved": "Swi yimbelekile",
+    "ai.rejected": "Swi tlakusiwile",
+    "ai.status_ok": "Swi hlanganisiwa na {model}",
+    "ai.status_down": "AI model a yi fikelelekiki — sungula LM Studio kumbe hlela LLM_API_BASE",
+    "ai.error": "Ku endlekile xikoxo: {detail}"
   }
 }

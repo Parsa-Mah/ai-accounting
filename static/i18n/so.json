@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Ku dar ugu yaraan hal saf.",
     "doclines.err_invalid_price": "Saf wuxuu leeyahay qiimo hal albaab ah oo aan sax ahayn.",
     "doclines.err_no_item_or_desc": "Saf kastaa wuxuu u baahan yahay alaab ama faahfaahin.",
-    "doclines.totals": "Wadarka hoose <b>{subtotal}</b> · Cashuurta <b>{tax}</b> · Wadarta <b>{total}</b>"
+    "doclines.totals": "Wadarka hoose <b>{subtotal}</b> · Cashuurta <b>{tax}</b> · Wadarta <b>{total}</b>",
+    "nav.ai": "Caawin",
+    "ai.title": "Xarunta Amarka AI",
+    "ai.subtitle": "Weydii kuwaagaaga. Caawinta waxay ka jawaabaysaa xogtaada oo ay kuu soo jeedinaysaa isbeddello la ogolaado.",
+    "ai.placeholder": "Weydii kuwaagaaga…",
+    "ai.send": "Dir",
+    "ai.thinking": "Wuxuu fiirinayaa…",
+    "ai.empty": "Si aad u bilowdo weydii su'aal. Isku day: “Wadarta lacagta cash ee iigu jirta miyaa?”",
+    "ai.trail": "Qalabka la isticmaalay",
+    "ai.proposal_title": "Isbeddelka la soo jeediyay",
+    "ai.approve": "Aqbal",
+    "ai.reject": "Diid",
+    "ai.approved": "La aqbaley",
+    "ai.rejected": "La diiday",
+    "ai.status_ok": "Waxay ku xiran tahay {model}",
+    "ai.status_down": "Nidaamka AI lama gaari karo — daahfur LM Studio ama dejin LLM_API_BASE",
+    "ai.error": "Wax isku dhacay: {detail}"
   }
 }

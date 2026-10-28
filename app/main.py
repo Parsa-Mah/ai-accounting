@@ -7,7 +7,12 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.database import init_db
-from app.services.errors import ConflictError, NotFoundError, ValidationError
+from app.services.errors import (
+    ConflictError,
+    LLMError,
+    NotFoundError,
+    ValidationError,
+)
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
@@ -28,8 +33,13 @@ def create_app() -> FastAPI:
     async def validation_error_handler(request: Request, exc: ValidationError):
         return JSONResponse(status_code=422, content={"detail": str(exc)})
 
+    @app.exception_handler(LLMError)
+    async def llm_error_handler(request: Request, exc: LLMError):
+        return JSONResponse(status_code=503, content={"detail": str(exc)})
+
     from app.routers import (
         accounts,
+        ai,
         auth,
         bills,
         budgets,
@@ -59,6 +69,7 @@ def create_app() -> FastAPI:
     app.include_router(reconciliation.router)
     app.include_router(estimates.router)
     app.include_router(export.router)
+    app.include_router(ai.router)
 
     @app.get("/api/health")
     def health():

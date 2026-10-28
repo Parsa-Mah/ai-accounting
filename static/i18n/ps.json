@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "لږ تر لږه یو خط زیات کړئ.",
     "doclines.err_invalid_price": "یو خط ناسم واحد بیه لري.",
     "doclines.err_no_item_or_desc": "هر خط ته شي یا تشریح اړتیا ده.",
-    "doclines.totals": "لومړنی ټول <b>{subtotal}</b> · ماليه <b>{tax}</b> · ټول <b>{total}</b>"
+    "doclines.totals": "لومړنی ټول <b>{subtotal}</b> · ماليه <b>{tax}</b> · ټول <b>{total}</b>",
+    "nav.ai": "مرستيون",
+    "ai.title": "AI امر مرکز",
+    "ai.subtitle": "خپلو حسابونو په اړه پوښتنه وکړئ. مرستيون ستاسو ډیټا څخه ځواب ورکوي او ستاسو د منلو لپاره بدلونونه وړاندې کوي.",
+    "ai.placeholder": "خپلو حسابونو په اړه پوښتنه وکړئ…",
+    "ai.send": "لېږل",
+    "ai.thinking": "غور کوي…",
+    "ai.empty": "د پیل لپاره یوه پوښتنه وکړئ. هڅه يې وکړئ: “زما نقدي توازن څومره دی؟”",
+    "ai.trail": "کارول شوي اوزار",
+    "ai.proposal_title": "وړاندیز شوی بدلون",
+    "ai.approve": "منل",
+    "ai.reject": "درناست",
+    "ai.approved": "منل شوی",
+    "ai.rejected": "درناست شوی",
+    "ai.status_ok": "تر {model} نښلول شوی",
+    "ai.status_down": "AI ماډل نه پورته کیږي — LM Studio پیل کړئ یا LLM_API_BASE تنظیم کړئ",
+    "ai.error": "یو څه چلنه ونه کړه: {detail}"
   }
 }

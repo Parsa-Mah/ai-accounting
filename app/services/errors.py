@@ -11,3 +11,7 @@ class ConflictError(Exception):
 
 class ValidationError(Exception):
     """Submitted content is well-formed but violates a domain rule (HTTP 422)."""
+
+
+class LLMError(Exception):
+    """Local LLM backend unreachable or returned an error (HTTP 503)."""

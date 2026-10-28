@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Lisää vähintään yksi rivi.",
     "doclines.err_invalid_price": "Rivillä on virheellinen kappalehinta.",
     "doclines.err_no_item_or_desc": "Jokaisen rivin tulee olla tuote tai kuvaus.",
-    "doclines.totals": "Yhteenveto <b>{subtotal}</b> · Vero <b>{tax}</b> · Yhteensä <b>{total}</b>"
+    "doclines.totals": "Yhteenveto <b>{subtotal}</b> · Vero <b>{tax}</b> · Yhteensä <b>{total}</b>",
+    "nav.ai": "Avustaja",
+    "ai.title": "AI-komentokeskus",
+    "ai.subtitle": "Kysy kirjanpidostasi. Avustaja vastaa tietojesi perusteella ja ehdottaa muutoksia hyväksyttäväksi.",
+    "ai.placeholder": "Kysy kirjanpidostasi…",
+    "ai.send": "Lähetä",
+    "ai.thinking": "Ajattelee…",
+    "ai.empty": "Aloita kysymällä. Kokeile: ”Mikä kassasaldoni on?”",
+    "ai.trail": "Käytetyt työkalut",
+    "ai.proposal_title": "Ehdotettu muutos",
+    "ai.approve": "Hyväksy",
+    "ai.reject": "Hylkää",
+    "ai.approved": "Hyväksytty",
+    "ai.rejected": "Hylätty",
+    "ai.status_ok": "Yhteys: {model}",
+    "ai.status_down": "AI-malliin ei saada yhteyttä — käynnistä LM Studio tai aseta LLM_API_BASE",
+    "ai.error": "Jokin meni pieleen: {detail}"
   }
 }

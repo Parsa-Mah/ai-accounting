@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Ajoutez au moins une ligne.",
     "doclines.err_invalid_price": "Une ligne a un prix unitaire invalide.",
     "doclines.err_no_item_or_desc": "Chaque ligne nécessite un article ou une description.",
-    "doclines.totals": "Sous-total <b>{subtotal}</b> · TVA <b>{tax}</b> · Total <b>{total}</b>"
+    "doclines.totals": "Sous-total <b>{subtotal}</b> · TVA <b>{tax}</b> · Total <b>{total}</b>",
+    "nav.ai": "Assistant",
+    "ai.title": "Centre de commande IA",
+    "ai.subtitle": "Posez des questions sur vos comptes. L'assistant répond à partir de vos données et propose des modifications à valider.",
+    "ai.placeholder": "Posez une question sur vos comptes…",
+    "ai.send": "Envoyer",
+    "ai.thinking": "Réflexion…",
+    "ai.empty": "Posez une question pour commencer. Essayez : « Quel est mon solde de caisse ? »",
+    "ai.trail": "Outils utilisés",
+    "ai.proposal_title": "Modification proposée",
+    "ai.approve": "Approuver",
+    "ai.reject": "Rejeter",
+    "ai.approved": "Approuvé",
+    "ai.rejected": "Rejeté",
+    "ai.status_ok": "Connecté à {model}",
+    "ai.status_down": "Modèle IA injoignable — démarrez LM Studio ou définissez LLM_API_BASE",
+    "ai.error": "Une erreur est survenue : {detail}"
   }
 }

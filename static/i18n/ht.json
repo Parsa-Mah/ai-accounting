@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Ajoute omwen yon liy.",
     "doclines.err_invalid_price": "Yon liy gen yon pri inite ki pa valab.",
     "doclines.err_no_item_or_desc": "Chak liy bezwen yon atik oswa yon deskripsyon.",
-    "doclines.totals": "Sous-total <b>{subtotal}</b> · Talè <b>{tax}</b> · Total <b>{total}</b>"
+    "doclines.totals": "Sous-total <b>{subtotal}</b> · Talè <b>{tax}</b> · Total <b>{total}</b>",
+    "nav.ai": "Asistan",
+    "ai.title": "Santwò Kòmand AI",
+    "ai.subtitle": "Mande kesyon sou liv kontablite w. Asistan an reponn dapre done w e li pwozose chanjman pou w apwouve.",
+    "ai.placeholder": "Mande kesyon sou liv kontablite w…",
+    "ai.send": "Voye",
+    "ai.thinking": "Ap panse…",
+    "ai.empty": "Mande yon kesyon pou kòmanse. Eseye: “Kilaka balans lajan kontan mwen genyen?”",
+    "ai.trail": "Zouti yo itilize",
+    "ai.proposal_title": "Chanjman ki pwozose",
+    "ai.approve": "Apwouve",
+    "ai.reject": "Rejete",
+    "ai.approved": "Apwouve",
+    "ai.rejected": "Rejete",
+    "ai.status_ok": "Konekte ak {model}",
+    "ai.status_down": "Model AI a pa disponib — kòmanse LM Studio oswa mete LLM_API_BASE",
+    "ai.error": "Gen yon pwoblèm: {detail}"
   }
 }

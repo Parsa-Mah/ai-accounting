@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Thêm ít nhất một dòng.",
     "doclines.err_invalid_price": "Một dòng có đơn giá không hợp lệ.",
     "doclines.err_no_item_or_desc": "Mỗi dòng cần một mặt hàng hoặc mô tả.",
-    "doclines.totals": "Tiểu kế <b>{subtotal}</b> · Thuế <b>{tax}</b> · Tổng <b>{total}</b>"
+    "doclines.totals": "Tiểu kế <b>{subtotal}</b> · Thuế <b>{tax}</b> · Tổng <b>{total}</b>",
+    "nav.ai": "Trợ lý",
+    "ai.title": "Trung tâm chỉ huy AI",
+    "ai.subtitle": "Hỏi về sổ sách của bạn. Trợ lý trả lời từ dữ liệu của bạn và đề xuất các thay đổi để bạn phê duyệt.",
+    "ai.placeholder": "Hỏi về sổ sách của bạn…",
+    "ai.send": "Gửi",
+    "ai.thinking": "Đang suy nghĩ…",
+    "ai.empty": "Đặt một câu hỏi để bắt đầu. Thử: “Số dư tiền mặt của tôi là bao nhiêu?”",
+    "ai.trail": "Công cụ đã dùng",
+    "ai.proposal_title": "Thay đổi được đề xuất",
+    "ai.approve": "Phê duyệt",
+    "ai.reject": "Từ chối",
+    "ai.approved": "Đã phê duyệt",
+    "ai.rejected": "Đã từ chối",
+    "ai.status_ok": "Đã kết nối {model}",
+    "ai.status_down": "Không thể kết nối mô hình AI — hãy khởi động LM Studio hoặc đặt LLM_API_BASE",
+    "ai.error": "Đã xảy ra lỗi: {detail}"
   }
 }

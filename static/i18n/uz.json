@@ -258,6 +258,22 @@
     "doclines.err_no_lines": "Kamida bitta qator qo'shing.",
     "doclines.err_invalid_price": "Bir qatorda noto'g'ri birlik narxi bor.",
     "doclines.err_no_item_or_desc": "Har qator uchun mahsulot yoki izoh kerak.",
-    "doclines.totals": "Oraliq jami <b>{subtotal}</b> · Soliq <b>{tax}</b> · Jami <b>{total}</b>"
+    "doclines.totals": "Oraliq jami <b>{subtotal}</b> · Soliq <b>{tax}</b> · Jami <b>{total}</b>",
+    "nav.ai": "Yordamchi",
+    "ai.title": "AI boshqaruv markazi",
+    "ai.subtitle": "Hisoblaringiz haqida so'rang. Yordamchi ma'lumotlaringizga tayanib javob beradi va tasdiqlash uchun o'zgarishlarni taklif etadi.",
+    "ai.placeholder": "Hisoblaringiz haqida so'rang…",
+    "ai.send": "Yuborish",
+    "ai.thinking": "O'ylayapti…",
+    "ai.empty": "Boshlash uchun savol bering. Sinab ko'ring: “Nayr qoldigim necha?”",
+    "ai.trail": "Ishlatilgan asboblar",
+    "ai.proposal_title": "Taklif qilingan o'zgarish",
+    "ai.approve": "Tasdiqlash",
+    "ai.reject": "Rad etish",
+    "ai.approved": "Tasdiqlandi",
+    "ai.rejected": "Rad etildi",
+    "ai.status_ok": "{model} ga ulanildi",
+    "ai.status_down": "AI modeliga ulanib bo'lmadi — LM Studio ni ishga tushiring yoki LLM_API_BASE ni so'nglang",
+    "ai.error": "Biror narsa xato bo'ldi: {detail}"
   }
 }
