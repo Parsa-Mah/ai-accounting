@@ -300,6 +300,11 @@
     "ai.rejected": "Zavrnjeno",
     "ai.status_ok": "Povezano z {model}",
     "ai.status_down": "AI model ni dosegljiv — zaženite LM Studio ali nastavite LLM_API_BASE",
-    "ai.error": "Kajš ni šlo prav: {detail}"
+    "ai.error": "Kajš ni šlo prav: {detail}",
+    "ai.conversations": "Pogovori",
+    "ai.new_chat": "Nov pogovor",
+    "ai.expired": "Potečeno — tega predloga ni mogoče več odobriti (stran se je ponovno naložila).",
+    "ai.no_conversations": "Ni še pogovorov. Postavite vprašanje, da začnete novega.",
+    "ai.save_failed": "Pogovora ni bilo mogoče shraniti: {detail}"
   }
 }

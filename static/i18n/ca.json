@@ -300,6 +300,11 @@
     "ai.rejected": "Rebutjat",
     "ai.status_ok": "Connectat a {model}",
     "ai.status_down": "El model d'IA no és accessible: inicia el LM Studio o defineix LLM_API_BASE",
-    "ai.error": "Alguna cosa ha anat malament: {detail}"
+    "ai.error": "Alguna cosa ha anat malament: {detail}",
+    "ai.conversations": "Converses",
+    "ai.new_chat": "Conversa nova",
+    "ai.expired": "Caducada — aquesta proposta ja no es pot aprovar (s'ha recarregat la pàgina).",
+    "ai.no_conversations": "Encara no hi ha converses. Fes una pregunta per començar-ne una.",
+    "ai.save_failed": "No s'ha pogut desar la conversa: {detail}"
   }
 }

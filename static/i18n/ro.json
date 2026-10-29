@@ -300,6 +300,11 @@
     "ai.rejected": "Respins",
     "ai.status_ok": "Conectat la {model}",
     "ai.status_down": "Modelul AI nu poate fi atins — pornește LM Studio sau setează LLM_API_BASE",
-    "ai.error": "Ceva nu a mers bine: {detail}"
+    "ai.error": "Ceva nu a mers bine: {detail}",
+    "ai.conversations": "Conversații",
+    "ai.new_chat": "Conversație nouă",
+    "ai.expired": "Expirată — această propunere nu mai poate fi aprobată (pagina a fost reîncărcată).",
+    "ai.no_conversations": "Nu există încă conversații. Pune o întrebare pentru a începe una.",
+    "ai.save_failed": "Conversația nu a putut fi salvată: {detail}"
   }
 }

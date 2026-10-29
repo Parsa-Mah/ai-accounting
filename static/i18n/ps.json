@@ -300,6 +300,11 @@
     "ai.rejected": "درناست شوی",
     "ai.status_ok": "تر {model} نښلول شوی",
     "ai.status_down": "AI ماډل نه پورته کیږي — LM Studio پیل کړئ یا LLM_API_BASE تنظیم کړئ",
-    "ai.error": "یو څه چلنه ونه کړه: {detail}"
+    "ai.error": "یو څه چلنه ونه کړه: {detail}",
+    "ai.conversations": "اړیکې",
+    "ai.new_chat": "نویې اړیکه",
+    "ai.expired": "مود پای ته ورسېده — دا وړاندیز بیا هم منونستل نشي کیدی (پاڼه بیا هم بار شوه).",
+    "ai.no_conversations": "هېڅه اړیکې شتون نلري. د پیل لپاره یو پوښتنه وکړئ.",
+    "ai.save_failed": "د اړیکې خوندي کول ونه شو: {detail}"
   }
 }

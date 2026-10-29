@@ -300,6 +300,11 @@
     "ai.rejected": "Raxist",
     "ai.status_ok": "Bi {model} ve girêdayî",
     "ai.status_down": "Nabe ku bigihîje modela AI — LM Studio dest pê bike an LLM_API_BASE rast bike",
-    "ai.error": "Tiştek xira bû: {detail}"
+    "ai.error": "Tiştek xira bû: {detail}",
+    "ai.conversations": "Gûftar",
+    "ai.new_chat": "Gûftareke nû",
+    "ai.expired": "Dem xelasî bû — ev pêşniyarî dîsa nayê qebûlkirin (rûpel hate nûbarandin).",
+    "ai.no_conversations": "Hîn tu gûftar tune. Ji bo destpêkirinê pirsêkeke bike.",
+    "ai.save_failed": "Gûftar nayê parastin: {detail}"
   }
 }

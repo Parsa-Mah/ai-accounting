@@ -300,6 +300,11 @@
     "ai.rejected": "Hafnað",
     "ai.status_ok": "Tengd við {model}",
     "ai.status_down": "AI líkan er ekki aðgengilegt — ræstu LM Studio eða stilltu LLM_API_BASE",
-    "ai.error": "Eitthvað fór úrskeiðs: {detail}"
+    "ai.error": "Eitthvað fór úrskeiðs: {detail}",
+    "ai.conversations": "Samtalir",
+    "ai.new_chat": "Ný samtal",
+    "ai.expired": "Rúmið runað út — þessa tillögu má ekki lengra samþykkja (síðan var endurhlaðin).",
+    "ai.no_conversations": "Engar samtalir ennþá. Stilltu spurning til að byrja á einni.",
+    "ai.save_failed": "Gat ekki vista samtal: {detail}"
   }
 }

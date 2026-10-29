@@ -300,6 +300,11 @@
     "ai.rejected": "Imekataliwa",
     "ai.status_ok": "Imeunganishwa na {model}",
     "ai.status_down": "Modeli ya AI haipatikani — anzisha LM Studio au weka LLM_API_BASE",
-    "ai.error": "Kilichokosea: {detail}"
+    "ai.error": "Kilichokosea: {detail}",
+    "ai.conversations": "Mazungumzo",
+    "ai.new_chat": "Mazungumzo mapya",
+    "ai.expired": "Imeisha — mapendekezo haya hayaweza kupitishwa tena (ukurasa ulipakuliwa upya).",
+    "ai.no_conversations": "Bado hakuna mazungumzo. Uliza swali ili uanze.",
+    "ai.save_failed": "Mazungumzo hayajakumbushwa: {detail}"
   }
 }

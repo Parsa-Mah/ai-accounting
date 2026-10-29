@@ -300,6 +300,11 @@
     "ai.rejected": "Rad etildi",
     "ai.status_ok": "{model} ga ulanildi",
     "ai.status_down": "AI modeliga ulanib bo'lmadi — LM Studio ni ishga tushiring yoki LLM_API_BASE ni so'nglang",
-    "ai.error": "Biror narsa xato bo'ldi: {detail}"
+    "ai.error": "Biror narsa xato bo'ldi: {detail}",
+    "ai.conversations": "Suhbatlar",
+    "ai.new_chat": "Yangi suhbat",
+    "ai.expired": "Muddati tug'di — bu taklifni yana tasdiqlash mumkin emas (sahifa qayta yuklandi).",
+    "ai.no_conversations": "Hozircha suhbat yo'q. Boshlash uchun savol bering.",
+    "ai.save_failed": "Suhbat saqlanmadi: {detail}"
   }
 }

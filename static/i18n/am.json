@@ -300,6 +300,11 @@
     "ai.rejected": "ውድቅ ተደርጓል",
     "ai.status_ok": "ከ {model} ጋር ተገናኝቷል",
     "ai.status_down": "AI ሞዴል አይገኝም — LM Studio ይጀምሩ ወይም LLM_API_BASE ይጥቀሙ",
-    "ai.error": "ሁኔታ አልተሳካም፦ {detail}"
+    "ai.error": "ሁኔታ አልተሳካም፦ {detail}",
+    "ai.conversations": "ውይይቶች",
+    "ai.new_chat": "አዲስ ውይይት",
+    "ai.expired": "ተጠፋ — ይህ ውሳኔ እንደገና ሊጸዋቅ አይችልም (ገጹ እንደገና ተጭኗል)።",
+    "ai.no_conversations": "እስካሁን ውይይት የለም። ለመጀመር ጥያቄ ይጠይቁ።",
+    "ai.save_failed": "ውይይቱ አልተቀመጠም: {detail}"
   }
 }

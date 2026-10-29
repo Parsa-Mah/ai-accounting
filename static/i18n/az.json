@@ -300,6 +300,11 @@
     "ai.rejected": "Redd edildi",
     "ai.status_ok": "{model} ilə bağlı",
     "ai.status_down": "AI modelinə çatmaq mümkün deyil — LM Studio-nu işə salın və ya LLM_API_BASE-i təyin edin",
-    "ai.error": "Bir şey səhv getdi: {detail}"
+    "ai.error": "Bir şey səhv getdi: {detail}",
+    "ai.conversations": "Söhbətlər",
+    "ai.new_chat": "Yeni söhbət",
+    "ai.expired": "Müddəti bitib — bu təklif artıq təsdiqlənə bilməz (səhifə yenidən yükləndi).",
+    "ai.no_conversations": "Hələ söhbət yoxdur. Yeni birini başlatmaq üçün sual verin.",
+    "ai.save_failed": "Söhbət saxlanmadı: {detail}"
   }
 }

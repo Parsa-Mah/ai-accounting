@@ -300,6 +300,11 @@
     "ai.rejected": "مسترد",
     "ai.status_ok": "{model} سے جڑا ہوا",
     "ai.status_down": "AI ماڈل تک رسائی ممکن نہیں — LM Studio شروع کریں یا LLM_API_BASE مقرر کریں",
-    "ai.error": "کچھ غلط ہو گیا: {detail}"
+    "ai.error": "کچھ غلط ہو گیا: {detail}",
+    "ai.conversations": "گفتگو",
+    "ai.new_chat": "نیا گفتگو",
+    "ai.expired": "میعادی ختم — یہ تجویز اب منظور نہیں کی جا سکتی (صفحہ دوبارہ لوڈ ہو گیا)۔",
+    "ai.no_conversations": "ابھی تک کوئی گفتگو نہیں ہے۔ ایک شروع کرنے کے لیے ایک سوال پوچھیں۔",
+    "ai.save_failed": "گفتگو محفوظ نہیں کیا جا سکا: {detail}"
   }
 }

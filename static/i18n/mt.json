@@ -300,6 +300,11 @@
     "ai.rejected": "Mirrakkjutat",
     "ai.status_ok": "Konnettut ma' {model}",
     "ai.status_down": "Il-mudell AI mhux accessibbli — ibda LM Studio jew issetta LLM_API_BASE",
-    "ai.error": "Xejn ma mexxa tajjeb: {detail}"
+    "ai.error": "Xejn ma mexxa tajjeb: {detail}",
+    "ai.conversations": "Kuntatt",
+    "ai.new_chat": "Kuntatt ġdid",
+    "ai.expired": "Skada — din il-proposta ma tistax tiġi approvat aktar (paġna ġiet ikkarigata).",
+    "ai.no_conversations": "Għadha ma hemm l-ebda kuntatt. Poġġi mistoqsija biex tibda wieħed.",
+    "ai.save_failed": "Ma setgħetx issalva l-kuntatt: {detail}"
   }
 }

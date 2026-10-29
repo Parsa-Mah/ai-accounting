@@ -300,6 +300,11 @@
     "ai.rejected": "Ret edildi",
     "ai.status_ok": "{model} e birleşdirildi",
     "ai.status_down": "AI modeline ýetip bolmady — LM Studio-ny işe düşüriň ýa-da LLM_API_BASE-i sazlaň",
-    "ai.error": "Bir zat ýalňyşlyk boldy: {detail}"
+    "ai.error": "Bir zat ýalňyşlyk boldy: {detail}",
+    "ai.conversations": "Söhbetler",
+    "ai.new_chat": "Täze söhbet",
+    "ai.expired": "Möhleti gutardy — bu teklip täzeden tassyklanylýar (sahypa täzeden ýükländi).",
+    "ai.no_conversations": "Indi ýa-da söhbet ýok. Täzeden başlamak üçin sorag beriň.",
+    "ai.save_failed": "Söhbet saklanylmady: {detail}"
   }
 }

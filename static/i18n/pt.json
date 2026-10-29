@@ -300,6 +300,11 @@
     "ai.rejected": "Rejeitado",
     "ai.status_ok": "Conectado a {model}",
     "ai.status_down": "Modelo de IA inacessível — inicie o LM Studio ou defina LLM_API_BASE",
-    "ai.error": "Algo deu errado: {detail}"
+    "ai.error": "Algo deu errado: {detail}",
+    "ai.conversations": "Conversas",
+    "ai.new_chat": "Nova conversa",
+    "ai.expired": "Expirada — esta proposta já não pode ser aprovada (a página foi recarregada).",
+    "ai.no_conversations": "Ainda não há conversas. Faça uma pergunta para começar uma.",
+    "ai.save_failed": "Não foi possível salvar a conversa: {detail}"
   }
 }

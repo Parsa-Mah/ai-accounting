@@ -300,6 +300,11 @@
     "ai.rejected": "U refuzua",
     "ai.status_ok": "I lidhur me {model}",
     "ai.status_down": "Modeli AI nuk arritet — nisni LM Studio ose vendosni LLM_API_BASE",
-    "ai.error": "Diçka shkoi keq: {detail}"
+    "ai.error": "Diçka shkoi keq: {detail}",
+    "ai.conversations": "Bisedat",
+    "ai.new_chat": "Bisedë e re",
+    "ai.expired": "E skaduar — ky propozim nuk mund të miratohet më (faqja u ripërditësua).",
+    "ai.no_conversations": "Ende nuk ka biseda. Bëni një pyetje për të filluar një.",
+    "ai.save_failed": "Nuk u ruajt biseda: {detail}"
   }
 }

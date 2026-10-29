@@ -300,6 +300,11 @@
     "ai.rejected": "Abgelehnt",
     "ai.status_ok": "Verbunden mit {model}",
     "ai.status_down": "KI-Modell nicht erreichbar — starten Sie LM Studio oder setzen Sie LLM_API_BASE",
-    "ai.error": "Etwas ist schiefgelaufen: {detail}"
+    "ai.error": "Etwas ist schiefgelaufen: {detail}",
+    "ai.conversations": "Unterhaltungen",
+    "ai.new_chat": "Neue Unterhaltung",
+    "ai.expired": "Abgelaufen — dieser Vorschlag kann nicht mehr genehmigt werden (die Seite wurde neu geladen).",
+    "ai.no_conversations": "Noch keine Unterhaltungen. Stellen Sie eine Frage, um eine zu starten.",
+    "ai.save_failed": "Unterhaltung konnte nicht gespeichert werden: {detail}"
   }
 }

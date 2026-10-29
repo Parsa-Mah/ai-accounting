@@ -300,6 +300,11 @@
     "ai.rejected": "Rejete",
     "ai.status_ok": "Konekte ak {model}",
     "ai.status_down": "Model AI a pa disponib — kòmanse LM Studio oswa mete LLM_API_BASE",
-    "ai.error": "Gen yon pwoblèm: {detail}"
+    "ai.error": "Gen yon pwoblèm: {detail}",
+    "ai.conversations": "Konvèsasyon",
+    "ai.new_chat": "Yon konvèsasyon nouvo",
+    "ai.expired": "Expiré — pwopozisyon sa a pa ka apwouve ankò ( paj la chaje ankò).",
+    "ai.no_conversations": "Pa gen okenn konvèsasyon. Poze yon kesyon pou w kòmanse.",
+    "ai.save_failed": "Konvèsasyon an pa anrejistre: {detail}"
   }
 }

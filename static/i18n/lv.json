@@ -300,6 +300,11 @@
     "ai.rejected": "Noraidīts",
     "ai.status_ok": "Pieslēgts pie {model}",
     "ai.status_down": "AI modelis nav pieejams — palaidiet LM Studio vai iestatiet LLM_API_BASE",
-    "ai.error": "Kaut kas nogāja greizi: {detail}"
+    "ai.error": "Kaut kas nogāja greizi: {detail}",
+    "ai.conversations": "Sarunas",
+    "ai.new_chat": "Jauna saruna",
+    "ai.expired": "Derīgums beidzies — šo piedāvājumu vairs nevar apstiprināt (lapa tika pārlādēta).",
+    "ai.no_conversations": "Vēl nav sarunu. Uzdotiet jautājumu, lai sāktu vienu.",
+    "ai.save_failed": "Neizdevās saglabāt sarunu: {detail}"
   }
 }

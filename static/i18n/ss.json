@@ -300,6 +300,11 @@
     "ai.rejected": "Swi tlakusiwile",
     "ai.status_ok": "Swi hlanganisiwa na {model}",
     "ai.status_down": "AI model a yi fikelelekiki — sungula LM Studio kumbe hlela LLM_API_BASE",
-    "ai.error": "Ku endlekile xikoxo: {detail}"
+    "ai.error": "Ku endlekile xikoxo: {detail}",
+    "ai.conversations": "Tikhulumbano",
+    "ai.new_chat": "Tikhulumbano letintjha",
+    "ai.expired": "Sikhatsi seliphelile — lesi sifusho asisengakwabelwa (sipheji sibhalwe futhi).",
+    "ai.no_conversations": "Kungekho tikhulumbano. Cebisa umbuzo ukuze uqale.",
+    "ai.save_failed": "Tikhulumbano awabhalwanga: {detail}"
   }
 }

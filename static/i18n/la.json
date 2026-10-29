@@ -300,6 +300,11 @@
     "ai.rejected": "Reiectum",
     "ai.status_ok": "Connectum ad {model}",
     "ai.status_down": "Modellus AI non attingitur — LM Studio incipe vel LLM_API_BASE constitue",
-    "ai.error": "Aliquid praeterierat: {detail}"
+    "ai.error": "Aliquid praeterierat: {detail}",
+    "ai.conversations": "Colloquia",
+    "ai.new_chat": "Colloquium novum",
+    "ai.expired": "Expiratum — haec propositio iam approbari nequit (pagina iterum est descripta).",
+    "ai.no_conversations": "Nemo colloquium est. Quaere quaestionem ut incipias.",
+    "ai.save_failed": "Colloquium non est servatum: {detail}"
   }
 }

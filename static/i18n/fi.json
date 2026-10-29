@@ -300,6 +300,11 @@
     "ai.rejected": "Hylätty",
     "ai.status_ok": "Yhteys: {model}",
     "ai.status_down": "AI-malliin ei saada yhteyttä — käynnistä LM Studio tai aseta LLM_API_BASE",
-    "ai.error": "Jokin meni pieleen: {detail}"
+    "ai.error": "Jokin meni pieleen: {detail}",
+    "ai.conversations": "Keskustelut",
+    "ai.new_chat": "Uusi keskustelu",
+    "ai.expired": "Vanhentunut — tätä ehdotusta ei voi enää hyväksyä (sivu ladataan uudelleen).",
+    "ai.no_conversations": "Ei vielä keskusteluja. Kysy kysymys aloittaaksesi keskustelun.",
+    "ai.save_failed": "Keskustelua ei voitu tallentaa: {detail}"
   }
 }

@@ -300,6 +300,11 @@
     "ai.rejected": "Kunyengwe",
     "ai.status_ok": "Iqhagamshelwe ku {model}",
     "ai.status_down": "I-modeli yeAI ayifikelelekanga — qalisa i-LM Studio okanye usete i-LLM_API_BASE",
-    "ai.error": "Kwenzeke into engalunganga: {detail}"
+    "ai.error": "Kwenzeke into engalunganga: {detail}",
+    "ai.conversations": "Iincoko",
+    "ai.new_chat": "Incoko entsha",
+    "ai.expired": "Iphelile — le nkxaso ayinakuvotywakho (iphepha lipakshiwe kwakhona).",
+    "ai.no_conversations": "Akukho ncoko. Cebisa umbuzo ukuze uqale.",
+    "ai.save_failed": "Incoko ayigcinwanga: {detail}"
   }
 }

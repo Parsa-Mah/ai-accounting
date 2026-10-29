@@ -300,6 +300,11 @@
     "ai.rejected": "Đã từ chối",
     "ai.status_ok": "Đã kết nối {model}",
     "ai.status_down": "Không thể kết nối mô hình AI — hãy khởi động LM Studio hoặc đặt LLM_API_BASE",
-    "ai.error": "Đã xảy ra lỗi: {detail}"
+    "ai.error": "Đã xảy ra lỗi: {detail}",
+    "ai.conversations": "Cuộc trò chuyện",
+    "ai.new_chat": "Cuộc trò chuyện mới",
+    "ai.expired": "Hết hạn — không thể phê duyệt đề xuất này nữa (trang đã được tải lại).",
+    "ai.no_conversations": "Chưa có cuộc trò chuyện nào. Hãy hỏi một câu hỏi để bắt đầu.",
+    "ai.save_failed": "Không thể lưu cuộc trò chuyện: {detail}"
   }
 }

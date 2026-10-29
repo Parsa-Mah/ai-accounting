@@ -300,6 +300,11 @@
     "ai.rejected": "ปฏิเสธแล้ว",
     "ai.status_ok": "เชื่อมต่อ {model}",
     "ai.status_down": "ไม่สามารถเข้าถึงโมเดล AI ได้ — เริ่ม LM Studio หรือตั้งค่า LLM_API_BASE",
-    "ai.error": "เกิดปัญหาบางอย่าง: {detail}"
+    "ai.error": "เกิดปัญหาบางอย่าง: {detail}",
+    "ai.conversations": "การสนทนา",
+    "ai.new_chat": "การสนทนาใหม่",
+    "ai.expired": "หมดอายุ — ไม่สามารถอนุมัติข้อเสนอได้อีกต่อไป (หน้าถูกรีโหลดแล้ว)",
+    "ai.no_conversations": "ยังไม่มีบทสนทนา ถามคำถามเพื่อเริ่มต้น",
+    "ai.save_failed": "ไม่สามารถบันทึกการสนทนาได้: {detail}"
   }
 }

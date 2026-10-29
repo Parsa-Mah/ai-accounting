@@ -300,6 +300,11 @@
     "ai.rejected": "Odrzucono",
     "ai.status_ok": "Połączono z {model}",
     "ai.status_down": "Nie można połączyć się z modelem AI — uruchom LM Studio lub ustaw LLM_API_BASE",
-    "ai.error": "Coś poszło nie tak: {detail}"
+    "ai.error": "Coś poszło nie tak: {detail}",
+    "ai.conversations": "Rozmowy",
+    "ai.new_chat": "Nowa rozmowa",
+    "ai.expired": "Wygasło — tej propozycji nie można już zatwierdzić (strona została przeładowana).",
+    "ai.no_conversations": "Jeszcze nie ma rozmów. Zadaj pytanie, aby rozpocząć nową.",
+    "ai.save_failed": "Nie udało się zapisać rozmowy: {detail}"
   }
 }

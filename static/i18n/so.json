@@ -300,6 +300,11 @@
     "ai.rejected": "La diiday",
     "ai.status_ok": "Waxay ku xiran tahay {model}",
     "ai.status_down": "Nidaamka AI lama gaari karo — daahfur LM Studio ama dejin LLM_API_BASE",
-    "ai.error": "Wax isku dhacay: {detail}"
+    "ai.error": "Wax isku dhacay: {detail}",
+    "ai.conversations": "Hadalka",
+    "ai.new_chat": "Hadalka cusub",
+    "ai.expired": "Waqtiga dhamaaday — taniinkaas wayaa la ogola (qoraalka dib loo celiyay).",
+    "ai.no_conversations": "Ma jira hadalka. Waya la qaboojiyo.",
+    "ai.save_failed": "Hadalka waa la furayay: {detail}"
   }
 }

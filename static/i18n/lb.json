@@ -300,6 +300,11 @@
     "ai.rejected": "Ofgeleet",
     "ai.status_ok": "Verbonnen mat {model}",
     "ai.status_down": "Den AI-Modell ass net erreechbar — start LM Studio oder sett LLM_API_BASE",
-    "ai.error": "Eppes ass schiefgaang: {detail}"
+    "ai.error": "Eppes ass schiefgaang: {detail}",
+    "ai.conversations": "Conversatiounen",
+    "ai.new_chat": "Nei Conversatioun",
+    "ai.expired": "Ofgelaf — dëse Propositioun kann net méi genehmegt ginn (d'Säit gouf nei gelueden).",
+    "ai.no_conversations": "Nach keng Conversatiounen. Stellt eng Fro fir eng ze starten.",
+    "ai.save_failed": "Conversatioun konnt net gespäichert ginn: {detail}"
   }
 }

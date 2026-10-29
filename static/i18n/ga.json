@@ -300,6 +300,11 @@
     "ai.rejected": "Diúltaithe",
     "ai.status_ok": "Ceangailte le {model}",
     "ai.status_down": "Níl an sampla AI inrochtaineach — tosú LM Studio nó socraigh LLM_API_BASE",
-    "ai.error": "Tharla drochscéal: {detail}"
+    "ai.error": "Tharla drochscéal: {detail}",
+    "ai.conversations": "Comhráite",
+    "ai.new_chat": "Comhrá nua",
+    "ai.expired": "Expiré — ní féadfaar an tairgeadh seo a cheadú a thuilleadh (cuirtear an leathanach ar ais).",
+    "ai.no_conversations": "Níl aon chomhrá fós. Cuir ceist chun ceann a thosú.",
+    "ai.save_failed": "Níor sábháiltear an chomhrá: {detail}"
   }
 }

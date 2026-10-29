@@ -300,6 +300,11 @@
     "ai.rejected": "已拒绝",
     "ai.status_ok": "已连接到 {model}",
     "ai.status_down": "无法连接 AI 模型 — 请启动 LM Studio 或设置 LLM_API_BASE",
-    "ai.error": "出了点问题: {detail}"
+    "ai.error": "出了点问题: {detail}",
+    "ai.conversations": "会话",
+    "ai.new_chat": "新会话",
+    "ai.expired": "已过期 — 该提案不可再批准(页面已重新加载)。",
+    "ai.no_conversations": "尚未有会话。提个问题开始一个吧。",
+    "ai.save_failed": "无法保存会话: {detail}"
   }
 }

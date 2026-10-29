@@ -300,6 +300,11 @@
     "ai.rejected": "अस्वीकृत",
     "ai.status_ok": "{model} सें जुड़ल",
     "ai.status_down": "AI मॉडल उपलब्ध नइं अहू — LM Studio सुरु करीं या LLM_API_BASE सेट करीं",
-    "ai.error": "कुछ गड़बड़ हो गइल: {detail}"
+    "ai.error": "कुछ गड़बड़ हो गइल: {detail}",
+    "ai.conversations": "बात-चीत",
+    "ai.new_chat": "नया बात-चीत",
+    "ai.expired": "समय खतम हो गेल — ई प्रस्ताव फेर से मान्य करे जाई (पृष्ठ फेर से लोड हो गेल)।",
+    "ai.no_conversations": "अबह तक केहू बात-चीत नइखे। एक शुरू करे खातिर एक प्रश्न पूछीं।",
+    "ai.save_failed": "बात-चीत सहेजल नइखे: {detail}"
   }
 }

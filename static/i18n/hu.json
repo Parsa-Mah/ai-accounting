@@ -300,6 +300,11 @@
     "ai.rejected": "Elutasítva",
     "ai.status_ok": "Csatlakozva ehhez: {model}",
     "ai.status_down": "Az AI modell nem érhető el – indítsa el az LM Studio-t, vagy állítsa be az LLM_API_BASE-t",
-    "ai.error": "Valami nem sikerült: {detail}"
+    "ai.error": "Valami nem sikerült: {detail}",
+    "ai.conversations": "Beszélgetések",
+    "ai.new_chat": "Új beszélgetés",
+    "ai.expired": "Lejárt — ezt a javaslatt többé nem lehet jóváhagyni (az oldal újratöltődött).",
+    "ai.no_conversations": "Még nincs beszélgetés. Tegyél fel egy kérdést az indításhoz.",
+    "ai.save_failed": "A beszélgetés nem menthető: {detail}"
   }
 }

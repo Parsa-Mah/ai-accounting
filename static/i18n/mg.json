@@ -300,6 +300,11 @@
     "ai.rejected": "Natahotra",
     "ai.status_ok": "Mampitambatra amin'ny {model}",
     "ai.status_down": "Tsy azo atao ny fahatretana amin'ny AI model — manomboka LM Studio na mamoaka LLM_API_BASE",
-    "ai.error": "Nisy fahadisoana: {detail}"
+    "ai.error": "Nisy fahadisoana: {detail}",
+    "ai.conversations": "Resaka",
+    "ai.new_chat": "Resaka vaovao",
+    "ai.expired": "Vao — ity hafa tsy azo ampahany heny (nandray indray ny pejy).",
+    "ai.no_conversations": "Tsy misy resaka. Manontany mba hanombohana.",
+    "ai.save_failed": "Tsy nahomby ny resaka: {detail}"
   }
 }

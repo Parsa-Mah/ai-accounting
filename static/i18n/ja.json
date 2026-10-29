@@ -300,6 +300,11 @@
     "ai.rejected": "却下済み",
     "ai.status_ok": "{model} に接続中",
     "ai.status_down": "AI モデルに接続できません — LM Studio を起動するか LLM_API_BASE を設定してください",
-    "ai.error": "問題が発生しました: {detail}"
+    "ai.error": "問題が発生しました: {detail}",
+    "ai.conversations": "会話",
+    "ai.new_chat": "新会話",
+    "ai.expired": "失効 — この提案を承認できません(ページが再読込されました)。",
+    "ai.no_conversations": "まだ会話がありません。質問して会話を始めましょう。",
+    "ai.save_failed": "会話を保存できませんでした: {detail}"
   }
 }

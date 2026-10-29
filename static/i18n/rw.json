@@ -300,6 +300,11 @@
     "ai.rejected": "Yahagaritswe",
     "ai.status_ok": "Yahuje na {model}",
     "ai.status_down": "AI model itaboneka — tangira LM Studio cyangwa uhindure LLM_API_BASE",
-    "ai.error": "Habaye ikibazo: {detail}"
+    "ai.error": "Habaye ikibazo: {detail}",
+    "ai.conversations": "Ibiganiro",
+    "ai.new_chat": "Ibiganiro bishya",
+    "ai.expired": "Igihe cyarangiye — iki gitekerezo nticyongera kemeza (urupapuro rwasubiwemo).",
+    "ai.no_conversations": "Nta biganiro. Fata ikibazo kugira ngo utangire.",
+    "ai.save_failed": "Ibiganiro ntibyabitswe: {detail}"
   }
 }

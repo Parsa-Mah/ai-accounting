@@ -300,6 +300,11 @@
     "ai.rejected": "අවලංගුයි",
     "ai.status_ok": "{model} සමඟ සම්බන්ධයි",
     "ai.status_down": "AI මාදිලියට ළඟා විය නොහැක — LM Studio ආරම්භ කරන්න හෝ LLM_API_BASE සකසන්න",
-    "ai.error": "මשהු වැරදුණා: {detail}"
+    "ai.error": "මשהු වැරදුණා: {detail}",
+    "ai.conversations": "සංවාද",
+    "ai.new_chat": "නව සංවාදය",
+    "ai.expired": "වලංගුකම් අවසන් — මෙම යෝජනාව දැන් තහවුරු කළ නොහැක (පිටුව නැවත පූරණය විය)।",
+    "ai.no_conversations": "දැනට සංවාද නැත. එකක් ආරම්භ කරන්න ප්‍රශ්නයක් අසන්න.",
+    "ai.save_failed": "සංවාදය සුරැකීමට නොහැකි විය: {detail}"
   }
 }

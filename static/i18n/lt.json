@@ -300,6 +300,11 @@
     "ai.rejected": "Atmesta",
     "ai.status_ok": "Prisijungta prie {model}",
     "ai.status_down": "AI modelis nepasiekiamas — paleiskite LM Studio arba nustatykite LLM_API_BASE",
-    "ai.error": "Kai kas nutiko ne taip: {detail}"
+    "ai.error": "Kai kas nutiko ne taip: {detail}",
+    "ai.conversations": "Pokalbiai",
+    "ai.new_chat": "Naujas pokalbis",
+    "ai.expired": "Nutraukta — šį pasiūlymą nebe galima patvirtinti (puslapis buvo perkeltas).",
+    "ai.no_conversations": "Dar nėra pokalbių. Užduokite klausimą, kad pradėtumėte.",
+    "ai.save_failed": "Nepavyko išsaugoti pokalbio: {detail}"
   }
 }

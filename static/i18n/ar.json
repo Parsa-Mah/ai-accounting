@@ -300,6 +300,11 @@
     "ai.rejected": "تم الرفض",
     "ai.status_ok": "متصل بـ {model}",
     "ai.status_down": "لا يمكن الوصول إلى نموذج الذكاء الاصطناعي — شغّل LM Studio أو اضبط LLM_API_BASE",
-    "ai.error": "حدث خطأ ما: {detail}"
+    "ai.error": "حدث خطأ ما: {detail}",
+    "ai.conversations": "المحادثات",
+    "ai.new_chat": "محادثة جديدة",
+    "ai.expired": "منتهية — لم يعد بالإمكان الموافقة على هذا الاقتراح (تم إعادة تحميل الصفحة).",
+    "ai.no_conversations": "لا توجد محادثات بعد. اطرح سؤالًا لبدء محادثة.",
+    "ai.save_failed": "تعذر حفظ المحادثة: {detail}"
   }
 }

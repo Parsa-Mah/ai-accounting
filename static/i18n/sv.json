@@ -300,6 +300,11 @@
     "ai.rejected": "Avvisad",
     "ai.status_ok": "Ansluten till {model}",
     "ai.status_down": "AI-modellen är inte tillgänglig — starta LM Studio eller sätt LLM_API_BASE",
-    "ai.error": "Något gick fel: {detail}"
+    "ai.error": "Något gick fel: {detail}",
+    "ai.conversations": "Samtal",
+    "ai.new_chat": "Nytt samtal",
+    "ai.expired": "Utgått — detta förslag kan inte godkännas längre (sajten laddades om).",
+    "ai.no_conversations": "Inga samtal ännu. Ställ en fråga för att starta ett.",
+    "ai.save_failed": "Kunde inte spara samtalet: {detail}"
   }
 }

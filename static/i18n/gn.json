@@ -300,6 +300,11 @@
     "ai.rejected": "Oñemondũva",
     "ai.status_ok": "Oñembo'e {model}",
     "ai.status_down": "Oñembo'e — LM Studio, ha LLM_API_BASE",
-    "ai.error": "Oñembo'e: {detail}"
+    "ai.error": "Oñembo'e: {detail}",
+    "ai.conversations": "Ñe'ẽ",
+    "ai.new_chat": "Ñe'ẽ oñemone'ẽva'erã",
+    "ai.expired": "Oñemone'ẽva'erã — oñemone'ẽva'erã (oñemone'ẽva'erã).",
+    "ai.no_conversations": "Oñemone'ẽva'erã. Oñemone'ẽva'erã.",
+    "ai.save_failed": "Oñemone'ẽva'erã: {detail}"
   }
 }

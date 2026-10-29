@@ -300,6 +300,11 @@
     "ai.rejected": "अस्वीकृत",
     "ai.status_ok": "{model} सँग जोडिएको",
     "ai.status_down": "AI मोडल पहुँच्न सकिन्न — LM Studio सुरु गर्नुहोस् वा LLM_API_BASE सेट गर्नुहोस्",
-    "ai.error": "केही गडबड भयो: {detail}"
+    "ai.error": "केही गडबड भयो: {detail}",
+    "ai.conversations": "कुराकानी",
+    "ai.new_chat": "नया कुराकानी",
+    "ai.expired": "समाप्त — यो प्रस्ताव अब स्वीकार्न सकिँदैन (पृष्ठ फेरि लोड भयो)।",
+    "ai.no_conversations": "अहिलेसम्म कुनै कुराकानी छैन। एक सुरु गर्न एउटा प्रश्न सोध्नुहोस्।",
+    "ai.save_failed": "कुराकानी सुरक्षित गर्न सकिएन: {detail}"
   }
 }

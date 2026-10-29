@@ -300,6 +300,11 @@
     "ai.rejected": "Avvist",
     "ai.status_ok": "Tilkoblet {model}",
     "ai.status_down": "AI-modellen er utilgjengelig — start LM Studio eller sett LLM_API_BASE",
-    "ai.error": "Noe gikk galt: {detail}"
+    "ai.error": "Noe gikk galt: {detail}",
+    "ai.conversations": "Samtaler",
+    "ai.new_chat": "Ny samtale",
+    "ai.expired": "Utgått — dette forslaget kan ikke godkjennes lenger (siden ble lastet på nytt).",
+    "ai.no_conversations": "Ingen samtaler ennå. Still et spørsmål for å starte en.",
+    "ai.save_failed": "Kunne ikke lagre samtalen: {detail}"
   }
 }

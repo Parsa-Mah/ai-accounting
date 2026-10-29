@@ -300,6 +300,11 @@
     "ai.rejected": "رد شد",
     "ai.status_ok": "متصل به {model}",
     "ai.status_down": "به مدل هوش مصنوعی دسترسی نیست — LM Studio را راه‌اندازی کنید یا LLM_API_BASE را تنظیم کنید",
-    "ai.error": "مشکلی پیش آمد: {detail}"
+    "ai.error": "مشکلی پیش آمد: {detail}",
+    "ai.conversations": "گفتگوها",
+    "ai.new_chat": "گفتگوی جدید",
+    "ai.expired": "منقضی شده — این پیشنهاد دیگر قابل تأیید نیست (صفحه دوباره بارگذاری شد).",
+    "ai.no_conversations": "هنوز گفتگویی وجود ندارد. برای شروع، یک سوال بپرسید.",
+    "ai.save_failed": "ذخیره گفتگو ناموفق بود: {detail}"
   }
 }

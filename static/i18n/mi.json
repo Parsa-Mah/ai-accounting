@@ -300,6 +300,11 @@
     "ai.rejected": "Kua whakakorengia",
     "ai.status_ok": "Kua honoa ki {model}",
     "ai.status_down": "Kāore e taea te tae i te tauira AI — whakahaerehia te LM Studio, whakarite rānei i te LLM_API_BASE",
-    "ai.error": "Kua hē tētahi mea: {detail}"
+    "ai.error": "Kua hē tētahi mea: {detail}",
+    "ai.conversations": "Ngā kōrerorero",
+    "ai.new_chat": "He kōrerorero hou",
+    "ai.expired": "Kua whakakore — kāore tēnei whakapae e taea anō te whakaae (kua tārewahia anō te whārangi).",
+    "ai.no_conversations": "Kāore he kōrerorero. Pātai kia tīmata.",
+    "ai.save_failed": "Kāore i tiakina te kōrerorero: {detail}"
   }
 }

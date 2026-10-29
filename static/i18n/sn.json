@@ -300,6 +300,11 @@
     "ai.rejected": "Zvakakundikanywa",
     "ai.status_ok": "Yakabatana na {model}",
     "ai.status_down": "AI model haigone kufanirwa — tanga LM Studio kana kuisa LLM_API_BASE",
-    "ai.error": "Zvakaitika zvisina kufanirwa: {detail}"
+    "ai.error": "Zvakaitika zvisina kufanirwa: {detail}",
+    "ai.conversations": "Mhokwiro",
+    "ai.new_chat": "Mhokwiro mitsva",
+    "ai.expired": "Yapera — purogiramu iyi ha isvikiri kutsigamwa (peji yavhurwazve).",
+    "ai.no_conversations": "Hapana mhokwiro. Taura mubvunzo kuti utange.",
+    "ai.save_failed": "Mhokwiro haigone kusimbudzwa: {detail}"
   }
 }

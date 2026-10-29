@@ -300,6 +300,11 @@
     "ai.rejected": "Zamítnuto",
     "ai.status_ok": "Připojeno k {model}",
     "ai.status_down": "AI model není dosažitelný — spusťte LM Studio nebo nastavte LLM_API_BASE",
-    "ai.error": "Něco se pokazilo: {detail}"
+    "ai.error": "Něco se pokazilo: {detail}",
+    "ai.conversations": "Konverzace",
+    "ai.new_chat": "Nová konverzace",
+    "ai.expired": "Vypršelo — tento návrh už nelze schválit (stránka se znovu načítla).",
+    "ai.no_conversations": "Zatím žádné konverzace. Zeptejte se na něco, abyste jednu začali.",
+    "ai.save_failed": "Konverzaci se nepodařilo uložit: {detail}"
   }
 }

@@ -300,6 +300,11 @@
     "ai.rejected": "Ditolak",
     "ai.status_ok": "Disambungkan ke {model}",
     "ai.status_down": "Model AI tidak boleh dicapai — mulakan LM Studio atau tetapkan LLM_API_BASE",
-    "ai.error": "Sesuatu tidak kena: {detail}"
+    "ai.error": "Sesuatu tidak kena: {detail}",
+    "ai.conversations": "Perbualan",
+    "ai.new_chat": "Perbualan baharu",
+    "ai.expired": "Tamat tempoh — cadangan ini tidak boleh diluluskan lagi (halaman dimuat semula).",
+    "ai.no_conversations": "Belum ada perbualan. Tanya soalan untuk memulakan.",
+    "ai.save_failed": "Perbualan tidak disimpan: {detail}"
   }
 }

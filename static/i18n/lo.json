@@ -300,6 +300,11 @@
     "ai.rejected": "ປະຕິເສດແລ້ວ",
     "ai.status_ok": "ຕໍ່ເຊື່ອມກັບ {model}",
     "ai.status_down": "ບໍ່ສາມາດຕໍ່ເຊື່ອມໂມເດວ AI — ເລີ່ມ LM Studio ຫຼື ຕັ້ງ LLM_API_BASE",
-    "ai.error": "ມີບັນຫາ: {detail}"
+    "ai.error": "ມີບັນຫາ: {detail}",
+    "ai.conversations": "ການເວົ້າ",
+    "ai.new_chat": "ການເວົ້າໃໝ່",
+    "ai.expired": "ໝົດກຳນົດ — ນີ້ມື້ນີ້ບໍ່ສາມາດຮັບຮອງໄດ້ອີກ (ໜ້າຖືກໂຫຼດຄືນ)",
+    "ai.no_conversations": "ຍັງບໍ່ມີການເວົ້າ. ຖາມຄຳຖາມເພື່ອເລີ່ມຕົ້ນ.",
+    "ai.save_failed": "ບໍ່ສາມາດບັນທຶກການເວົ້າໄດ້: {detail}"
   }
 }

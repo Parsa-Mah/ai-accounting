@@ -300,6 +300,11 @@
     "ai.rejected": "Odbijeno",
     "ai.status_ok": "Povezano sa {model}",
     "ai.status_down": "AI model nije dostupan — pokrenite LM Studio ili podesite LLM_API_BASE",
-    "ai.error": "Nešto nije u redu: {detail}"
+    "ai.error": "Nešto nije u redu: {detail}",
+    "ai.conversations": "Разговори",
+    "ai.new_chat": "Нови разговор",
+    "ai.expired": "Истекло — овај предлог више не може да се одобри (страница је поново учитана).",
+    "ai.no_conversations": "Још нема разговора. Поставите питање да бисте започели нови.",
+    "ai.save_failed": "Разговор није сачуван: {detail}"
   }
 }

@@ -300,6 +300,11 @@
     "ai.rejected": "E hanoa",
     "ai.status_ok": "E hokahantsoe le {model}",
     "ai.status_down": "AI model ha e fihlellohe — qala LM Studio kapa beha LLM_API_BASE",
-    "ai.error": "Ho etsahetse phoso: {detail}"
+    "ai.error": "Ho etsahetse phoso: {detail}",
+    "ai.conversations": "Lipuisano",
+    "ai.new_chat": "Lipuisano lecha",
+    "ai.expired": "Nako e felile — sena sena ha se ke sa emelwa (leqephe le qetshwe hape).",
+    "ai.no_conversations": "Ha ho lipuisano. Bona potso ho qala.",
+    "ai.save_failed": "Lipuisano ha li boloke: {detail}"
   }
 }

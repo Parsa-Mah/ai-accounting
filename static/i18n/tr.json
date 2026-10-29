@@ -300,6 +300,11 @@
     "ai.rejected": "Reddedildi",
     "ai.status_ok": "{model} bağlantılı",
     "ai.status_down": "AI modeline ulaşılamıyor — LM Studio'yu başlatın veya LLM_API_BASE'ı ayarlayın",
-    "ai.error": "Bir şeyler ters gitti: {detail}"
+    "ai.error": "Bir şeyler ters gitti: {detail}",
+    "ai.conversations": "Sohbetler",
+    "ai.new_chat": "Yeni sohbet",
+    "ai.expired": "Süresi doldu — bu öneri artık onaylanamaz (sayfa yeniden yüklendi).",
+    "ai.no_conversations": "Henüz sohbet yok. Başlamak için bir soru sorun.",
+    "ai.save_failed": "Sohbet kaydedilemedi: {detail}"
   }
 }

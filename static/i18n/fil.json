@@ -300,6 +300,11 @@
     "ai.rejected": "Tinanggihan",
     "ai.status_ok": "Kumakonekta sa {model}",
     "ai.status_down": "Hindi maabot ang AI model — i-launch ang LM Studio o i-set ang LLM_API_BASE",
-    "ai.error": "May naging mali: {detail}"
+    "ai.error": "May naging mali: {detail}",
+    "ai.conversations": "Mga usapan",
+    "ai.new_chat": "Bagong usapan",
+    "ai.expired": "Expirado — hindi na maaaring aprubahan ang offer na ito (na-load ulit ang pahina).",
+    "ai.no_conversations": "Wala pang usapan. Magtanong ng katanungan upang magsimula.",
+    "ai.save_failed": "Hindi na-save ang usapan: {detail}"
   }
 }

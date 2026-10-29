@@ -300,6 +300,11 @@
     "ai.rejected": "Hüjutatud",
     "ai.status_ok": "Ühendatud {model}ga",
     "ai.status_down": "AI mudelit ei leita — käivita LM Studio või määra LLM_API_BASE",
-    "ai.error": "Midagi läks valesti: {detail}"
+    "ai.error": "Midagi läks valesti: {detail}",
+    "ai.conversations": "Vestlused",
+    "ai.new_chat": "Uus vestlus",
+    "ai.expired": "Aegumist — seda ettepanekut ei saa enam heakskiive (leht laaditi uuesti).",
+    "ai.no_conversations": "Vestlusi veel pole. Alusta üht, pidades küsimuse.",
+    "ai.save_failed": "Vestlust ei õnnestunud salvestada: {detail}"
   }
 }
