@@ -848,8 +848,28 @@ body.auth-mode .content {
   color: var(--text-muted);
 }
 
+.proposal-note.expired {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .proposal-note a {
   color: var(--primary);
+}
+
+/* Conversation picker bar above the AI message list. */
+.ai-convs-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.ai-convs-bar label.field {
+  flex: 1;
+  min-width: 200px;
 }
 
 .ai-input-row {

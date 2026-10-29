@@ -300,6 +300,11 @@
     "ai.rejected": "Rejected",
     "ai.status_ok": "Connected to {model}",
     "ai.status_down": "AI model not reachable — start LM Studio or set LLM_API_BASE",
-    "ai.error": "Something went wrong: {detail}"
+    "ai.error": "Something went wrong: {detail}",
+    "ai.conversations": "Conversations",
+    "ai.new_chat": "New chat",
+    "ai.expired": "Expired — this proposal can no longer be approved (the page was reloaded).",
+    "ai.no_conversations": "No conversations yet. Ask a question to start one.",
+    "ai.save_failed": "Couldn't save the conversation: {detail}"
   }
 }

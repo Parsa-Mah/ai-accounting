@@ -148,6 +148,17 @@ export const API = {
   unlockPeriod: (year, month) =>
     request("POST", `/api/periods/${year}/${month}/unlock`),
 
+  // --- ai conversations (chat history) ---
+  // Note: /api/ai/chat (SSE) and /api/ai/approve stay on raw fetch in
+  // pages/ai.js; only the conversation CRUD goes through this wrapper.
+  listConversations: () => request("GET", "/api/ai/conversations"),
+  getConversation: (id) => request("GET", `/api/ai/conversations/${id}`),
+  createConversation: (body) => request("POST", "/api/ai/conversations", body),
+  saveConversation: (id, body) =>
+    request("PUT", `/api/ai/conversations/${id}`, body),
+  deleteConversation: (id) =>
+    request("DELETE", `/api/ai/conversations/${id}`),
+
   // --- export ---
   // Returns a download URL (not a fetch); the caller sets window.location.href
   // to it. The server responds with Content-Disposition: attachment, so the

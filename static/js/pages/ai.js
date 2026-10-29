@@ -5,8 +5,18 @@
 // The chat streams over SSE (POST /api/ai/chat). We parse the stream by
 // hand (fetch + ReadableStream) rather than through api.js, which is for
 // JSON responses. The conversation is held in a page-level `messages`
-// array (OpenAI format) and refreshed from each `done` event; a page
-// reload starts a fresh chat (no server-side sessions).
+// array (OpenAI format) and refreshed from each `done` event.
+//
+// Chat history: conversations are persisted server-side (one row each,
+// holding the full message array + the last completed turn). On load we
+// open the most recent conversation and re-render its bubbles; a turn's
+// trail chips + proposals come from the stored `last_done`. A conversation
+// is created lazily on the first send of a new chat, and every `done`
+// event is saved back with a PUT. Proposals re-loaded from a persisted
+// conversation are "stale": re-approving one could double-execute a write
+// that may already have happened, so their Approve/Reject buttons are
+// disabled and an "expired" note is shown instead.
+import { API } from "../api.js";
 import { esc, toast } from "../ui.js";
 import { t } from "../i18n.js";
 
@@ -50,6 +60,8 @@ export default {
   async render(container) {
     let messages = []; // OpenAI-format conversation; refreshed from `done.messages`.
     let busy = false;
+    let currentConvId = null; // id of the open conversation, or null for a new chat.
+    let lastDone = null; // last `done` state: {answer, trail, proposals}.
 
     container.innerHTML = `
       <div class="page-head">
@@ -60,6 +72,12 @@ export default {
         <div id="ai-status" class="ai-status"></div>
       </div>
       <div class="card ai-card">
+        <div class="ai-convs-bar">
+          <label class="field"><span>${t("ai.conversations")}</span>
+            <select id="ai-conv-select"></select>
+          </label>
+          <button id="ai-new-chat" class="btn" type="button">${t("ai.new_chat")}</button>
+        </div>
         <div id="ai-messages" class="ai-messages"></div>
         <div class="ai-input-row">
           <textarea id="ai-input" class="ai-input" rows="1"></textarea>
@@ -71,6 +89,8 @@ export default {
     const messagesEl = document.getElementById("ai-messages");
     const inputEl = document.getElementById("ai-input");
     const sendBtn = document.getElementById("ai-send");
+    const convSelect = document.getElementById("ai-conv-select");
+    const newChatBtn = document.getElementById("ai-new-chat");
     inputEl.placeholder = t("ai.placeholder");
     messagesEl.innerHTML = `<div class="empty">${t("ai.empty")}</div>`;
 
@@ -146,7 +166,11 @@ export default {
     }
 
     // A proposal card: the write tool + its arguments, with Approve/Reject.
-    function addProposal(proposalsEl, proposal) {
+    // When `opts.stale` is set (a proposal re-loaded from a persisted
+    // conversation), both buttons are disabled and an "expired" note is
+    // shown: re-approving could double-execute an already-applied write.
+    function addProposal(proposalsEl, proposal, opts = {}) {
+      const stale = !!opts.stale;
       const card = document.createElement("div");
       card.className = "proposal";
       card.innerHTML = `
@@ -170,6 +194,13 @@ export default {
         approveBtn.disabled = true;
         rejectBtn.disabled = true;
       };
+
+      if (stale) {
+        disableButtons();
+        note.className = "proposal-note expired";
+        note.textContent = t("ai.expired");
+        return;
+      }
 
       approveBtn.addEventListener("click", async () => {
         approveBtn.disabled = true;
@@ -249,9 +280,24 @@ export default {
           break;
         case "done":
           // Keep the accumulated delta text (done.answer is only the final
-          // round); just refresh the conversation state for the next turn.
+          // round); refresh the conversation state for the next turn and
+          // persist the completed turn (fire-and-forget — a failure surfaces
+          // as a toast but never blocks the stream).
           dropThinking(turn);
           messages = event.messages;
+          lastDone = {
+            answer: event.answer,
+            trail: event.trail,
+            proposals: event.proposals,
+          };
+          if (currentConvId !== null) {
+            API.saveConversation(currentConvId, {
+              messages,
+              last_done: lastDone,
+            }).catch((err) =>
+              toast(t("ai.save_failed", { detail: err.message }), "error"),
+            );
+          }
           scrollBottom();
           break;
       }
@@ -285,6 +331,103 @@ export default {
       }
     }
 
+    // Re-render a loaded conversation: user + assistant text bubbles from
+    // `messages`, then the last turn's trail chips + (stale) proposals from
+    // `lastDone`. system/tool messages are not rendered — the system prompt
+    // is boilerplate and tool results surface through the trail chips.
+    function renderHistory() {
+      messagesEl.innerHTML = "";
+      let lastAiTurn = null;
+      for (const m of messages) {
+        if (m.role === "user") {
+          addUserMessage(typeof m.content === "string" ? m.content : "");
+        } else if (m.role === "assistant") {
+          const turn = newAiTurn();
+          dropThinking(turn);
+          if (typeof m.content === "string" && m.content) {
+            turn.text.textContent = m.content;
+          }
+          lastAiTurn = turn;
+        }
+      }
+      if (!lastAiTurn) {
+        messagesEl.innerHTML = `<div class="empty">${t("ai.empty")}</div>`;
+      }
+      if (lastDone && lastAiTurn) {
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.role === "assistant") {
+          for (const ev of lastDone.trail || []) {
+            addTrailChip(lastAiTurn.trail, ev);
+          }
+          for (const p of lastDone.proposals || []) {
+            addProposal(lastAiTurn.proposals, p, { stale: true });
+          }
+        }
+      }
+      scrollBottom();
+    }
+
+    // Open a persisted conversation by id and render it.
+    async function openConversation(id) {
+      try {
+        const detail = await API.getConversation(id);
+        currentConvId = id;
+        messages = detail.messages;
+        lastDone = detail.last_done;
+        renderHistory();
+        inputEl.focus();
+      } catch (err) {
+        toast(err.message, "error");
+      }
+    }
+
+    // Start a fresh (not-yet-persisted) chat.
+    function newChat() {
+      currentConvId = null;
+      messages = [];
+      lastDone = null;
+      convSelect.value = "";
+      messagesEl.innerHTML = `<div class="empty">${t("ai.empty")}</div>`;
+      inputEl.focus();
+    }
+
+    // Populate the picker from the server list and open the most recent
+    // conversation (the list is newest-first).
+    async function loadConversations() {
+      try {
+        const convs = await API.listConversations();
+        convSelect.innerHTML = "";
+        if (convs.length === 0) {
+          messagesEl.innerHTML = `<div class="empty">${t("ai.no_conversations")}</div>`;
+          return;
+        }
+        for (const c of convs) {
+          const opt = document.createElement("option");
+          opt.value = String(c.id);
+          opt.textContent = c.title;
+          convSelect.appendChild(opt);
+        }
+        convSelect.value = String(convs[0].id);
+        await openConversation(convs[0].id);
+      } catch (err) {
+        toast(err.message, "error");
+      }
+    }
+
+    // Add a freshly created conversation to the picker (newest first) and
+    // select it.
+    function refreshConvSelect(created) {
+      if (
+        ![...convSelect.options].some((o) => o.value === String(created.id))
+      ) {
+        const opt = document.createElement("option");
+        opt.value = String(created.id);
+        opt.textContent = created.title;
+        convSelect.insertBefore(opt, convSelect.firstChild);
+      }
+      convSelect.value = String(created.id);
+    }
+
     async function send() {
       if (busy) return;
       const content = inputEl.value.trim();
@@ -298,6 +441,19 @@ export default {
       const turn = newAiTurn();
 
       try {
+        // Lazily create the conversation on the first send of a new chat so
+        // the turn can be saved; the title is derived server-side from this
+        // message. If creation fails we can't persist the turn, so abort.
+        if (currentConvId === null) {
+          try {
+            const created = await API.createConversation({ messages });
+            currentConvId = created.id;
+            refreshConvSelect(created);
+          } catch (err) {
+            showTurnError(turn, t("ai.save_failed", { detail: err.message }));
+            return;
+          }
+        }
         const res = await fetch("/api/ai/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -330,6 +486,11 @@ export default {
         send();
       }
     });
+    convSelect.addEventListener("change", (e) => {
+      const id = Number(e.target.value);
+      if (id) openConversation(id);
+    });
+    newChatBtn.addEventListener("click", newChat);
 
     // Reachability check on load: a green dot + model name, or a down notice.
     async function loadStatus() {
@@ -350,5 +511,6 @@ export default {
     }
 
     loadStatus();
+    loadConversations();
   },
 };
