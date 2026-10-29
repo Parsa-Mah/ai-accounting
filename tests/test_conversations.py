@@ -126,3 +126,73 @@ def test_no_audit_rows_for_conversations(db) -> None:
         select(AuditLog).where(AuditLog.model == "ChatConversation")
     ).all()
     assert rows == []
+
+
+# --- REST endpoints -------------------------------------------------------
+
+
+def test_conversations_require_auth(app_client) -> None:
+    assert app_client.get("/api/ai/conversations").status_code == 401
+    assert (
+        app_client.post(
+            "/api/ai/conversations",
+            json={"messages": [{"role": "user", "content": "hi"}]},
+        ).status_code
+        == 401
+    )
+
+
+def test_create_and_get_conversation(client) -> None:
+    response = client.post(
+        "/api/ai/conversations",
+        json={"messages": [{"role": "user", "content": "What's my cash balance?"}]},
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["title"] == "What's my cash balance?"
+    conv_id = body["id"]
+
+    detail = client.get(f"/api/ai/conversations/{conv_id}")
+    assert detail.status_code == 200
+    d = detail.json()
+    assert d["id"] == conv_id
+    assert d["messages"] == [{"role": "user", "content": "What's my cash balance?"}]
+    assert d["last_done"] is None
+
+
+def test_list_conversations(client) -> None:
+    client.post(
+        "/api/ai/conversations", json={"messages": [{"role": "user", "content": "one"}]}
+    )
+    client.post(
+        "/api/ai/conversations", json={"messages": [{"role": "user", "content": "two"}]}
+    )
+    rows = client.get("/api/ai/conversations").json()
+    assert len(rows) == 2
+    # Same-second updated_at ties break by id desc -> newest (higher id) first.
+    assert [row["title"] for row in rows] == ["two", "one"]
+
+
+def test_save_conversation(client) -> None:
+    conv_id = client.post(
+        "/api/ai/conversations", json={"messages": [{"role": "user", "content": "hi"}]}
+    ).json()["id"]
+    done = {"answer": "42", "trail": [], "proposals": []}
+    response = client.put(
+        f"/api/ai/conversations/{conv_id}",
+        json={"messages": [{"role": "user", "content": "hi"}], "last_done": done},
+    )
+    assert response.status_code == 200
+    assert response.json()["last_done"] == done
+
+
+def test_delete_conversation(client) -> None:
+    conv_id = client.post(
+        "/api/ai/conversations", json={"messages": [{"role": "user", "content": "hi"}]}
+    ).json()["id"]
+    assert client.delete(f"/api/ai/conversations/{conv_id}").status_code == 204
+    assert client.get(f"/api/ai/conversations/{conv_id}").status_code == 404
+
+
+def test_get_conversation_404(client) -> None:
+    assert client.get("/api/ai/conversations/9999").status_code == 404

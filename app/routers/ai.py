@@ -15,10 +15,20 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
 
+from app.database import get_db
 from app.dependencies import get_current_user
-from app.schemas.ai import ApproveIn, ChatIn
-from app.services import ai_chat, llm
+from app.models.chat import ChatConversation
+from app.schemas.ai import (
+    ApproveIn,
+    ChatIn,
+    ConversationCreate,
+    ConversationDetail,
+    ConversationRead,
+    ConversationSave,
+)
+from app.services import ai_chat, conversations, llm
 from app.services import audit as audit_service
 
 router = APIRouter(
@@ -55,3 +65,57 @@ def approve(body: ApproveIn) -> dict[str, Any]:
 @router.get("/status")
 def status() -> dict[str, Any]:
     return ai_chat.status()
+
+
+def _to_detail(conv: ChatConversation) -> ConversationDetail:
+    """Render a conversation ORM row as the detail schema (JSON parsed)."""
+    return ConversationDetail(
+        id=conv.id,
+        title=conv.title,
+        created_at=conv.created_at,
+        updated_at=conv.updated_at,
+        messages=json.loads(conv.messages_json) if conv.messages_json else [],
+        last_done=json.loads(conv.last_done_json) if conv.last_done_json else None,
+    )
+
+
+@router.get("/conversations", response_model=list[ConversationRead])
+def list_conversations(db: Session = Depends(get_db)) -> list[ChatConversation]:
+    return conversations.list_conversations(db)
+
+
+@router.post(
+    "/conversations", response_model=ConversationRead, status_code=201
+)
+def create_conversation(
+    body: ConversationCreate, db: Session = Depends(get_db)
+) -> ChatConversation:
+    return conversations.create_conversation(
+        db, messages=body.messages, title=body.title
+    )
+
+
+@router.get("/conversations/{conversation_id}", response_model=ConversationDetail)
+def get_conversation(
+    conversation_id: int, db: Session = Depends(get_db)
+) -> ConversationDetail:
+    return _to_detail(conversations.get_conversation(db, conversation_id))
+
+
+@router.put("/conversations/{conversation_id}", response_model=ConversationDetail)
+def save_conversation(
+    conversation_id: int,
+    body: ConversationSave,
+    db: Session = Depends(get_db),
+) -> ConversationDetail:
+    return _to_detail(
+        conversations.save_conversation(
+            db, conversation_id, messages=body.messages, last_done=body.last_done
+        )
+    )
+
+
+@router.delete("/conversations/{conversation_id}", status_code=204)
+def delete_conversation(conversation_id: int, db: Session = Depends(get_db)) -> None:
+    conversations.delete_conversation(db, conversation_id)
+    return None
