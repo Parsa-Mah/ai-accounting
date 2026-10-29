@@ -141,6 +141,13 @@ export const API = {
   // --- audit ---
   listAudit: (params) => request("GET", withQuery("/api/audit", params)),
 
+  // --- periods ---
+  listPeriods: () => request("GET", "/api/periods"),
+  lockPeriod: (year, month) =>
+    request("POST", `/api/periods/${year}/${month}/lock`),
+  unlockPeriod: (year, month) =>
+    request("POST", `/api/periods/${year}/${month}/unlock`),
+
   // --- export ---
   // Returns a download URL (not a fetch); the caller sets window.location.href
   // to it. The server responds with Content-Disposition: attachment, so the
