@@ -4,6 +4,7 @@ from app.models.account import Account, AccountType
 from app.models.audit import AuditLog
 from app.models.bill import Bill, BillLine, BillPayment
 from app.models.budget import Budget
+from app.models.chat import ChatConversation
 from app.models.estimate import Estimate, EstimateLine
 from app.models.invoice import Invoice, InvoiceLine, InvoicePayment
 from app.models.item import Item
@@ -21,6 +22,7 @@ __all__ = [
     "BillLine",
     "BillPayment",
     "Budget",
+    "ChatConversation",
     "Customer",
     "Estimate",
     "EstimateLine",

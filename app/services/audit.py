@@ -69,7 +69,16 @@ _actor_override: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 # Negative skip list: everything is audited except these. AuditLog itself
 # guards against recursion; the line-item child models are audited through
 # their parent (journal entry / invoice / bill / estimate).
-_SKIP = frozenset({"AuditLog", "JournalLine", "InvoiceLine", "BillLine", "EstimateLine"})
+_SKIP = frozenset(
+    {
+        "AuditLog",
+        "JournalLine",
+        "InvoiceLine",
+        "BillLine",
+        "EstimateLine",
+        "ChatConversation",
+    }
+)
 
 _BUFFER_KEY = "audit_buffer"
 
